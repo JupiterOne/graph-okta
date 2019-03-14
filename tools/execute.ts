@@ -10,7 +10,8 @@ async function run(): Promise<void> {
   const logger = createLogger({ name: "local", level: TRACE });
 
   const integrationConfig = {
-    // providerApiToken: process.env.PROVIDER_LOCAL_EXECUTION_API_TOKEN
+    oktaApiKey: process.env.OKTA_API_KEY,
+    oktaOrgUrl: process.env.OKTA_ORG_URL,
   };
 
   const invocationArgs = {
