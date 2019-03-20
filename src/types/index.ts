@@ -56,6 +56,7 @@ export interface OktaAccountInfo {
 export interface OktaUserProfile {
   firstName: string;
   lastName: string;
+  displayName?: string;
   mobilePhone: string;
   secondEmail: string;
   login: string;
@@ -63,6 +64,9 @@ export interface OktaUserProfile {
   email: string;
   userType?: string;
   employeeType?: string;
+  employeeNumber?: string;
+  manager?: string;
+  managerId?: string;
   generic?: boolean;
   role?: string;
   samlRoles?: string[];
@@ -179,6 +183,7 @@ export interface OktaFactor {
  */
 export interface FlattenedOktaUser {
   id: string;
+  name: string;
   displayName?: string;
   status: string;
   active: boolean;
@@ -193,13 +198,17 @@ export interface FlattenedOktaUser {
   mobilePhone: string;
   secondEmail: string;
   login: string;
+  username: string;
   tenant: string[];
   email: string;
   verifiedEmails?: string[];
   unverifiedEmails?: string[];
   userType?: string;
   employeeType?: string;
+  employeeNumber?: string;
   generic?: boolean;
+  manager?: string;
+  managerId?: string;
 }
 
 export interface FlattenedOktaApplication {

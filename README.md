@@ -1,6 +1,6 @@
-# JupiterOne Managed Integration for Okta
+# JupiterOne Managed Integration Example
 
-[![Build Status](https://travis-ci.org/JupiterOne/jupiter-integration-okta.svg?branch=master)](https://travis-ci.org/JupterOne/jupiter-integration-okta)
+[![Build Status](https://travis-ci.org/JupiterOne/managed-integration-example.svg?branch=master)](https://travis-ci.org/JupterOne/managed-integration-example)
 
 A JupiterOne integration ingests information such as configurations and other
 metadata about digital and physical assets belonging to an organization. The
@@ -64,8 +64,8 @@ provider. Developing an integration involves:
 1.  Delivering create/update/delete operations to the persister to update the
     graph
 
-This example integration hand waves 1 and 2a. 🤪 The rest of it is serious
-business. Run the integration to see what happens:
+Run the integration to see what happens. You may use use Node to execute
+directly on your machine (NVM is recommended).
 
 1.  Install Docker
 1.  `yarn install`
@@ -80,12 +80,54 @@ Execute the integration again to see that there are no change operations
 produced.
 
 Restart the graph server to clear the data when you want to run the integration
-with no existing data:
+with no existing data.
 
-1.  `yarn stop:graph`
-1.  `yarn start:graph`
+```sh
+yarn stop:graph && yarn start:graph
+```
 
 ### Environment Variables
+
+Provider API configuration is specified by users when they install the
+integration into their JupiterOne environment. Some integrations may also
+require pre-shared secrets, used across all integration installations, which is
+to be secured by JupiterOne and provided in the execution context.
+
+Local execution requires the same configuration parameters for a development
+provider account. `tools/execute.ts` is the place to provide the parameters. The
+execution script must not include any credentials, and it is important to make
+it easy for other developers to execute the integration against their own
+development provider account.
+
+1. Update `tools/execute.ts` to provide the properties required by the
+   `executionHandler` function
+1. Create a `.env` file to provide the environment variables transferred into
+   the properties
+
+For example, given this execution script:
+
+```typescript
+const integrationConfig = {
+  apiToken: process.env.MYPROVIDER_LOCAL_EXECUTION_API_TOKEN,
+};
+
+const invocationArgs = {
+  preSharedPrivateKey: process.env.MYPROVIDER_LOCAL_EXECUTION_PRIVATE_KEY,
+};
+```
+
+Create a `.env` file (this is `.gitignore`'d):
+
+```sh
+MYPROVIDER_LOCAL_EXECUTION_API_TOKEN=abc123
+MYPROVIDER_LOCAL_EXECUTION_PRIVATE_KEY='something\nreally\nlong'
+```
+
+#### SDK Variables
+
+Environment variables can modify some aspects of the integration SDK behavior.
+These may be added to your `.env` with values to overrided the defaults listed
+here.
 
 - `GRAPH_DB_ENDPOINT` - `"localhost"`
 
@@ -96,7 +138,7 @@ and conversion from provider data to entities and relationships.
 
 To run tests locally:
 
-```shell
+```sh
 yarn test
 ```
 
@@ -106,6 +148,6 @@ Managed integrations are deployed into the JupiterOne infrastructure by staff
 engineers using internal projects that declare a dependency on the open source
 integration NPM package. The package will be published by the JupiterOne team.
 
-```shell
+```sh
 yarn build:publish
 ```

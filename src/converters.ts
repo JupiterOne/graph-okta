@@ -1,12 +1,8 @@
 import * as url from "url";
-import * as constants from "./constants";
-import buildAppShortName from "./util/buildAppShortName";
-import getOktaAccountAdminUrl from "./util/getOktaAccountAdminUrl";
-import getOktaAccountInfo from "./util/getOktaAccountInfo";
-
 import {
   FlattenedOktaUser,
   FlattenedOktaUserGroup,
+  MappedRelationship,
   OktaApplication,
   OktaExecutionContext,
   OktaFactor,
@@ -26,16 +22,19 @@ import {
 } from "./types";
 
 import {
+  RelationshipDirection,
+  RelationshipFromIntegration,
+} from "@jupiterone/jupiter-managed-integration-sdk";
+
+import * as constants from "./constants";
+import buildAppShortName from "./util/buildAppShortName";
+import getOktaAccountAdminUrl from "./util/getOktaAccountAdminUrl";
+import getOktaAccountInfo from "./util/getOktaAccountInfo";
+import {
   getAccountName,
   getVendorName,
   isMultiInstanceApp,
 } from "./util/knownVendors";
-
-import {
-  MappedRelationship,
-  RelationshipDirection,
-  RelationshipFromIntegration,
-} from "@jupiterone/jupiter-managed-integration-sdk";
 
 /**
  * Okta returns back nested objects in API calls. Due to the nature of using a
@@ -67,10 +66,14 @@ export function flattenUser(user: OktaUser): FlattenedOktaUser {
     userType,
     employeeType,
     generic,
+    manager,
+    managerId,
   } = profile;
 
   const flattenedUser: FlattenedOktaUser = {
-    displayName: `${login}`,
+    displayName: login,
+    name: `${firstName} ${lastName}`,
+    username: login.split("@")[0],
     id,
     status,
     active: status === "ACTIVE",
@@ -90,6 +93,8 @@ export function flattenUser(user: OktaUser): FlattenedOktaUser {
     userType,
     employeeType,
     generic,
+    manager,
+    managerId,
   };
 
   if (credentials && credentials.emails) {
@@ -97,12 +102,12 @@ export function flattenUser(user: OktaUser): FlattenedOktaUser {
     const unverifiedEmails = [];
 
     for (const e of credentials.emails) {
-      const eVal = e.value;
+      const emailVal = e.value;
 
       if (e.status === "VERIFIED") {
-        verifiedEmails.push(eVal);
+        verifiedEmails.push(emailVal);
       } else {
-        unverifiedEmails.push(eVal);
+        unverifiedEmails.push(emailVal);
       }
     }
 
@@ -259,7 +264,7 @@ export function convertOktaApplication(
     _class: "Application",
     displayName: app.label || app.name || app.id,
     id: app.id,
-    name: app.name,
+    name: app.name || app.label,
     shortName: appShortName,
     label: app.label,
     status: app.status,
@@ -439,8 +444,6 @@ export function convertOktaUserFactorRelationship(
   return relationship;
 }
 
-type AWSRoleAssignment = RelationshipFromIntegration & MappedRelationship;
-
 // See bullet point #11 in the following Okta documentation:
 // https://saml-doc.okta.com/SAML_Docs/How-to-Configure-SAML-2.0-for-Amazon-Web-Service#scenarioB
 //
@@ -454,7 +457,7 @@ function mapAWSRoleAssignment(
   sourceKey: string,
   role: string,
   awsAccountId: string,
-): AWSRoleAssignment {
+): MappedRelationship {
   const regex = /\[?([a-zA-Z0-9_-]+)\]? -- ([a-zA-Z0-9_-]+)/;
   const match = regex.exec(role);
   if (match) {
