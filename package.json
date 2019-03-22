@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "A JupiterOne managed integration for https://www.okta.com",
   "main": "index.js",
-  "repository": "https://github.com/jupiterone-io/managed-integration-example",
+  "repository": "https://github.com/jupiterone/jupiter-integration-okta",
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "start": "ts-node --require dotenv/config tools/execute.ts | bunyan",
