@@ -70,6 +70,8 @@ export interface OktaUserProfile {
   generic?: boolean;
   role?: string;
   samlRoles?: string[];
+  bitbucketUsername?: string;
+  githubUsername?: string;
 }
 
 // tslint:disable-next-line:no-empty-interface
@@ -181,7 +183,7 @@ export interface OktaFactor {
  * Graph database, we need to flatten these objects, so that all properties are
  * at the top level.
  */
-export interface FlattenedOktaUser {
+export interface FlattenedOktaUser extends OktaUserProfile {
   id: string;
   name: string;
   displayName?: string;
@@ -193,22 +195,9 @@ export interface FlattenedOktaUser {
   lastLogin: Date;
   lastUpdated: Date;
   passwordChanged: Date;
-  firstName: string;
-  lastName: string;
-  mobilePhone: string;
-  secondEmail: string;
-  login: string;
   username: string;
-  tenant: string[];
-  email: string;
   verifiedEmails?: string[];
   unverifiedEmails?: string[];
-  userType?: string;
-  employeeType?: string;
-  employeeNumber?: string;
-  generic?: boolean;
-  manager?: string;
-  managerId?: string;
 }
 
 export interface FlattenedOktaApplication {

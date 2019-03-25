@@ -54,6 +54,8 @@ function getMockUser(): OktaUser {
       secondEmail: "kingaustin@lifeomic.com",
       employeeType: "employee",
       generic: false,
+      bitbucketUsername: "bb-austin1",
+      githubUsername: "gh-austin1",
     } as OktaUserProfile,
     credentials: {} as OktaUserCredentials,
   } as OktaUser;

@@ -68,6 +68,8 @@ export function flattenUser(user: OktaUser): FlattenedOktaUser {
     generic,
     manager,
     managerId,
+    bitbucketUsername,
+    githubUsername,
   } = profile;
 
   const flattenedUser: FlattenedOktaUser = {
@@ -95,6 +97,8 @@ export function flattenUser(user: OktaUser): FlattenedOktaUser {
     generic,
     manager,
     managerId,
+    bitbucketUsername,
+    githubUsername,
   };
 
   if (credentials && credentials.emails) {
