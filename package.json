@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/jupiter-integration-okta",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A JupiterOne managed integration for https://www.okta.com",
   "main": "index.js",
   "repository": "https://github.com/jupiterone/jupiter-integration-okta",
