@@ -281,7 +281,7 @@ export interface StandardizedOktaApplicationUserRelationship
   applicationId: string;
   userId: string;
   userEmail: string;
-  roles?: string[];
+  roles?: string;
   role?: string;
 }
 
@@ -289,7 +289,7 @@ export interface StandardizedOktaApplicationGroupRelationship
   extends RelationshipFromIntegration {
   applicationId: string;
   groupId: string;
-  roles?: string[];
+  roles?: string;
   role?: string;
 }
 

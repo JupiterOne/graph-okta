@@ -352,7 +352,8 @@ export function convertOktaApplicationUserRelationship(
   };
 
   if (application.awsAccountId) {
-    relationship.roles = user.profile.samlRoles;
+    // Array property not supported on the edge in Neptune
+    relationship.roles = JSON.stringify(user.profile.samlRoles);
     relationship.role = user.profile.role;
 
     if (user.profile.samlRoles) {
@@ -394,7 +395,8 @@ export function convertOktaApplicationGroupRelationship(
   };
 
   if (application.awsAccountId) {
-    relationship.roles = group.profile.samlRoles;
+    // Array property not supported on the edge in Neptune
+    relationship.roles = JSON.stringify(group.profile.samlRoles);
     relationship.role = group.profile.role;
   }
 
