@@ -320,37 +320,40 @@ export function convertOktaApplication(
     appVendorName: getVendorName(appShortName),
     appAccountType: getAccountName(appShortName),
     isMultiInstanceApp: isMultiInstanceApp(appShortName),
-    isSAMLApp: app.signOnMode.startsWith("SAML"),
+    isSAMLApp: !!app.signOnMode && app.signOnMode.startsWith("SAML"),
     webLink,
   };
 
   const settings = app.settings;
   const appSettings = settings.app;
-  if (appSettings.awsEnvironmentType === "aws.amazon") {
-    if (appSettings.identityProviderArn) {
-      const awsAccountIdMatch = /^arn:aws:iam::([0-9]+):/.exec(
-        appSettings.identityProviderArn,
-      );
-      if (awsAccountIdMatch) {
-        entity.awsAccountId = awsAccountIdMatch[1];
-        entity.appAccountId = awsAccountIdMatch[1];
+  if (appSettings) {
+    if (appSettings.awsEnvironmentType === "aws.amazon") {
+      if (appSettings.identityProviderArn) {
+        const awsAccountIdMatch = /^arn:aws:iam::([0-9]+):/.exec(
+          appSettings.identityProviderArn,
+        );
+        if (awsAccountIdMatch) {
+          entity.awsAccountId = awsAccountIdMatch[1];
+          entity.appAccountId = awsAccountIdMatch[1];
+        }
       }
-    }
 
-    entity.awsIdentityProviderArn = appSettings.identityProviderArn;
-    entity.awsEnvironmentType = appSettings.awsEnvironmentType;
-    entity.awsGroupFilter = appSettings.groupFilter;
-    entity.awsRoleValuePattern = appSettings.roleValuePattern;
-    entity.awsJoinAllRoles = appSettings.joinAllRoles;
-    entity.awsSessionDuration = appSettings.sessionDuration;
-  } else if (appSettings.githubOrg) {
-    entity.githubOrg = appSettings.githubOrg;
-    entity.appAccountId = appSettings.githubOrg;
-  } else if (appSettings.domain) {
-    // Google Cloud Platform and G Suite apps use `domain` as the account identifier
-    entity.appDomain = appSettings.domain;
-    entity.appAccountId = appSettings.domain;
+      entity.awsIdentityProviderArn = appSettings.identityProviderArn;
+      entity.awsEnvironmentType = appSettings.awsEnvironmentType;
+      entity.awsGroupFilter = appSettings.groupFilter;
+      entity.awsRoleValuePattern = appSettings.roleValuePattern;
+      entity.awsJoinAllRoles = appSettings.joinAllRoles;
+      entity.awsSessionDuration = appSettings.sessionDuration;
+    } else if (appSettings.githubOrg) {
+      entity.githubOrg = appSettings.githubOrg;
+      entity.appAccountId = appSettings.githubOrg;
+    } else if (appSettings.domain) {
+      // Google Cloud Platform and G Suite apps use `domain` as the account identifier
+      entity.appDomain = appSettings.domain;
+      entity.appAccountId = appSettings.domain;
+    }
   }
+
   return entity;
 }
 
