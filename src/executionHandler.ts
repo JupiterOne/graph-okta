@@ -4,13 +4,13 @@ import {
   IntegrationInvocationEvent,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import initializeContext from "./initializeContext";
-import processUsers from "./processUsers";
+import synchronize from "./synchronizer";
 
 export default async function executionHandler(
   context: IntegrationExecutionContext<IntegrationInvocationEvent>,
 ): Promise<IntegrationExecutionResult> {
   const executionContext = await initializeContext(context);
-  const operations = await processUsers(executionContext);
+  const operations = await synchronize(executionContext);
   return {
     operations: await executionContext.persister.publishPersisterOperations(
       operations,

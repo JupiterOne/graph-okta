@@ -1,4 +1,12 @@
 import * as url from "url";
+
+import {
+  EntityFromIntegration,
+  RelationshipDirection,
+  RelationshipFromIntegration,
+} from "@jupiterone/jupiter-managed-integration-sdk";
+
+import * as constants from "./constants";
 import {
   FlattenedOktaUser,
   FlattenedOktaUserGroup,
@@ -20,13 +28,6 @@ import {
   StandardizedOktaUserGroup,
   StandardizedOktaUserGroupRelationship,
 } from "./types";
-
-import {
-  RelationshipDirection,
-  RelationshipFromIntegration,
-} from "@jupiterone/jupiter-managed-integration-sdk";
-
-import * as constants from "./constants";
 import buildAppShortName from "./util/buildAppShortName";
 import getOktaAccountAdminUrl from "./util/getOktaAccountAdminUrl";
 import getOktaAccountInfo from "./util/getOktaAccountInfo";
@@ -212,6 +213,45 @@ export function convertOktaUserGroup(
   };
 
   return entity;
+}
+
+export function createHasRelationships(
+  fromEntity: EntityFromIntegration,
+  toEntities: EntityFromIntegration[],
+  relationshipType: string,
+  relationshipProperties?: any,
+) {
+  const relationships: RelationshipFromIntegration[] = [];
+  for (const e of toEntities) {
+    relationships.push(
+      createHasRelationship(
+        fromEntity,
+        e,
+        relationshipType,
+        relationshipProperties,
+      ),
+    );
+  }
+  return relationships;
+}
+
+export function createHasRelationship(
+  fromEntity: EntityFromIntegration,
+  toEntity: EntityFromIntegration,
+  relationshipType: string,
+  relationshipProperties?: any,
+) {
+  const relationship: RelationshipFromIntegration = {
+    _key: `${fromEntity._key}|has|${toEntity._key}`,
+    _type: relationshipType,
+    _class: "HAS",
+    _fromEntityKey: fromEntity._key,
+    _toEntityKey: toEntity._key,
+    displayName: "HAS",
+    ...relationshipProperties,
+  };
+
+  return relationship;
 }
 
 export function convertOktaUserGroupRelationship(

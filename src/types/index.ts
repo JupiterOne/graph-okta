@@ -260,6 +260,13 @@ export interface StandardizedOktaAccount extends EntityFromIntegration {
   webLink: string;
 }
 
+export interface StandardizedOktaService extends EntityFromIntegration {
+  name: string;
+  category: string;
+  function: string;
+  controlDomain: string;
+}
+
 export interface StandardizedOktaAccountGroupRelationship
   extends RelationshipFromIntegration {
   accountUrl: string;
