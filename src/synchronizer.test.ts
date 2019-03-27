@@ -8,7 +8,7 @@ import uuidV4 from "uuid/v4";
 import * as constants from "./constants";
 import * as converters from "./converters";
 import createOktaClient from "./createOktaClient";
-import processUsers from "./processUsers";
+import synchronize from "./synchronizer";
 import {
   OktaClient,
   OktaExecutionContext,
@@ -84,6 +84,88 @@ function getMockAccount(): StandardizedOktaAccount {
   };
 }
 
+function getMockAccountEntityOperations() {
+  const mockAccount = getMockAccount();
+  return [
+    {
+      type: EntityOperationType.CREATE_ENTITY,
+      entityKey: mockAccount.webLink,
+      entityType: constants.ENTITY_TYPE_ACCOUNT,
+      entityClass: "Account",
+      timestamp: executionContext.event.timestamp,
+      properties: {
+        name: "dummy",
+        displayName: "dummy",
+        webLink: mockAccount.webLink,
+      },
+    },
+  ];
+}
+
+function getMockServiceEntityOperations() {
+  return [
+    {
+      type: EntityOperationType.CREATE_ENTITY,
+      entityKey: "okta:sso:dummy",
+      entityType: constants.ENTITY_TYPE_SERVICE,
+      entityClass: ["Service", "Control"],
+      timestamp: executionContext.event.timestamp,
+      properties: {
+        name: "SSO",
+        displayName: "Okta SSO",
+        category: "security",
+        function: "sso",
+        controlDomain: "identity-access",
+      },
+    },
+    {
+      type: EntityOperationType.CREATE_ENTITY,
+      entityKey: "okta:mfa:dummy",
+      entityType: constants.ENTITY_TYPE_SERVICE,
+      entityClass: ["Service", "Control"],
+      timestamp: executionContext.event.timestamp,
+      properties: {
+        name: "MFA",
+        displayName: "Okta MFA",
+        category: "security",
+        function: "mfa",
+        controlDomain: "identity-access",
+      },
+    },
+  ];
+}
+
+function getMockAccountServiceRelationshipOperations() {
+  const mockAccount = getMockAccount();
+  const timestamp = executionContext.event.timestamp;
+  return [
+    {
+      type: RelationshipOperationType.CREATE_RELATIONSHIP,
+      relationshipKey: `${mockAccount._key}|has|okta:sso:dummy`,
+      relationshipType: constants.RELATIONSHIP_TYPE_ACCOUNT_SERVICE,
+      fromEntityKey: mockAccount._key,
+      toEntityKey: "okta:sso:dummy",
+      relationshipClass: "HAS",
+      timestamp,
+      properties: {
+        displayName: "HAS",
+      },
+    },
+    {
+      type: RelationshipOperationType.CREATE_RELATIONSHIP,
+      relationshipKey: `${mockAccount._key}|has|okta:mfa:dummy`,
+      relationshipType: constants.RELATIONSHIP_TYPE_ACCOUNT_SERVICE,
+      fromEntityKey: mockAccount._key,
+      toEntityKey: "okta:mfa:dummy",
+      relationshipClass: "HAS",
+      timestamp,
+      properties: {
+        displayName: "HAS",
+      },
+    },
+  ];
+}
+
 let executionContext: OktaExecutionContext;
 let mockOktaClient: jest.Mocked<OktaClient>;
 
@@ -110,8 +192,7 @@ beforeEach(() => {
   };
 });
 
-test("should return empty entityOperations and relationshipOperations if there is no data to diff", async () => {
-  const mockAccount = getMockAccount();
+test("should only build account and service entities and relationships if there is no other data", async () => {
   mockOktaClient.listUsers.mockResolvedValue(EMPTY_OKTA_COLLECTION);
   mockOktaClient.listUserGroups.mockResolvedValue(EMPTY_OKTA_COLLECTION);
   mockOktaClient.listApplications.mockResolvedValue(EMPTY_OKTA_COLLECTION);
@@ -123,30 +204,21 @@ test("should return empty entityOperations and relationshipOperations if there i
   jest.spyOn(executionContext.graph, "findEntities").mockResolvedValue([]);
   jest.spyOn(executionContext.graph, "findRelationships").mockResolvedValue([]);
 
-  const [entityOperations, relationshipOperations] = await processUsers(
+  const [entityOperations, relationshipOperations] = await synchronize(
     executionContext,
   );
 
   expect(entityOperations).toEqual([
-    {
-      type: EntityOperationType.CREATE_ENTITY,
-      entityKey: mockAccount.webLink,
-      entityType: constants.ENTITY_TYPE_ACCOUNT,
-      entityClass: "Account",
-      timestamp: executionContext.event.timestamp,
-      properties: {
-        name: "dummy",
-        displayName: "dummy",
-        webLink: mockAccount.webLink,
-      },
-    },
+    ...getMockAccountEntityOperations(),
+    ...getMockServiceEntityOperations(),
   ]);
-  expect(relationshipOperations).toEqual([]);
+  expect(relationshipOperations).toEqual(
+    getMockAccountServiceRelationshipOperations(),
+  );
 });
 
 test("should build a CreateEntityOperation for a new user", async () => {
   const mockUser = getMockUser();
-  const mockAccount = getMockAccount();
 
   mockOktaClient.listUsers.mockResolvedValue({
     each: (cb: (item: OktaUser) => void) => {
@@ -165,25 +237,15 @@ test("should build a CreateEntityOperation for a new user", async () => {
   jest.spyOn(executionContext.graph, "findEntities").mockResolvedValue([]);
   jest.spyOn(executionContext.graph, "findRelationships").mockResolvedValue([]);
 
-  const [entityOperations, relationshipOperations] = await processUsers(
+  const [entityOperations, relationshipOperations] = await synchronize(
     executionContext,
   );
 
   const entityKey = mockUser.id;
 
   expect(entityOperations).toEqual([
-    {
-      type: EntityOperationType.CREATE_ENTITY,
-      entityKey: mockAccount.webLink,
-      entityType: constants.ENTITY_TYPE_ACCOUNT,
-      entityClass: "Account",
-      timestamp: executionContext.event.timestamp,
-      properties: {
-        name: "dummy",
-        displayName: "dummy",
-        webLink: mockAccount.webLink,
-      },
-    },
+    ...getMockAccountEntityOperations(),
+    ...getMockServiceEntityOperations(),
     {
       type: EntityOperationType.CREATE_ENTITY,
       entityKey,
@@ -197,7 +259,9 @@ test("should build a CreateEntityOperation for a new user", async () => {
     },
   ]);
 
-  expect(relationshipOperations).toEqual([]);
+  expect(relationshipOperations).toEqual(
+    getMockAccountServiceRelationshipOperations(),
+  );
 });
 
 test("should diff new users from existing users", async () => {
@@ -237,7 +301,9 @@ test("should diff new users from existing users", async () => {
         ...mockAccount,
       },
     ])
-    // Second call is for fetching existing users
+    // Second call is for fetching existing services
+    .mockResolvedValueOnce([])
+    // Third call is for fetching existing users
     .mockResolvedValueOnce(([
       {
         _id: userEntityId,
@@ -250,11 +316,12 @@ test("should diff new users from existing users", async () => {
 
   jest.spyOn(executionContext.graph, "findRelationships").mockResolvedValue([]);
 
-  const [entityOperations, relationshipOperations] = await processUsers(
+  const [entityOperations, relationshipOperations] = await synchronize(
     executionContext,
   );
   // Validate that the "status" has been updated
-  expect(entityOperations).toEqual([
+  const expectedEntityOperations = [
+    ...getMockServiceEntityOperations(),
     {
       type: EntityOperationType.UPDATE_ENTITY,
       entityId: userEntityId,
@@ -269,12 +336,16 @@ test("should diff new users from existing users", async () => {
         }`,
       },
     },
-  ]);
+  ];
 
-  expect(relationshipOperations).toEqual([]);
+  expect(entityOperations).toEqual(expectedEntityOperations);
+
+  expect(relationshipOperations).toEqual(
+    getMockAccountServiceRelationshipOperations(),
+  );
 });
 
-test("should create user entites and relationships", async () => {
+test("should create user entities and relationships", async () => {
   const mockUser = getMockUser();
   const mockUserGroup = getMockUserGroup();
   const mockAccount = getMockAccount();
@@ -307,23 +378,14 @@ test("should create user entites and relationships", async () => {
   jest.spyOn(executionContext.graph, "findEntities").mockResolvedValue([]);
   jest.spyOn(executionContext.graph, "findRelationships").mockResolvedValue([]);
 
-  const [entityOperations, relationshipOperations] = await processUsers(
+  const [entityOperations, relationshipOperations] = await synchronize(
     executionContext,
   );
   const timestamp = executionContext.event.timestamp;
-  expect(entityOperations).toEqual([
-    {
-      type: EntityOperationType.CREATE_ENTITY,
-      entityKey: mockAccount.webLink,
-      entityType: constants.ENTITY_TYPE_ACCOUNT,
-      entityClass: "Account",
-      timestamp,
-      properties: {
-        name: "dummy",
-        displayName: "dummy",
-        webLink: mockAccount.webLink,
-      },
-    },
+
+  const expectedEntityOperations = [
+    ...getMockAccountEntityOperations(),
+    ...getMockServiceEntityOperations(),
     {
       type: EntityOperationType.CREATE_ENTITY,
       entityKey: userEntityKey,
@@ -346,9 +408,11 @@ test("should create user entites and relationships", async () => {
         ...converters.flattenUserGroup(mockUserGroup),
       },
     },
-  ]);
+  ];
+  expect(entityOperations).toEqual(expectedEntityOperations);
 
-  expect(relationshipOperations).toEqual([
+  const expectedRelationshipOperations = [
+    ...getMockAccountServiceRelationshipOperations(),
     {
       type: RelationshipOperationType.CREATE_RELATIONSHIP,
       relationshipKey: accountGroupRelationshipKey,
@@ -377,5 +441,6 @@ test("should create user entites and relationships", async () => {
         displayName: "HAS",
       },
     },
-  ]);
+  ];
+  expect(relationshipOperations).toEqual(expectedRelationshipOperations);
 });

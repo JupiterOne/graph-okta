@@ -5,10 +5,9 @@ import {
   RelationshipFromIntegration,
   RelationshipOperation,
 } from "@jupiterone/jupiter-managed-integration-sdk";
+
 import * as constants from "./constants";
 import * as converters from "./converters";
-import getOktaAccountInfo from "./util/getOktaAccountInfo";
-
 import {
   OktaApplication,
   OktaExecutionContext,
@@ -23,12 +22,13 @@ import {
   StandardizedOktaApplicationGroupRelationship,
   StandardizedOktaApplicationUserRelationship,
   StandardizedOktaFactor,
+  StandardizedOktaService,
   StandardizedOktaUser,
   StandardizedOktaUserFactorRelationship,
   StandardizedOktaUserGroup,
   StandardizedOktaUserGroupRelationship,
 } from "./types";
-
+import getOktaAccountInfo from "./util/getOktaAccountInfo";
 import retryIfRateLimited from "./util/retryIfRateLimited";
 
 async function listAllUsers(
@@ -297,7 +297,7 @@ interface Lookup<V> {
   [k: string]: V;
 }
 
-export default async function processUsers(
+export default async function synchronize(
   executionContext: OktaExecutionContext,
 ): Promise<PersisterOperations> {
   const { instance, logEvent, logger, persister } = executionContext;
@@ -323,11 +323,48 @@ export default async function processUsers(
     webLink: integrationConfig.oktaOrgUrl,
   };
 
+  const ssoService: StandardizedOktaService = {
+    _type: constants.ENTITY_TYPE_SERVICE,
+    _key: `okta:sso:${oktaAccountInfo.name}`,
+    _class: constants.ENTITY_CLASS_SERVICE,
+    name: "SSO",
+    displayName: "Okta SSO",
+    category: "security",
+    function: "sso",
+    controlDomain: "identity-access",
+  };
+
+  const mfaService: StandardizedOktaService = {
+    _type: constants.ENTITY_TYPE_SERVICE,
+    _key: `okta:mfa:${oktaAccountInfo.name}`,
+    _class: constants.ENTITY_CLASS_SERVICE,
+    name: "MFA",
+    displayName: "Okta MFA",
+    category: "security",
+    function: "mfa",
+    controlDomain: "identity-access",
+  };
+
   const oldAccounts = await queryExistingEntities<StandardizedOktaAccount>(
     constants.ENTITY_TYPE_ACCOUNT,
     executionContext,
   );
   const newAccounts = [account];
+
+  const oldServices = await queryExistingEntities<StandardizedOktaService>(
+    constants.ENTITY_TYPE_SERVICE,
+    executionContext,
+  );
+  const newServices = [ssoService, mfaService];
+
+  const oldAccountServiceRelationships = await queryExistingRelationships<
+    RelationshipFromIntegration
+  >(constants.RELATIONSHIP_TYPE_ACCOUNT_SERVICE, executionContext);
+  const newAccountServiceRelationships: RelationshipFromIntegration[] = converters.createHasRelationships(
+    account,
+    [ssoService, mfaService],
+    constants.RELATIONSHIP_TYPE_ACCOUNT_SERVICE,
+  );
 
   const oldAccountGroupRelationships = await queryExistingRelationships<
     StandardizedOktaAccountGroupRelationship
@@ -517,6 +554,19 @@ export default async function processUsers(
   // Process `okta_account` entities
   entityOperations = entityOperations.concat(
     persister.processEntities(oldAccounts, newAccounts),
+  );
+
+  // Process `okta_service` entities
+  entityOperations = entityOperations.concat(
+    persister.processEntities(oldServices, newServices),
+  );
+
+  // Process `okta_account` -> `okta_user_group` relationships
+  relationshipOperations = relationshipOperations.concat(
+    persister.processRelationships(
+      oldAccountServiceRelationships,
+      newAccountServiceRelationships,
+    ),
   );
 
   // Process `okta_user` entities
