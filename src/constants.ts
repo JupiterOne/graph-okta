@@ -17,3 +17,5 @@ export const RELATIONSHIP_TYPE_APPLICATION_USER =
   "okta_user_assigned_application";
 export const RELATIONSHIP_TYPE_APPLICATION_GROUP =
   "okta_group_assigned_application";
+export const RELATIONSHIP_TYPE_USER_IAM_ROLE_ASSIGNMENT =
+  "okta_user_assigned_aws_iam_role";

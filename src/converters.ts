@@ -514,7 +514,7 @@ function mapAWSRoleAssignment(
     const roleName = match[2];
     return {
       _key: `${sourceKey}|assigned|${awsAccountName}|${roleName}`,
-      _type: "okta_user_assigned_aws_iam_role",
+      _type: constants.RELATIONSHIP_TYPE_USER_IAM_ROLE_ASSIGNMENT,
       _class: "ASSIGNED",
       _fromEntityKey: sourceKey,
       _toEntityKey: `${awsAccountName}:${roleName}`,
