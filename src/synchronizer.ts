@@ -419,9 +419,15 @@ export default async function synchronize(
   >(constants.RELATIONSHIP_TYPE_ACCOUNT_APPLICATION, executionContext);
   const newAccountApplicationRelationships: StandardizedOktaAccountApplicationRelationship[] = [];
 
-  const oldApplicationUserRelationships = await queryExistingRelationships<
-    StandardizedOktaApplicationUserRelationship
-  >(constants.RELATIONSHIP_TYPE_APPLICATION_USER, executionContext);
+  const oldApplicationUserRelationships = [
+    ...(await queryExistingRelationships<RelationshipFromIntegration>(
+      constants.RELATIONSHIP_TYPE_USER_IAM_ROLE_ASSIGNMENT,
+      executionContext,
+    )),
+    ...(await queryExistingRelationships<
+      StandardizedOktaApplicationUserRelationship
+    >(constants.RELATIONSHIP_TYPE_APPLICATION_USER, executionContext)),
+  ];
   const newApplicationUserRelationships: RelationshipFromIntegration[] = [];
 
   const oldApplicationGroupRelationships = await queryExistingRelationships<
