@@ -27,7 +27,7 @@
     "promise-retry": "^1.1.1"
   },
   "peerDependencies": {
-    "@jupiterone/jupiter-managed-integration-sdk": "^20.0.0"
+    "@jupiterone/jupiter-managed-integration-sdk": "^21.1.7"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -36,7 +36,7 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-typescript": "^7.1.0",
-    "@jupiterone/jupiter-managed-integration-sdk": "^20.0.0",
+    "@jupiterone/jupiter-managed-integration-sdk": "^21.1.7",
     "@types/bunyan": "^1.8.5",
     "@types/fs-extra": "^5.0.5",
     "@types/jest": "^24.0.0",

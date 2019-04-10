@@ -3,6 +3,7 @@ import {
   GraphClient,
   IntegrationExecutionContext,
   IntegrationInvocationEvent,
+  JobsClient,
   PersisterClient,
   RelationshipFromIntegration,
   RelationshipMapping,
@@ -11,6 +12,7 @@ import {
 export interface OktaExecutionContext
   extends IntegrationExecutionContext<IntegrationInvocationEvent> {
   okta: OktaClient;
+  jobs: JobsClient;
   graph: GraphClient;
   persister: PersisterClient;
 }
