@@ -44,9 +44,9 @@ async function listAllUsers(
   const factors: StandardizedOktaFactor[] = [];
   const relationships: StandardizedOktaUserFactorRelationship[] = [];
 
-  const { okta, logEvent, logger } = executionContext;
+  const { okta, jobs, logger } = executionContext;
 
-  await logEvent("query_start", "Querying for users from Okta...");
+  await jobs.logEvent("query_start", "Querying for users from Okta...");
 
   const userCollection = await okta.listUsers();
   await retryIfRateLimited(logger, () =>
@@ -55,9 +55,9 @@ async function listAllUsers(
     }),
   );
 
-  await logEvent("query_end", "Successfully queried users from Okta.");
+  await jobs.logEvent("query_end", "Successfully queried users from Okta.");
 
-  await logEvent(
+  await jobs.logEvent(
     "query_start",
     "Querying for mfa factors from Okta for all users...",
   );
@@ -79,7 +79,10 @@ async function listAllUsers(
     );
   }
 
-  await logEvent("query_end", "Successfully queried user factors from Okta.");
+  await jobs.logEvent(
+    "query_end",
+    "Successfully queried user factors from Okta.",
+  );
 
   return [users, factors, relationships];
 }
@@ -115,9 +118,9 @@ async function listAllApplications(
   executionContext: OktaExecutionContext,
 ): Promise<StandardizedOktaApplication[]> {
   const applications: StandardizedOktaApplication[] = [];
-  const { okta, logEvent, logger } = executionContext;
+  const { okta, jobs, logger } = executionContext;
 
-  await logEvent("query_start", "Querying for applications from Okta...");
+  await jobs.logEvent("query_start", "Querying for applications from Okta...");
 
   const applicationsCollection = await okta.listApplications();
   await retryIfRateLimited(logger, () =>
@@ -128,7 +131,7 @@ async function listAllApplications(
     }),
   );
 
-  await logEvent(
+  await jobs.logEvent(
     "query_end",
     "Successfully queried for applications from Okta.",
   );
@@ -210,9 +213,9 @@ async function queryExistingEntities<T extends EntityFromIntegration>(
   entityType: string,
   executionContext: OktaExecutionContext,
 ): Promise<T[]> {
-  const { graph, instance, logEvent, logger } = executionContext;
+  const { graph, instance, jobs, logger } = executionContext;
 
-  await logEvent(
+  await jobs.logEvent(
     "query_start",
     `Querying for existing ${entityType} entities from database...`,
   );
@@ -240,7 +243,7 @@ async function queryExistingEntities<T extends EntityFromIntegration>(
     "Finished finding entities",
   );
 
-  await logEvent(
+  await jobs.logEvent(
     "query_end",
     `Successfully queried for existing ${entityType} entities from database.`,
   );
@@ -254,9 +257,9 @@ async function queryExistingRelationships<
   relationshipType: string,
   executionContext: OktaExecutionContext,
 ): Promise<T[]> {
-  const { graph, instance, logEvent, logger } = executionContext;
+  const { graph, instance, jobs, logger } = executionContext;
 
-  await logEvent(
+  await jobs.logEvent(
     "query_start",
     `Querying for existing ${relationshipType} relationships...`,
   );
@@ -285,7 +288,7 @@ async function queryExistingRelationships<
     "Finished finding relationships",
   );
 
-  await logEvent(
+  await jobs.logEvent(
     "query_end",
     `Successfully queried for existing ${relationshipType} relationships.`,
   );
@@ -300,13 +303,13 @@ interface Lookup<V> {
 export default async function synchronize(
   executionContext: OktaExecutionContext,
 ): Promise<PersisterOperations> {
-  const { instance, logEvent, logger, persister } = executionContext;
+  const { instance, jobs, logger, persister } = executionContext;
   const integrationConfig = instance.config as OktaIntegrationConfig;
 
   let entityOperations: EntityOperation[] = [];
   let relationshipOperations: RelationshipOperation[] = [];
 
-  await logEvent("work_start", "Processing Okta resources...");
+  await jobs.logEvent("work_start", "Processing Okta resources...");
 
   const oktaAccountInfo = getOktaAccountInfo(executionContext.instance);
   let displayName = oktaAccountInfo.name;
@@ -437,7 +440,7 @@ export default async function synchronize(
 
   const groupByIdLookup: Lookup<StandardizedOktaUserGroup> = {};
 
-  await logEvent("query_start", "Querying for user groups from Okta...");
+  await jobs.logEvent("query_start", "Querying for user groups from Okta...");
 
   for (const user of newUsers) {
     // Examine the user and group relationships
@@ -464,12 +467,12 @@ export default async function synchronize(
     }
   }
 
-  await logEvent(
+  await jobs.logEvent(
     "query_end",
     "Successfully queried for user groups from Okta.",
   );
 
-  await logEvent(
+  await jobs.logEvent(
     "query_start",
     "Querying for Okta application user/group assignments...",
   );
@@ -497,7 +500,7 @@ export default async function synchronize(
     }
   }
 
-  await logEvent(
+  await jobs.logEvent(
     "query_end",
     "Successfully queried for application assignments from Okta.",
   );
@@ -648,7 +651,7 @@ export default async function synchronize(
     ),
   );
 
-  await logEvent("work_end", "Successfully processed Okta resources.");
+  await jobs.logEvent("work_end", "Successfully processed Okta resources.");
 
   return [entityOperations, relationshipOperations];
 }

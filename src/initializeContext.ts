@@ -27,11 +27,11 @@ export default async function initializeContext(
           _class: application._class,
         };
       },
-      user: (application: StandardizedOktaUser) => {
+      user: (user: StandardizedOktaUser) => {
         return {
-          _key: application._key,
-          _type: application._type,
-          _class: application._class,
+          _key: user._key,
+          _type: user._type,
+          _class: user._class,
         };
       },
     },
