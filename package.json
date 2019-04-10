@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/jupiter-integration-okta",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "description": "A JupiterOne managed integration for https://www.okta.com",
   "main": "dist/index.js",
   "repository": "https://github.com/jupiterone/jupiter-integration-okta",
@@ -13,7 +13,8 @@
     "start": "ts-node --require dotenv/config tools/execute.ts | bunyan",
     "start:graph": "docker run -d --rm --name jupiterone-local-graph -p 8182:8182 tinkerpop/gremlin-server:3.3",
     "stop:graph": "docker stop jupiterone-local-graph",
-    "prepublish": "rm -rf dist/* && yarn build:types && yarn build:src && yarn build:docs",
+    "prebuild": "yarn test",
+    "build": "rm -rf dist/* && yarn build:types && yarn build:src && yarn build:docs",
     "build:src": "babel src --extensions '.ts' --out-dir dist",
     "build:docs": "ts-node tools/docs.ts",
     "build:types": "tsc --project tsconfig.dist.json --declaration --emitDeclarationOnly",
