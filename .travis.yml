@@ -1,3 +1,14 @@
 language: node_js
 node_js:
   - "8.10"
+branches:
+  only:
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+deploy:
+  provider: npm
+  email: npm@jupiterone.io
+  api_key:
+    secure: HfeV6wbgHYQQ9T34KZE4FtfU27sN/ewQCfyfzJpNYmCpvQV71Cz4dEhj91Md1yXyHl1Hr9e75tk/PVIxVnoDgdg/Rtbl5p30mxM5Ogn15ZgpwndkFGzOZDcHkm3USkCZT9JaupxAfz/6I/+KZ8csMln7F2iseGyc7WYyJJtbeNTU8qljwPNuixWN156jdE+wygJzihUnPKtJ1UMAOVk4B0eFKQmO05VTK8XYCX1ThIWvlLnOBHBiUKvgrr7c2E5j+Yp6A0QR6LxNi6SMbhBPFVttyu+N3RhE6+BfCTHascbV8F8w7QvWre6rGPJ7xDwPZuVvaToZ5ukMiTqy5l/Fs+KeRruBx5SHGnS7cEoS/PT8iuyVRApYl1cK32sTfpj/7t8m+zWrdE1QPPrRwukC3u7qhgTC50rbAwzGplG5TKZYMPByacJolpkYtuINbkdY0AfAyvFVCeTMH3oG4tEiAEXEb9WNwT39qw0CfOHjpHQGmZZbJcMTTAdNMVXNdoK0xWfusdVrOYryadN5Lx3cu/Yio9wQzUYhAxFvaxcTh+wJnjvkaVYsGsA4WSfxrwS3KlGrateR3LaA2fFsOuYAyYcMrHNQucXs+ow8EZw8tR6kq/dsrkEJvW6V5jqgEwQ1DBQIfnbfdeA/AZn64jhz0i7clPGCdbLw9h6AaJzLDVc=
+  on:
+    tags: true
+    repo: JupiterOne/jupiter-integration-okta
