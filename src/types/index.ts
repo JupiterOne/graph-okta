@@ -2,15 +2,13 @@ import {
   EntityFromIntegration,
   GraphClient,
   IntegrationExecutionContext,
-  IntegrationInvocationEvent,
   JobsClient,
   PersisterClient,
   RelationshipFromIntegration,
   RelationshipMapping,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
-export interface OktaExecutionContext
-  extends IntegrationExecutionContext<IntegrationInvocationEvent> {
+export interface OktaExecutionContext extends IntegrationExecutionContext {
   okta: OktaClient;
   jobs: JobsClient;
   graph: GraphClient;

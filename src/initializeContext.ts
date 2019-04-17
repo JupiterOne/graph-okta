@@ -1,9 +1,6 @@
 import createOktaClient from "./createOktaClient";
 
-import {
-  IntegrationExecutionContext,
-  IntegrationInvocationEvent,
-} from "@jupiterone/jupiter-managed-integration-sdk";
+import { IntegrationExecutionContext } from "@jupiterone/jupiter-managed-integration-sdk";
 
 import {
   OktaExecutionContext,
@@ -13,7 +10,7 @@ import {
 } from "./types";
 
 export default async function initializeContext(
-  context: IntegrationExecutionContext<IntegrationInvocationEvent>,
+  context: IntegrationExecutionContext,
 ): Promise<OktaExecutionContext> {
   const { oktaOrgUrl, oktaApiKey } = context.instance
     .config as OktaIntegrationConfig;
