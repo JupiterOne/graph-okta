@@ -1,7 +1,6 @@
 import {
-  IntegrationExecutionContext,
   IntegrationInstanceConfigError,
-  IntegrationInvocationEvent,
+  IntegrationValidationContext,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import { OktaIntegrationConfig } from "./types";
 import isValidOktaOrgUrl from "./util/isValidOktaOrgUrl";
@@ -11,20 +10,20 @@ import isValidOktaOrgUrl from "./util/isValidOktaOrgUrl";
  * invoked.
  *
  * At a minimum, integrations should ensure that the
- * `executionContext.instance.config` is valid. Integrations that require
- * additional information in `executionContext.invocationArgs` should also
+ * `validationContext.instance.config` is valid. Integrations that require
+ * additional information in `validationContext.invocationArgs` should also
  * validate those properties. It is also helpful to perform authentication with
  * the provider to ensure that credentials are valid.
  *
  * The function will be awaited to support connecting to the provider for this
  * purpose.
  *
- * @param executionContext
+ * @param validationContext
  */
 export default async function invocationValidator(
-  executionContext: IntegrationExecutionContext<IntegrationInvocationEvent>,
+  validationContext: IntegrationValidationContext,
 ) {
-  const { accountId, config } = executionContext.instance;
+  const { accountId, config } = validationContext.instance;
   const oktaInstanceConfig = config as OktaIntegrationConfig;
 
   if (!oktaInstanceConfig) {
