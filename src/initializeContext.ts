@@ -1,4 +1,4 @@
-import createOktaClient from "./createOktaClient";
+import createOktaClient from "./okta/createOktaClient";
 
 import { IntegrationExecutionContext } from "@jupiterone/jupiter-managed-integration-sdk";
 

@@ -1,4 +1,4 @@
-import { OktaAccountInfo } from "../types";
+import { OktaAccountInfo } from "../okta/types";
 
 export default function buildAppShortName(
   oktaAccountInfo: OktaAccountInfo,
