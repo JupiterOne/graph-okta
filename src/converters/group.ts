@@ -54,6 +54,7 @@ export function createUserGroupEntity(
     ],
     id,
     webLink,
+    name: profileName,
     displayName: profileName,
     created,
     lastUpdated,
