@@ -1,8 +1,6 @@
 export interface OktaUserGroupProfile {
   name: string;
   description: string;
-  role?: string;
-  samlRoles?: string[];
 }
 
 export interface OktaUserGroup {

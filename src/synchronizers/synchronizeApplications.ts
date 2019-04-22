@@ -11,18 +11,20 @@ import {
   createAccountApplicationRelationship,
   createAccountEntity,
   createApplicationEntity,
-  createApplicationGroupRelationship,
+  createApplicationGroupRelationships,
   createApplicationUserRelationships,
-  createUserEntity,
-  createUserGroupEntity,
+  GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
   USER_IAM_ROLE_RELATIONSHIP_TYPE,
 } from "../converters";
-import { OktaApplication, OktaUser, OktaUserGroup } from "../okta/types";
+import {
+  OktaApplication,
+  OktaApplicationGroup,
+  OktaApplicationUser,
+} from "../okta/types";
 import {
   OktaExecutionContext,
   StandardizedOktaAccountApplicationRelationship,
   StandardizedOktaApplication,
-  StandardizedOktaApplicationGroupRelationship,
 } from "../types";
 import getOktaAccountInfo from "../util/getOktaAccountInfo";
 import retryIfRateLimited from "../util/retryIfRateLimited";
@@ -49,7 +51,7 @@ export default async function synchronizeApplications(
 
   const newApplications: StandardizedOktaApplication[] = [];
   const newAccountApplicationRelationships: StandardizedOktaAccountApplicationRelationship[] = [];
-  const newApplicationGroupRelationships: StandardizedOktaApplicationGroupRelationship[] = [];
+  const newApplicationGroupAndGroupRoleRelationships: IntegrationRelationship[] = [];
   const newApplicationUserAndUserRoleRelationships: IntegrationRelationship[] = [];
 
   const applicationsCollection = await okta.listApplications();
@@ -68,10 +70,9 @@ export default async function synchronizeApplications(
       applicationEntity.id,
     );
     await retryIfRateLimited(logger, () =>
-      applicationGroups.each((group: OktaUserGroup) => {
-        const groupEntity = createUserGroupEntity(config, group);
-        newApplicationGroupRelationships.push(
-          createApplicationGroupRelationship(applicationEntity, groupEntity),
+      applicationGroups.each((group: OktaApplicationGroup) => {
+        newApplicationGroupAndGroupRoleRelationships.push(
+          ...createApplicationGroupRelationships(applicationEntity, group),
         );
       }),
     );
@@ -80,10 +81,9 @@ export default async function synchronizeApplications(
       applicationEntity.id,
     );
     await retryIfRateLimited(logger, () =>
-      applicationUsersCollection.each((user: OktaUser) => {
-        const userEntity = createUserEntity(config, user);
+      applicationUsersCollection.each((user: OktaApplicationUser) => {
         newApplicationUserAndUserRoleRelationships.push(
-          ...createApplicationUserRelationships(applicationEntity, userEntity),
+          ...createApplicationUserRelationships(applicationEntity, user),
         );
       }),
     );
@@ -93,12 +93,14 @@ export default async function synchronizeApplications(
     oldApplications,
     oldAccountApplicationRelationships,
     oldApplicationGroupRelationships,
+    oldGroupIAMRoleRelationships,
     oldApplicationUserRelationships,
     oldUserIAMRoleRelationships,
   ] = await Promise.all([
     graph.findEntitiesByType(APPLICATION_ENTITY_TYPE),
     graph.findRelationshipsByType(ACCOUNT_APPLICATION_RELATIONSHIP_TYPE),
     graph.findRelationshipsByType(APPLICATION_GROUP_RELATIONSHIP_TYPE),
+    graph.findRelationshipsByType(GROUP_IAM_ROLE_RELATIONSHIP_TYPE),
     graph.findRelationshipsByType(APPLICATION_USER_RELATIONSHIP_TYPE),
     graph.findRelationshipsByType(USER_IAM_ROLE_RELATIONSHIP_TYPE),
   ]);
@@ -112,8 +114,11 @@ export default async function synchronizeApplications(
           newAccountApplicationRelationships,
         ),
         ...persister.processRelationships(
-          oldApplicationGroupRelationships,
-          newApplicationGroupRelationships,
+          [
+            ...oldApplicationGroupRelationships,
+            ...oldGroupIAMRoleRelationships,
+          ],
+          newApplicationGroupAndGroupRoleRelationships,
         ),
         ...persister.processRelationships(
           [...oldApplicationUserRelationships, ...oldUserIAMRoleRelationships],

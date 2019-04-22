@@ -1,19 +1,19 @@
-import * as url from "url";
-
 import {
   IntegrationInstance,
   IntegrationRelationship,
   MappedRelationshipFromIntegration,
   RelationshipDirection,
 } from "@jupiterone/jupiter-managed-integration-sdk";
-
-import { OktaApplication } from "../okta/types";
+import * as url from "url";
+import {
+  OktaApplication,
+  OktaApplicationGroup,
+  OktaApplicationUser,
+} from "../okta/types";
 import {
   StandardizedOktaApplication,
   StandardizedOktaApplicationGroupRelationship,
   StandardizedOktaApplicationUserRelationship,
-  StandardizedOktaUser,
-  StandardizedOktaUserGroup,
 } from "../types";
 import buildAppShortName from "../util/buildAppShortName";
 import getOktaAccountAdminUrl from "../util/getOktaAccountAdminUrl";
@@ -27,6 +27,8 @@ import {
 export const APPLICATION_ENTITY_TYPE = "okta_application";
 export const APPLICATION_USER_RELATIONSHIP_TYPE =
   "okta_user_assigned_application";
+export const GROUP_IAM_ROLE_RELATIONSHIP_TYPE =
+  "okta_user_group_assigned_aws_iam_role";
 export const USER_IAM_ROLE_RELATIONSHIP_TYPE =
   "okta_user_assigned_aws_iam_role";
 
@@ -100,64 +102,37 @@ export function createApplicationEntity(
   return entity;
 }
 
-export function createApplicationGroupRelationship(
+export function createApplicationGroupRelationships(
   application: StandardizedOktaApplication,
-  group: StandardizedOktaUserGroup,
-): StandardizedOktaApplicationGroupRelationship {
+  group: OktaApplicationGroup,
+): IntegrationRelationship[] {
+  const relationships: IntegrationRelationship[] = [];
+
   const relationship: StandardizedOktaApplicationGroupRelationship = {
-    _key: `${group._key}|assigned|${application._key}`,
+    _key: `${group.id}|assigned|${application._key}`,
     _type: APPLICATION_GROUP_RELATIONSHIP_TYPE,
     _class: "ASSIGNED",
-    _fromEntityKey: group._key,
+    _fromEntityKey: group.id,
     _toEntityKey: application._key,
     displayName: "ASSIGNED",
     applicationId: application.id,
     groupId: group.id,
+    // Array property not supported on the edge in Neptune
+    roles:
+      group.profile && group.profile.samlRoles
+        ? JSON.stringify(group.profile.samlRoles)
+        : undefined,
+    role: group.profile ? group.profile.role : undefined,
   };
 
   if (application.awsAccountId) {
-    // Array property not supported on the edge in Neptune
-    relationship.roles = JSON.stringify(group.samlRoles);
-    relationship.role = group.role;
-  }
-
-  return relationship;
-}
-
-export function createApplicationUserRelationships(
-  application: StandardizedOktaApplication,
-  user: StandardizedOktaUser,
-) {
-  const relationships: IntegrationRelationship[] = [];
-
-  const relationship: StandardizedOktaApplicationUserRelationship = {
-    _key: `${user._key}|assigned|${application._key}`,
-    _type: APPLICATION_USER_RELATIONSHIP_TYPE,
-    _class: "ASSIGNED",
-    _fromEntityKey: user._key,
-    _toEntityKey: application._key,
-    displayName: "ASSIGNED",
-    applicationId: application.id,
-    userId: user.id,
-    userEmail: user.email,
-  };
-
-  if (application.awsAccountId) {
-    // Array property not supported on the edge in Neptune
-    relationship.roles = JSON.stringify(user.samlRoles);
-    relationship.role = user.role;
-
-    if (user.samlRoles) {
-      for (const samlRole of user.samlRoles) {
-        relationships.push(
-          mapAWSRoleAssignment(user._key, samlRole, application.awsAccountId),
-        );
-      }
-    } else if (user.role) {
-      relationships.push(
-        mapAWSRoleAssignment(user._key, user.role, application.awsAccountId),
-      );
-    }
+    relationships.push(
+      ...convertAWSRolesToRelationships(
+        application,
+        group,
+        GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
+      ),
+    );
   }
 
   relationships.push(relationship);
@@ -165,10 +140,78 @@ export function createApplicationUserRelationships(
   return relationships;
 }
 
+export function createApplicationUserRelationships(
+  application: StandardizedOktaApplication,
+  user: OktaApplicationUser,
+): IntegrationRelationship[] {
+  const relationships: IntegrationRelationship[] = [];
+
+  const relationship: StandardizedOktaApplicationUserRelationship = {
+    _key: `${user.id}|assigned|${application._key}`,
+    _type: APPLICATION_USER_RELATIONSHIP_TYPE,
+    _class: "ASSIGNED",
+    _fromEntityKey: user.id,
+    _toEntityKey: application._key,
+    displayName: "ASSIGNED",
+    applicationId: application.id,
+    userId: user.id,
+    userEmail: user.profile.email,
+    // Array property not supported on the edge in Neptune
+    roles: user.profile.samlRoles
+      ? JSON.stringify(user.profile.samlRoles)
+      : undefined,
+    role: user.profile.role,
+  };
+
+  if (application.awsAccountId) {
+    relationships.push(
+      ...convertAWSRolesToRelationships(
+        application,
+        user,
+        USER_IAM_ROLE_RELATIONSHIP_TYPE,
+      ),
+    );
+  }
+
+  relationships.push(relationship);
+
+  return relationships;
+}
+
+function convertAWSRolesToRelationships(
+  application: StandardizedOktaApplication,
+  oktaPrincipal: OktaApplicationUser | OktaApplicationGroup,
+  relationshipType: string,
+): MappedRelationshipFromIntegration[] {
+  const relationships = [];
+  if (application.awsAccountId && oktaPrincipal.profile) {
+    const profile = oktaPrincipal.profile;
+    const roles = profile.samlRoles
+      ? profile.samlRoles
+      : profile.role
+      ? [profile.role]
+      : undefined;
+    if (roles) {
+      for (const role of roles) {
+        relationships.push(
+          mapAWSRoleAssignment({
+            sourceKey: oktaPrincipal.id,
+            role,
+            relationshipType,
+            awsAccountId: application.awsAccountId,
+          }),
+        );
+      }
+    }
+  }
+  return relationships;
+}
+
 /**
- * When Okta provides a user access to an AWS account (an application with
- * `awsAccountId`), the user `samlRoles` or `role` identifies an AWS IAM role
- * that may be assumed by the user. The roles are parsed to create mapped
+ * When an Okta application represents access to an AWS Account (the application
+ * has an `awsAccountId`), the application user or group profile may define a
+ * `role` or `samlRoles` property that identifies one or more AWS IAM roles that
+ * may be assumed by the user or group. The roles are parsed to create mapped
  * relationships to the AWS IAM roles. The relationship is not created unless
  * the role is already in the graph.
  *
@@ -185,11 +228,17 @@ export function createApplicationUserRelationships(
  * @param role the AWS IAM role identifier provided by Okta
  * @param awsAccountId the application `awsAccountId`
  */
-function mapAWSRoleAssignment(
-  sourceKey: string,
-  role: string,
-  awsAccountId: string,
-): MappedRelationshipFromIntegration {
+function mapAWSRoleAssignment({
+  sourceKey,
+  role,
+  relationshipType,
+  awsAccountId,
+}: {
+  sourceKey: string;
+  role: string;
+  relationshipType: string;
+  awsAccountId: string;
+}): MappedRelationshipFromIntegration {
   const regex = /\[?([a-zA-Z0-9_-]+)\]? -- ([a-zA-Z0-9_-]+)/;
   const match = regex.exec(role);
   if (match) {
@@ -197,7 +246,7 @@ function mapAWSRoleAssignment(
     const roleName = match[2];
     return {
       _key: `${sourceKey}|assigned|${awsAccountName}|${roleName}`,
-      _type: USER_IAM_ROLE_RELATIONSHIP_TYPE,
+      _type: relationshipType,
       _class: "ASSIGNED",
       _mapping: {
         sourceEntityKey: sourceKey,
@@ -219,7 +268,7 @@ function mapAWSRoleAssignment(
     const roleArn = `arn:aws:iam::${awsAccountId}:role/${role}`;
     return {
       _key: `${sourceKey}|assigned|${roleArn}`,
-      _type: "okta_user_assigned_aws_iam_role",
+      _type: relationshipType,
       _class: "ASSIGNED",
       _mapping: {
         sourceEntityKey: sourceKey,

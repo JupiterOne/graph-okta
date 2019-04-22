@@ -54,8 +54,6 @@ export interface OktaUserProfile {
   manager?: string;
   managerId?: string;
   generic?: boolean;
-  role?: string;
-  samlRoles?: string[];
   bitbucketUsername?: string;
   githubUsername?: string;
 }

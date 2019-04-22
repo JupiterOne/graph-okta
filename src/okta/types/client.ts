@@ -1,4 +1,8 @@
-import { OktaApplication } from "./applications";
+import {
+  OktaApplication,
+  OktaApplicationGroup,
+  OktaApplicationUser,
+} from "./applications";
 import { OktaFactor } from "./devices";
 import { OktaUserGroup } from "./groups";
 import { OktaUser } from "./users";
@@ -20,9 +24,11 @@ export interface OktaClient {
   listUsers: () => Promise<OktaCollection<OktaUser>>;
   listUserGroups: (userId: string) => Promise<OktaCollection<OktaUserGroup>>;
   listApplications: () => Promise<OktaCollection<OktaApplication>>;
-  listApplicationUsers: (appId: string) => Promise<OktaCollection<OktaUser>>;
+  listApplicationUsers: (
+    appId: string,
+  ) => Promise<OktaCollection<OktaApplicationUser>>;
   listApplicationGroupAssignments: (
     appId: string,
-  ) => Promise<OktaCollection<OktaUserGroup>>;
+  ) => Promise<OktaCollection<OktaApplicationGroup>>;
   listFactors: (userId: string) => Promise<OktaCollection<OktaFactor>>;
 }

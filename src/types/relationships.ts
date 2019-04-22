@@ -23,7 +23,7 @@ export interface StandardizedOktaApplicationUserRelationship
   extends RelationshipFromIntegration {
   applicationId: string;
   userId: string;
-  userEmail: string;
+  userEmail?: string;
   roles?: string;
   role?: string;
 }

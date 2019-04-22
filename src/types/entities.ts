@@ -38,8 +38,6 @@ export interface StandardizedOktaUser extends EntityFromIntegration {
   manager?: string;
   managerId?: string;
   generic?: boolean;
-  role?: string;
-  samlRoles?: string[];
   bitbucketUsername?: string;
   githubUsername?: string;
   verifiedEmails?: string[];
@@ -56,8 +54,6 @@ export interface StandardizedOktaUserGroup extends EntityFromIntegration {
   type: string;
   profileName: string;
   profileDescription: string;
-  role?: string;
-  samlRoles?: string[];
 }
 
 export interface StandardizedOktaApplication extends EntityFromIntegration {
