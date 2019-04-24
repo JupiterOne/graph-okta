@@ -16,16 +16,10 @@ module.exports = {
   collectCoverage: true,
   coverageThreshold: {
     global: {
-      statements: 53,
-      branches: 17,
-      functions: 48,
-      lines: 53,
-    },
-    "./src/constants.ts": {
-      branches: 100,
-      functions: 100,
-      lines: 100,
-      statements: 100,
+      statements: 0,
+      branches: 0,
+      functions: 0,
+      lines: 0,
     },
     "./src/invocationValidator.ts": {
       branches: 100,

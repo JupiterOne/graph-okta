@@ -1,9 +1,11 @@
 import { IntegrationInstance } from "@jupiterone/jupiter-managed-integration-sdk";
-import { OktaAccountInfo, OktaIntegrationConfig } from "../types";
+
+import { OktaAccountInfo } from "../okta/types";
+import { OktaIntegrationConfig } from "../types";
 
 const DOMAIN_REGEX = /\/\/([^.]*).okta(preview)?.com/;
 
-export default function(
+export default function getOktaAccountInfo(
   integrationInstance: IntegrationInstance,
 ): OktaAccountInfo {
   const config = integrationInstance.config as OktaIntegrationConfig;
