@@ -7,7 +7,8 @@
   "license": "SEE LICENSE IN LICENSE",
   "files": [
     "LICENSE",
-    "dist"
+    "dist",
+    "docs"
   ],
   "scripts": {
     "start": "ts-node --require dotenv/config tools/execute.ts | bunyan",
