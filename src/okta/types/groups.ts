@@ -5,9 +5,9 @@ export interface OktaUserGroupProfile {
 
 export interface OktaUserGroup {
   id: string;
-  created: Date;
-  lastUpdated: Date;
-  lastMembershipUpdated: Date;
+  created: string;
+  lastUpdated: string;
+  lastMembershipUpdated: string;
   objectClass: string[];
   type: string;
   profile: OktaUserGroupProfile;

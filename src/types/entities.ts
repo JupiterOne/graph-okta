@@ -18,12 +18,12 @@ export interface StandardizedOktaUser extends EntityFromIntegration {
   displayName?: string;
   status: string;
   active: boolean;
-  created: Date;
-  activated: Date;
-  statusChanged: Date;
-  lastLogin: Date;
-  lastUpdated: Date;
-  passwordChanged: Date;
+  created: number;
+  activated: number;
+  statusChanged: number;
+  lastLogin: number;
+  lastUpdated: number;
+  passwordChanged: number;
   username: string;
   firstName: string;
   lastName: string;
@@ -47,9 +47,9 @@ export interface StandardizedOktaUser extends EntityFromIntegration {
 export interface StandardizedOktaUserGroup extends EntityFromIntegration {
   id: string;
   displayName?: string;
-  created: Date;
-  lastUpdated: Date;
-  lastMembershipUpdated: Date;
+  created: number;
+  lastUpdated: number;
+  lastMembershipUpdated: number;
   objectClass: string[];
   type: string;
   profileName: string;

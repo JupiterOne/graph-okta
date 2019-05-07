@@ -36,14 +36,14 @@ export interface OktaApplication {
 export interface OktaApplicationUser {
   id: string;
   externalId?: string;
-  created: Date;
-  lastUpdated: Date;
+  created: number;
+  lastUpdated: number;
   scope: string;
   status: string;
-  statusChanged?: Date;
-  passwordChanged?: Date;
+  statusChanged?: number;
+  passwordChanged?: number;
   syncState: string;
-  lastSync?: Date;
+  lastSync?: number;
   credentials: OktaApplicationUserCredentials;
   profile: OktaApplicationUserProfile;
   _embedded?: any;
@@ -78,7 +78,7 @@ export interface OktaApplicationUserProfile {
 
 export interface OktaApplicationGroup {
   id: string;
-  lastUpdated: Date;
+  lastUpdated: number;
   priority?: number;
   profile?: any;
   _links?: any;

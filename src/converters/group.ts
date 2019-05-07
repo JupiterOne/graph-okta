@@ -8,6 +8,7 @@ import {
   StandardizedOktaUserGroupRelationship,
 } from "../types";
 import getOktaAccountAdminUrl from "../util/getOktaAccountAdminUrl";
+import getTime from "../util/getTime";
 
 /**
  * The entity type for Okta user groups having `type: 'OKTA_GROUP'` or
@@ -56,9 +57,9 @@ export function createUserGroupEntity(
     webLink,
     name: profileName,
     displayName: profileName,
-    created,
-    lastUpdated,
-    lastMembershipUpdated,
+    created: getTime(created) as number,
+    lastUpdated: getTime(lastUpdated) as number,
+    lastMembershipUpdated: getTime(lastMembershipUpdated) as number,
     objectClass,
     type,
     profileName,
