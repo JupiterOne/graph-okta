@@ -1,7 +1,6 @@
 import {
   GraphClient,
   IntegrationExecutionContext,
-  JobsClient,
   PersisterClient,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
@@ -17,7 +16,6 @@ export interface OktaIntegrationConfig {
 
 export interface OktaExecutionContext extends IntegrationExecutionContext {
   okta: OktaClient;
-  jobs: JobsClient;
   graph: GraphClient;
   persister: PersisterClient;
 }
