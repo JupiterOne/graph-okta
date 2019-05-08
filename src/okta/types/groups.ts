@@ -8,7 +8,7 @@ export interface OktaUserGroup {
   created: string;
   lastUpdated: string;
   lastMembershipUpdated: string;
-  objectClass: string[];
+  objectClass?: string[];
   type: string;
   profile: OktaUserGroupProfile;
   _links?: any;

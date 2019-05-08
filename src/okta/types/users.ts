@@ -23,12 +23,12 @@ export interface OktaUser {
   status: string;
   created: string;
   activated: string;
-  statusChanged: string;
-  lastLogin: string;
+  statusChanged?: string;
+  lastLogin?: string;
   lastUpdated: string;
-  passwordChanged: string;
+  passwordChanged?: string;
   profile: OktaUserProfile;
-  credentials: OktaUserCredentials;
+  credentials?: OktaUserCredentials;
   _links?: any;
 }
 

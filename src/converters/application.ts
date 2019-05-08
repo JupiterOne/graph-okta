@@ -69,8 +69,7 @@ export function createApplicationEntity(
     webLink,
   };
 
-  const settings = data.settings;
-  const appSettings = settings.app;
+  const appSettings = data.settings && data.settings.app;
   if (appSettings) {
     if (appSettings.awsEnvironmentType === "aws.amazon") {
       if (appSettings.identityProviderArn) {

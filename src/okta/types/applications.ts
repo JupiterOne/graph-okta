@@ -26,11 +26,11 @@ export interface OktaApplication {
   lastUpdated: string;
   created: string;
   signOnMode: string;
-  accessibility: any;
-  visibility: any;
-  features: string[];
-  settings: OktaApplicationSettings;
-  links: OktaApplicationLinks;
+  accessibility?: any;
+  visibility?: any;
+  features?: string[];
+  settings?: OktaApplicationSettings;
+  links?: OktaApplicationLinks;
 }
 
 export interface OktaApplicationUser {
@@ -44,7 +44,7 @@ export interface OktaApplicationUser {
   passwordChanged?: string;
   syncState: string;
   lastSync?: string;
-  credentials: OktaApplicationUserCredentials;
+  credentials?: OktaApplicationUserCredentials;
   profile: OktaApplicationUserProfile;
   _embedded?: any;
   _links?: any;
