@@ -18,12 +18,12 @@ export interface StandardizedOktaUser extends EntityFromIntegration {
   displayName?: string;
   status: string;
   active: boolean;
-  created: Date;
-  activated: Date;
-  statusChanged: Date;
-  lastLogin: Date;
-  lastUpdated: Date;
-  passwordChanged: Date;
+  created: number;
+  activated: number;
+  statusChanged?: number;
+  lastLogin?: number;
+  lastUpdated: number;
+  passwordChanged?: number;
   username: string;
   firstName: string;
   lastName: string;
@@ -47,10 +47,10 @@ export interface StandardizedOktaUser extends EntityFromIntegration {
 export interface StandardizedOktaUserGroup extends EntityFromIntegration {
   id: string;
   displayName?: string;
-  created: Date;
-  lastUpdated: Date;
-  lastMembershipUpdated: Date;
-  objectClass: string[];
+  created: number;
+  lastUpdated: number;
+  lastMembershipUpdated: number;
+  objectClass?: string[];
   type: string;
   profileName: string;
   profileDescription: string;
@@ -70,7 +70,7 @@ export interface StandardizedOktaApplication extends EntityFromIntegration {
   active: boolean;
   lastUpdated: string;
   created: string;
-  features: string[];
+  features?: string[];
   signOnMode: string;
   awsIdentityProviderArn?: string;
   awsAccountId?: string;

@@ -18,24 +18,17 @@ export interface OktaAuthenticationIntegration {
   name: string;
 }
 
-export interface OktaUserCredentials {
-  password: OktaPasswordCredential;
-  recovery_question: OktaRecoveryQuestionCredential;
-  integration: OktaAuthenticationIntegration;
-  emails: OktaEmailCredential[];
-}
-
 export interface OktaUser {
   id: string;
   status: string;
-  created: Date;
-  activated: Date;
-  statusChanged: Date;
-  lastLogin: Date;
-  lastUpdated: Date;
-  passwordChanged: Date;
+  created: string;
+  activated: string;
+  statusChanged?: string;
+  lastLogin?: string;
+  lastUpdated: string;
+  passwordChanged?: string;
   profile: OktaUserProfile;
-  credentials: OktaUserCredentials;
+  credentials?: OktaUserCredentials;
   _links?: any;
 }
 
@@ -56,4 +49,11 @@ export interface OktaUserProfile {
   generic?: boolean;
   bitbucketUsername?: string;
   githubUsername?: string;
+}
+
+export interface OktaUserCredentials {
+  password: OktaPasswordCredential;
+  recovery_question: OktaRecoveryQuestionCredential;
+  integration: OktaAuthenticationIntegration;
+  emails: OktaEmailCredential[];
 }

@@ -8,6 +8,7 @@ import {
   StandardizedOktaUserFactorRelationship,
 } from "../types";
 import getOktaAccountAdminUrl from "../util/getOktaAccountAdminUrl";
+import getTime from "../util/getTime";
 
 export const USER_ENTITY_TYPE = "okta_user";
 export const USER_MFA_DEVICE_RELATIONSHIP_TYPE = "okta_user_assigned_factor";
@@ -67,12 +68,12 @@ export function createUserEntity(
     username: login.split("@")[0],
     status,
     active: status === "ACTIVE",
-    created,
-    activated,
-    statusChanged,
-    lastLogin,
-    lastUpdated,
-    passwordChanged,
+    created: getTime(created)!,
+    activated: getTime(activated)!,
+    statusChanged: getTime(statusChanged),
+    lastLogin: getTime(lastLogin),
+    lastUpdated: getTime(lastUpdated)!,
+    passwordChanged: getTime(passwordChanged),
     firstName,
     lastName,
     mobilePhone,

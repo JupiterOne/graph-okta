@@ -26,25 +26,25 @@ export interface OktaApplication {
   lastUpdated: string;
   created: string;
   signOnMode: string;
-  accessibility: any;
-  visibility: any;
-  features: string[];
-  settings: OktaApplicationSettings;
-  links: OktaApplicationLinks;
+  accessibility?: any;
+  visibility?: any;
+  features?: string[];
+  settings?: OktaApplicationSettings;
+  links?: OktaApplicationLinks;
 }
 
 export interface OktaApplicationUser {
   id: string;
   externalId?: string;
-  created: Date;
-  lastUpdated: Date;
+  created: string;
+  lastUpdated: string;
   scope: string;
   status: string;
-  statusChanged?: Date;
-  passwordChanged?: Date;
+  statusChanged?: string;
+  passwordChanged?: string;
   syncState: string;
-  lastSync?: Date;
-  credentials: OktaApplicationUserCredentials;
+  lastSync?: string;
+  credentials?: OktaApplicationUserCredentials;
   profile: OktaApplicationUserProfile;
   _embedded?: any;
   _links?: any;
@@ -78,7 +78,7 @@ export interface OktaApplicationUserProfile {
 
 export interface OktaApplicationGroup {
   id: string;
-  lastUpdated: Date;
+  lastUpdated: string;
   priority?: number;
   profile?: any;
   _links?: any;
