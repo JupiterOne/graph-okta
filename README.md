@@ -1,6 +1,6 @@
 # JupiterOne Managed Integration for Okta
 
-[![Build Status](https://travis-ci.org/JupiterOne/jupiter-integration-okta.svg?branch=master)](https://travis-ci.org/JupterOne/jupiter-integration-okta)
+[![Build Status](https://travis-ci.org/JupiterOne/jupiter-integration-okta.svg?branch=master)](https://travis-ci.org/JupterOne/jupiter-integration-okta) [![Greenkeeper badge](https://badges.greenkeeper.io/JupiterOne/jupiter-integration-okta.svg)](https://greenkeeper.io/)
 
 A JupiterOne integration ingests information such as configurations and other
 metadata about digital and physical assets belonging to an organization. The
