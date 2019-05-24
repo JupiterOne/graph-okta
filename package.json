@@ -9,6 +9,9 @@
     "LICENSE",
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "start": "ts-node --require dotenv/config tools/execute.ts | bunyan",
     "start:graph": "docker run -d --rm --name jupiterone-local-graph -p 8182:8182 tinkerpop/gremlin-server:3.3",
@@ -30,7 +33,7 @@
     "promise-retry": "^1.1.1"
   },
   "peerDependencies": {
-    "@jupiterone/jupiter-managed-integration-sdk": "^23.0.2"
+    "@jupiterone/jupiter-managed-integration-sdk": "^23.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -39,12 +42,12 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-typescript": "^7.1.0",
-    "@jupiterone/jupiter-managed-integration-sdk": "^23.0.2",
+    "@jupiterone/jupiter-managed-integration-sdk": "^23.1.0",
     "@types/bunyan": "^1.8.5",
     "@types/fs-extra": "^7.0.0",
     "@types/jest": "^24.0.0",
     "@types/lodash.startcase": "^4.4.6",
-    "@types/node": "^12.0.2",
+    "@types/node": "~8.10.0",
     "@types/uuid": "^3.4.4",
     "bunyan": "^1.8.12",
     "dotenv": "^8.0.0",
@@ -73,19 +76,22 @@
     }
   },
   "lint-staged": {
-    "*.md": [
-      "remark .",
-      "prettier --write",
-      "git add"
-    ],
-    "*.ts": [
-      "tslint --project .",
-      "prettier --write",
-      "git add"
-    ],
-    "*.{js,json}": [
-      "prettier --write",
-      "git add"
-    ]
+    "linters": {
+      "*.md": [
+        "remark .",
+        "prettier --write",
+        "git add"
+      ],
+      "*.ts": [
+        "tslint --project .",
+        "prettier --write",
+        "git add"
+      ],
+      "*.{js,json}": [
+        "prettier --write",
+        "git add"
+      ]
+    },
+    "ignore": []
   }
 }

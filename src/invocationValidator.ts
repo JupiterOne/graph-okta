@@ -10,20 +10,20 @@ import isValidOktaOrgUrl from "./util/isValidOktaOrgUrl";
  * invoked.
  *
  * At a minimum, integrations should ensure that the
- * `validationContext.instance.config` is valid. Integrations that require
- * additional information in `validationContext.invocationArgs` should also
+ * `context.instance.config` is valid. Integrations that require
+ * additional information in `context.invocationArgs` should also
  * validate those properties. It is also helpful to perform authentication with
  * the provider to ensure that credentials are valid.
  *
  * The function will be awaited to support connecting to the provider for this
  * purpose.
  *
- * @param validationContext
+ * @param context
  */
 export default async function invocationValidator(
-  validationContext: IntegrationValidationContext,
+  context: IntegrationValidationContext,
 ) {
-  const { accountId, config } = validationContext.instance;
+  const { accountId, config } = context.instance;
   const oktaInstanceConfig = config as OktaIntegrationConfig;
 
   if (!oktaInstanceConfig) {
