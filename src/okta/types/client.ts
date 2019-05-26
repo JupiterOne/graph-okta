@@ -8,7 +8,24 @@ import { OktaUserGroup } from "./groups";
 import { OktaUser } from "./users";
 
 export interface OktaCollection<T> {
+  /**
+   * The initial URI of the resource collection, or the `next` rel link provided
+   * in the response, which may be `undefined`. After the first request, if this
+   * is `undefined`, it means there is are no more pages to fetch.
+   */
+  nextUri?: string;
+
   each: (cb: (item: T) => void) => any;
+}
+
+export interface OktaQueryParams {
+  q?: string;
+  after?: string;
+  limit?: string;
+  filter?: string;
+  format?: string;
+  search?: string;
+  expand?: string;
 }
 
 /**
@@ -27,7 +44,9 @@ export interface OktaClient {
   listGroups: () => Promise<OktaCollection<OktaUserGroup>>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/users.html#list-users
-  listUsers: () => Promise<OktaCollection<OktaUser>>;
+  listUsers: (
+    queryParameters?: OktaQueryParams,
+  ) => Promise<OktaCollection<OktaUser>>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/users/#get-member-groups
   listUserGroups: (userId: string) => Promise<OktaCollection<OktaUserGroup>>;

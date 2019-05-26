@@ -5,6 +5,7 @@ import {
 
 import initializeContext from "./initializeContext";
 import invocationValidator from "./invocationValidator";
+import fetchBatchOfUsers from "./okta/fetchBatchOfUsers";
 import synchronizeAccount from "./synchronizers/synchronizeAccount";
 import synchronizeApplications from "./synchronizers/synchronizeApplications";
 import synchronizeGroups from "./synchronizers/synchronizeGroups";
@@ -22,6 +23,22 @@ const invocationConfig: IntegrationInvocationConfig = {
           ) => {
             return synchronizeAccount(
               await initializeContext(executionContext),
+            );
+          },
+        },
+      ],
+    },
+    {
+      steps: [
+        {
+          name: "Fetch Users",
+          iterates: true,
+          executionHandler: async (
+            executionContext: IntegrationStepExecutionContext,
+          ) => {
+            return fetchBatchOfUsers(
+              await initializeContext(executionContext),
+              executionContext.event.continuation!,
             );
           },
         },
