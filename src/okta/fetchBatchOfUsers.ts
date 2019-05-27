@@ -44,7 +44,8 @@ export default async function fetchBatchOfUsers(
     limit: String(PAGE_LIMIT),
   };
 
-  const userIds = (await userCache.getIds()) || [];
+  const userIds =
+    continuation.iterationsCompleted > 0 ? (await userCache.getIds())! : [];
   const userCacheEntries: OktaUserCacheEntry[] = [];
 
   const listUsers = await okta.listUsers(userQueryParams);
