@@ -21,7 +21,7 @@ import {
   OktaUserCacheEntry,
 } from "./cache";
 
-const PAGE_LIMIT = "5";
+const PAGE_LIMIT = 5;
 
 /**
  * An iterating execution handler that loads Okta users and associated data in
@@ -41,7 +41,7 @@ export default async function fetchBatchOfUsers(
 
   const userQueryParams: OktaQueryParams = {
     after: continuation.iterationState.state.after,
-    limit: PAGE_LIMIT,
+    limit: String(PAGE_LIMIT),
   };
 
   const userIds = (await userCache.getIds()) || [];
@@ -51,11 +51,17 @@ export default async function fetchBatchOfUsers(
   await retryIfRateLimited(logger, () =>
     listUsers.each((user: OktaUser) => {
       userIds.push(user.id);
+
       return (async () => {
         userCacheEntries.push({
           key: user.id,
           data: await fetchUserData(user, okta, logger),
         });
+
+        // Prevent the listUsers collection from loading another page by
+        // returning `false` once all items of the current page have been
+        // processed.
+        return listUsers.currentItems.length > 0;
       })();
     }),
   );
@@ -70,6 +76,8 @@ export default async function fetchBatchOfUsers(
       finished: typeof listUsers.nextUri !== "string",
       state: {
         after: extractAfterParam(listUsers.nextUri),
+        limit: PAGE_LIMIT,
+        count: userIds.length,
       },
     },
   };
