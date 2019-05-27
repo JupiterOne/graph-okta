@@ -839,10 +839,10 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^12.0.9"
 
-"@jupiterone/jupiter-managed-integration-sdk@23.2.0-beta.1":
-  version "23.2.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@jupiterone/jupiter-managed-integration-sdk/-/jupiter-managed-integration-sdk-23.2.0-beta.1.tgz#837459ed6af5b828fdca0a218500a650584d5e05"
-  integrity sha512-I8MIHvcsUwVZVgjlZqJ1iPpY2Je5UAnEjvmubrOCCJrNzwO+h3TP4uJb/U1aTiDy0EeAiigL+S/OeEoCansr0w==
+"@jupiterone/jupiter-managed-integration-sdk@^23.2.0-beta.2":
+  version "23.2.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@jupiterone/jupiter-managed-integration-sdk/-/jupiter-managed-integration-sdk-23.2.0-beta.2.tgz#ac5c55fe1432516c4ee86c7a0fca19b3d0376b64"
+  integrity sha512-Iuy5k5CckqJX1qG5qIPoUKeQY4wYc1QLBBTDUG4FvSpktLdMC7IJ4agnN6UTF3zWKxi15jD2RoCjTlGxcK1yUQ==
 
 "@okta/okta-sdk-nodejs@^2.0.0":
   version "2.0.0"
