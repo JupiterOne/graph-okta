@@ -11,7 +11,7 @@ import {
   USER_ENTITY_TYPE,
   USER_MFA_DEVICE_RELATIONSHIP_TYPE,
 } from "../converters";
-import { OktaFactor, OktaUser, OktaUserGroup } from "../okta/types";
+import { createUserCache } from "../okta/cache";
 import {
   OktaExecutionContext,
   StandardizedOktaFactor,
@@ -19,7 +19,6 @@ import {
   StandardizedOktaUserFactorRelationship,
   StandardizedOktaUserGroupRelationship,
 } from "../types";
-import retryIfRateLimited from "../util/retryIfRateLimited";
 
 /**
  * Synchronizes Okta users, including their MFA devices and relationships to
@@ -32,75 +31,78 @@ export default async function synchronizeUsers(
 ): Promise<IntegrationExecutionResult> {
   const {
     instance: { config },
-    okta,
     graph,
     persister,
     logger,
   } = executionContext;
+  const usersCache = createUserCache(executionContext.clients.getCache());
 
-  const newUsers: StandardizedOktaUser[] = [];
-  const newMFADevices: StandardizedOktaFactor[] = [];
-  const newUserMFADeviceRelationships: StandardizedOktaUserFactorRelationship[] = [];
-  const newGroupUserRelationships: StandardizedOktaUserGroupRelationship[] = [];
+  const userIds = await usersCache.getIds();
+  if (userIds) {
+    const newUsers: StandardizedOktaUser[] = [];
+    const newMFADevices: StandardizedOktaFactor[] = [];
+    const newUserMFADeviceRelationships: StandardizedOktaUserFactorRelationship[] = [];
+    const newGroupUserRelationships: StandardizedOktaUserGroupRelationship[] = [];
 
-  const usersCollection = await okta.listUsers();
-  await retryIfRateLimited(logger, () =>
-    usersCollection.each((user: OktaUser) => {
-      newUsers.push(createUserEntity(config, user));
-    }),
-  );
+    const usersCacheEntries = await usersCache.getEntries(userIds);
+    for (const entry of usersCacheEntries) {
+      const userEntity = createUserEntity(config, entry.data.user);
+      newUsers.push(userEntity);
 
-  for (const userEntity of newUsers) {
-    const userFactorsCollection = await okta.listFactors(userEntity.id);
-    await retryIfRateLimited(logger, () =>
-      userFactorsCollection.each((factor: OktaFactor) => {
+      for (const factor of entry.data.factors) {
         const mfaDeviceEntity = createMFADeviceEntity(factor);
         newMFADevices.push(mfaDeviceEntity);
         newUserMFADeviceRelationships.push(
           createUserMfaDeviceRelationship(userEntity, mfaDeviceEntity),
         );
-      }),
-    );
+      }
 
-    const userGroupsCollection = await okta.listUserGroups(userEntity.id);
-    await retryIfRateLimited(logger, () =>
-      userGroupsCollection.each((group: OktaUserGroup) => {
+      for (const group of entry.data.userGroups) {
         const groupEntity = createUserGroupEntity(config, group);
         newGroupUserRelationships.push(
           createGroupUserRelationship(groupEntity, userEntity),
         );
-      }),
-    );
+      }
+    }
+
+    const [
+      oldUsers,
+      oldMFADevices,
+      oldUserMFADeviceRelationships,
+      oldGroupUserRelationships,
+    ] = await Promise.all([
+      graph.findEntitiesByType(USER_ENTITY_TYPE),
+      graph.findEntitiesByType(MFA_DEVICE_ENTITY_TYPE),
+      graph.findRelationshipsByType(USER_MFA_DEVICE_RELATIONSHIP_TYPE),
+      graph.findRelationshipsByType(GROUP_USER_RELATIONSHIP_TYPE),
+    ]);
+
+    return {
+      operations: await persister.publishPersisterOperations([
+        [
+          ...persister.processEntities(oldUsers, newUsers),
+          ...persister.processEntities(oldMFADevices, newMFADevices),
+        ],
+        [
+          ...persister.processRelationships(
+            oldUserMFADeviceRelationships,
+            newUserMFADeviceRelationships,
+          ),
+          ...persister.processRelationships(
+            oldGroupUserRelationships,
+            newGroupUserRelationships,
+          ),
+        ],
+      ]),
+    };
+  } else {
+    logger.info("No userIds found in cache, nothing to synchronize");
+    return {
+      operations: {
+        created: 0,
+        updated: 0,
+        deleted: 0,
+      },
+    };
   }
-
-  const [
-    oldUsers,
-    oldMFADevices,
-    oldUserMFADeviceRelationships,
-    oldGroupUserRelationships,
-  ] = await Promise.all([
-    graph.findEntitiesByType(USER_ENTITY_TYPE),
-    graph.findEntitiesByType(MFA_DEVICE_ENTITY_TYPE),
-    graph.findRelationshipsByType(USER_MFA_DEVICE_RELATIONSHIP_TYPE),
-    graph.findRelationshipsByType(GROUP_USER_RELATIONSHIP_TYPE),
-  ]);
-
-  return {
-    operations: await persister.publishPersisterOperations([
-      [
-        ...persister.processEntities(oldUsers, newUsers),
-        ...persister.processEntities(oldMFADevices, newMFADevices),
-      ],
-      [
-        ...persister.processRelationships(
-          oldUserMFADeviceRelationships,
-          newUserMFADeviceRelationships,
-        ),
-        ...persister.processRelationships(
-          oldGroupUserRelationships,
-          newGroupUserRelationships,
-        ),
-      ],
-    ]),
-  };
 }
