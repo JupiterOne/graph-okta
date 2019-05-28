@@ -21,12 +21,24 @@ import {
   OktaUserCacheEntry,
 } from "./cache";
 
-const PAGE_LIMIT = 5;
+/**
+ * The number of users to request per Okta users API call (pagination `limit`).
+ */
+const PAGE_LIMIT = process.env.OKTA_USERS_PAGE_LIMIT
+  ? Number(process.env.OKTA_USERS_PAGE_LIMIT)
+  : 200;
+
+/**
+ * The number of pages to process per iteration.
+ */
+const BATCH_PAGES = process.env.OKTA_USERS_BATCH_PAGES
+  ? Number(process.env.OKTA_USERS_BATCH_PAGES)
+  : 2;
 
 /**
  * An iterating execution handler that loads Okta users and associated data in
- * batches of `PAGE_LIMIT`, storing the raw response data in the
- * `IntegrationCache` for later processing in another step.
+ * `BATCH_PAGES` batches of `PAGE_LIMIT` users, storing the raw response data in
+ * the `IntegrationCache` for later processing in another step.
  *
  * This is necessary because Okta throttles API requests, leading to a need to
  * spread requests over a period of time that exceeds the execution time limits
@@ -48,6 +60,8 @@ export default async function fetchBatchOfUsers(
     iterationState.iteration > 0 ? (await userCache.getIds())! : [];
   const userCacheEntries: OktaUserCacheEntry[] = [];
 
+  let pagesProcessed = 0;
+
   const listUsers = await okta.listUsers(userQueryParams);
   await retryIfRateLimited(logger, () =>
     listUsers.each((user: OktaUser) => {
@@ -59,10 +73,15 @@ export default async function fetchBatchOfUsers(
           data: await fetchUserData(user, okta, logger),
         });
 
+        const moreItemsInCurrentPage = listUsers.currentItems.length > 0;
+        if (!moreItemsInCurrentPage) {
+          pagesProcessed++;
+        }
+
         // Prevent the listUsers collection from loading another page by
-        // returning `false` once all items of the current page have been
+        // returning `false` once all items of `BATCH_PAGES` have been
         // processed.
-        return listUsers.currentItems.length > 0;
+        return pagesProcessed !== BATCH_PAGES;
       })();
     }),
   );
@@ -79,6 +98,7 @@ export default async function fetchBatchOfUsers(
       state: {
         after: extractAfterParam(listUsers.nextUri),
         limit: PAGE_LIMIT,
+        pages: pagesProcessed,
         count: userIds.length,
       },
     },
