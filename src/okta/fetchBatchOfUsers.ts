@@ -2,8 +2,8 @@ import { URL } from "url";
 
 import {
   IntegrationLogger,
-  IntegrationStepContinuation,
   IntegrationStepExecutionResult,
+  IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
 import {
@@ -34,18 +34,18 @@ const PAGE_LIMIT = 5;
  */
 export default async function fetchBatchOfUsers(
   executionContext: OktaExecutionContext,
-  continuation: IntegrationStepContinuation,
+  iterationState: IntegrationStepIterationState,
 ): Promise<IntegrationStepExecutionResult> {
   const { okta, logger } = executionContext;
   const userCache = createUserCache(executionContext.clients.getCache());
 
   const userQueryParams: OktaQueryParams = {
-    after: continuation.iterationState.state.after,
+    after: iterationState.state.after,
     limit: String(PAGE_LIMIT),
   };
 
   const userIds =
-    continuation.iterationsCompleted > 0 ? (await userCache.getIds())! : [];
+    iterationState.iteration > 0 ? (await userCache.getIds())! : [];
   const userCacheEntries: OktaUserCacheEntry[] = [];
 
   const listUsers = await okta.listUsers(userQueryParams);
@@ -74,6 +74,7 @@ export default async function fetchBatchOfUsers(
 
   return {
     iterationState: {
+      ...iterationState,
       finished: typeof listUsers.nextUri !== "string",
       state: {
         after: extractAfterParam(listUsers.nextUri),

@@ -1,4 +1,5 @@
 import {
+  IntegrationError,
   IntegrationInvocationConfig,
   IntegrationStepExecutionContext,
 } from "@jupiterone/jupiter-managed-integration-sdk";
@@ -36,9 +37,15 @@ const invocationConfig: IntegrationInvocationConfig = {
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
           ) => {
+            const iterationState = executionContext.event.iterationState;
+            if (!iterationState) {
+              throw new IntegrationError(
+                "Expected iterationState not found in event!",
+              );
+            }
             return fetchBatchOfUsers(
               await initializeContext(executionContext),
-              executionContext.event.continuation!,
+              iterationState,
             );
           },
         },
