@@ -10,7 +10,7 @@ export interface OktaUserCacheData {
 
 export interface OktaUserCacheEntry {
   key: string;
-  data: OktaUserCacheData;
+  data?: OktaUserCacheData;
 }
 
 export function createUserCache(cache: IntegrationCache) {

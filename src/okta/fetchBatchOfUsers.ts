@@ -14,6 +14,7 @@ import {
   OktaUserGroup,
 } from "../okta/types";
 import { OktaExecutionContext } from "../types";
+import { appendFetchSuccess } from "../util/fetchSuccess";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 import {
   createUserCache,
@@ -49,7 +50,8 @@ export default async function fetchBatchOfUsers(
   iterationState: IntegrationStepIterationState,
 ): Promise<IntegrationStepExecutionResult> {
   const { okta, logger } = executionContext;
-  const userCache = createUserCache(executionContext.clients.getCache());
+  const cache = executionContext.clients.getCache();
+  const userCache = createUserCache(cache);
 
   const userQueryParams: OktaQueryParams = {
     after: iterationState.state.after,
@@ -91,10 +93,15 @@ export default async function fetchBatchOfUsers(
     userCache.putEntries(userCacheEntries),
   ]);
 
+  const finished = typeof listUsers.nextUri !== "string";
+  if (finished) {
+    appendFetchSuccess(cache, "users");
+  }
+
   return {
     iterationState: {
       ...iterationState,
-      finished: typeof listUsers.nextUri !== "string",
+      finished,
       state: {
         after: extractAfterParam(listUsers.nextUri),
         limit: PAGE_LIMIT,
