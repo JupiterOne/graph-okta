@@ -19,6 +19,7 @@ import {
   StandardizedOktaUserFactorRelationship,
   StandardizedOktaUserGroupRelationship,
 } from "../types";
+import { fetchSucceeded } from "../util/fetchSuccess";
 
 /**
  * Synchronizes Okta users, including their MFA devices and relationships to
@@ -35,7 +36,16 @@ export default async function synchronizeUsers(
     persister,
     logger,
   } = executionContext;
-  const usersCache = createUserCache(executionContext.clients.getCache());
+  const cache = executionContext.clients.getCache();
+  const usersCache = createUserCache(cache);
+
+  if (!(await fetchSucceeded(cache, ["users"]))) {
+    const err = new Error("User fetching did not complete");
+    executionContext.logger.error({ err }, "User synchronization aborted");
+    return {
+      error: err,
+    };
+  }
 
   const userIds = await usersCache.getIds();
   if (userIds) {
@@ -46,10 +56,10 @@ export default async function synchronizeUsers(
 
     const usersCacheEntries = await usersCache.getEntries(userIds);
     for (const entry of usersCacheEntries) {
-      const userEntity = createUserEntity(config, entry.data.user);
+      const userEntity = createUserEntity(config, entry.data!.user);
       newUsers.push(userEntity);
 
-      for (const factor of entry.data.factors) {
+      for (const factor of entry.data!.factors) {
         const mfaDeviceEntity = createMFADeviceEntity(factor);
         newMFADevices.push(mfaDeviceEntity);
         newUserMFADeviceRelationships.push(
@@ -57,7 +67,7 @@ export default async function synchronizeUsers(
         );
       }
 
-      for (const group of entry.data.userGroups) {
+      for (const group of entry.data!.userGroups) {
         const groupEntity = createUserGroupEntity(config, group);
         newGroupUserRelationships.push(
           createGroupUserRelationship(groupEntity, userEntity),
