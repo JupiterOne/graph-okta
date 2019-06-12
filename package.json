@@ -28,12 +28,10 @@
     "test": "jest"
   },
   "dependencies": {
+    "@jupiterone/jupiter-managed-integration-sdk": "^24.0.2",
     "@okta/okta-sdk-nodejs": "^2.0.0",
     "lodash.startcase": "^4.4.0",
     "promise-retry": "^1.1.1"
-  },
-  "peerDependencies": {
-    "@jupiterone/jupiter-managed-integration-sdk": "^23.2.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -42,7 +40,6 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-typescript": "^7.1.0",
-    "@jupiterone/jupiter-managed-integration-sdk": "^24.0.1",
     "@types/bunyan": "^1.8.5",
     "@types/fs-extra": "^7.0.0",
     "@types/jest": "^24.0.0",
