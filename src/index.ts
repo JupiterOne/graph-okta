@@ -13,7 +13,19 @@ import synchronizeGroups from "./synchronizers/synchronizeGroups";
 import synchronizeUsers from "./synchronizers/synchronizeUsers";
 
 const invocationConfig: IntegrationInvocationConfig = {
+  instanceConfigFields: {
+    oktaOrgUrl: {
+      type: "string",
+      mask: false,
+    },
+    oktaApiKey: {
+      type: "string",
+      mask: true,
+    },
+  },
+
   invocationValidator,
+
   integrationStepPhases: [
     {
       steps: [
