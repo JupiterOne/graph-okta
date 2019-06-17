@@ -1,0 +1,24 @@
+[
+  {
+    "scope": "https://abc.okta.com:443",
+    "method": "GET",
+    "path": "/",
+    "body": "",
+    "status": 404,
+    "response": "<html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>",
+    "rawHeaders": [
+      "Date",
+      "Mon, 17 Jun 2019 20:13:09 GMT",
+      "Server",
+      "Apache",
+      "Public-Key-Pins-Report-Only",
+      "pin-sha256=\"r5EfzZxQVvQpKo3AgYRaT7X2bDO/kj3ACwmxfdT2zt8=\"; pin-sha256=\"MaqlcUgk2mvY/RFSGeSwBRkI+rZ6/dxe/DuQfBT/vnQ=\"; pin-sha256=\"72G5IEvDEWn+EThf3qjR7/bQSWaS2ZSLqolhnO6iyJI=\"; pin-sha256=\"rrV6CLCCvqnk89gWibYT0JO6fNQ8cCit7GGoiVTjCOg=\"; max-age=60; report-uri=\"https://okta.report-uri.io/r/default/hpkp/reportOnly\"",
+      "Content-Length",
+      "139",
+      "Connection",
+      "close",
+      "Content-Type",
+      "text/html; charset=iso-8859-1"
+    ]
+  }
+]

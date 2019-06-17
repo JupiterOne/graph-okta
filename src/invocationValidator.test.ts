@@ -1,7 +1,22 @@
-import { createTestIntegrationExecutionContext } from "@jupiterone/jupiter-managed-integration-sdk";
+import nock from "nock";
 import uuid from "uuid/v4";
+
+import {
+  createTestIntegrationExecutionContext,
+  IntegrationInstanceAuthenticationError,
+} from "@jupiterone/jupiter-managed-integration-sdk";
+
 import invocationValidator from "./invocationValidator";
 import { OktaIntegrationConfig } from "./types";
+
+beforeAll(() => {
+  nock.back.fixtures = `${__dirname}/../test/fixtures/`;
+  process.env.CI ? nock.back.setMode("lockdown") : nock.back.setMode("record");
+});
+
+afterAll(() => {
+  nock.restore();
+});
 
 test("should throw if okta configuration is not found", async () => {
   const accountId = uuid();
@@ -94,9 +109,13 @@ test("should throw if invalid oktapreview.com oktaOrgUrl provided", async () => 
   );
 });
 
-test("should not throw if valid okta config provided and okta.com oktaOrgUrl used", async () => {
+test("oktaOrgUrl vanity url not found (404)", async () => {
   const accountId = uuid();
-  const oktaOrgUrl = "https://abc.okta.com";
+  const oktaOrgUrl = "https://abc.okta.com:443";
+
+  const { nockDone } = await nock.back("vanity-url-not-found.json", {
+    before: def => (def.scope = oktaOrgUrl),
+  });
 
   const config: Partial<OktaIntegrationConfig> = {
     oktaOrgUrl,
@@ -110,12 +129,20 @@ test("should not throw if valid okta config provided and okta.com oktaOrgUrl use
     } as any,
   });
 
-  await expect(invocationValidator(executionContext)).resolves.not.toThrow();
+  await expect(invocationValidator(executionContext)).rejects.toThrow(
+    `Invalid Okta org URL provided (code=404, oktaOrgUrl=${oktaOrgUrl}, accountId=${accountId})`,
+  );
+
+  nockDone();
 });
 
-test("should not throw if valid okta config provided and oktapreview.com oktaOrgUrl used", async () => {
+test("unauthorized account", async () => {
   const accountId = uuid();
-  const oktaOrgUrl = "https://abc.oktapreview.com";
+  const oktaOrgUrl = "https://dev-589921.oktapreview.com";
+
+  const { nockDone } = await nock.back("unauthorized.json", {
+    before: def => (def.scope = oktaOrgUrl),
+  });
 
   const config: Partial<OktaIntegrationConfig> = {
     oktaOrgUrl,
@@ -129,5 +156,59 @@ test("should not throw if valid okta config provided and oktapreview.com oktaOrg
     } as any,
   });
 
+  await expect(invocationValidator(executionContext)).rejects.toThrow(
+    IntegrationInstanceAuthenticationError,
+  );
+
+  nockDone();
+});
+
+test("valid oktapreview.com account", async () => {
+  const accountId = uuid();
+  const oktaOrgUrl = "https://dev-589921.oktapreview.com";
+
+  const { nockDone } = await nock.back("valid-oktapreview.json", {
+    before: def => (def.scope = oktaOrgUrl),
+  });
+
+  const config: Partial<OktaIntegrationConfig> = {
+    oktaOrgUrl,
+    oktaApiKey: "replace-me-to-update-recording",
+  };
+
+  const executionContext = createTestIntegrationExecutionContext({
+    instance: {
+      accountId,
+      config,
+    } as any,
+  });
+
   await expect(invocationValidator(executionContext)).resolves.not.toThrow();
+
+  nockDone();
+});
+
+test("valid okta.com account", async () => {
+  const accountId = uuid();
+  const oktaOrgUrl = "https://dev-589921.okta.com";
+
+  const { nockDone } = await nock.back("valid-okta.json", {
+    before: def => (def.scope = oktaOrgUrl),
+  });
+
+  const config: Partial<OktaIntegrationConfig> = {
+    oktaOrgUrl,
+    oktaApiKey: "this-test-copied-valid-oktapreview-and-modified-it",
+  };
+
+  const executionContext = createTestIntegrationExecutionContext({
+    instance: {
+      accountId,
+      config,
+    } as any,
+  });
+
+  await expect(invocationValidator(executionContext)).resolves.not.toThrow();
+
+  nockDone();
 });
