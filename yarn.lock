@@ -840,9 +840,9 @@
     "@types/yargs" "^12.0.9"
 
 "@jupiterone/jupiter-managed-integration-sdk@^24.0.2":
-  version "24.0.2"
-  resolved "https://registry.yarnpkg.com/@jupiterone/jupiter-managed-integration-sdk/-/jupiter-managed-integration-sdk-24.0.2.tgz#e289906ad83f70fdef24e5216d6d5d11e43a7d6c"
-  integrity sha512-Ckhr8u7aO/Zx6mhdE5z82psjny5r8sGq+Wi/iyAk9GgrUqcOopoLaD3jrVNhsOJxoQZsAP0MS5YJYlQ3TbSVRQ==
+  version "24.0.3"
+  resolved "https://registry.yarnpkg.com/@jupiterone/jupiter-managed-integration-sdk/-/jupiter-managed-integration-sdk-24.0.3.tgz#08341dc8e0fdb5b319e46dec5e60394a52044a75"
+  integrity sha512-Qif5J3glncNThi3DM2cMExFYebIEuuqu/bQPFOTdvKwN44WtZBTSXqgNDqnfSnkZpsu7eYmt+8bkup0ke7WX4A==
 
 "@okta/okta-sdk-nodejs@^2.0.0":
   version "2.0.0"
