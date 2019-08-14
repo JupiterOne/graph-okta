@@ -185,21 +185,15 @@ function convertAWSRolesToRelationships(
   const relationships = [];
   if (application.awsAccountId && oktaPrincipal.profile) {
     const profile = oktaPrincipal.profile;
-    const roles = profile.samlRoles
-      ? profile.samlRoles
-      : profile.role
-      ? [profile.role]
-      : undefined;
-    if (roles) {
-      for (const role of roles) {
-        relationships.push(
-          mapAWSRoleAssignment({
-            sourceKey: oktaPrincipal.id,
-            role,
-            relationshipType,
-            awsAccountId: application.awsAccountId,
-          }),
-        );
+    for (const role of profile.samlRoles || [profile.role]) {
+      const relationship = mapAWSRoleAssignment({
+        sourceKey: oktaPrincipal.id,
+        role,
+        relationshipType,
+        awsAccountId: application.awsAccountId,
+      });
+      if (relationship) {
+        relationships.push(relationship);
       }
     }
   }
@@ -237,9 +231,9 @@ function mapAWSRoleAssignment({
   role: string;
   relationshipType: string;
   awsAccountId: string;
-}): MappedRelationshipFromIntegration {
+}): MappedRelationshipFromIntegration | undefined {
   const regex = /\[?([a-zA-Z0-9_-]+)\]? -- ([a-zA-Z0-9_-]+)/;
-  const match = regex.exec(role);
+  const match = role && regex.exec(role);
   if (match) {
     const awsAccountName = match[1];
     const roleName = match[2];
@@ -263,7 +257,7 @@ function mapAWSRoleAssignment({
       },
       displayName: "ASSIGNED",
     };
-  } else {
+  } else if (role) {
     const roleArn = `arn:aws:iam::${awsAccountId}:role/${role}`;
     return {
       _key: `${sourceKey}|assigned|${roleArn}`,
