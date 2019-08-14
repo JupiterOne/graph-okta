@@ -75,10 +75,8 @@ every response.
 The Okta integration currently ingests users, groups, applications, and MFA
 devices. The number of calls works out to be:
 
-•
-`((numUsers / 200) * listUsers) + (numUsers * (listFactors(user) + listGroups(user)))`
-•
-`listApplications + (numApplications * (listApplicationGroupAssignments(app) + listApplicationUsers(app)))`
+* `((numUsers / 200) * listUsers) + (numUsers * (listFactors(user) + listGroups(user)))`
+* `listApplications + (numApplications * (listApplicationGroupAssignments(app) + listApplicationUsers(app)))`
 
 [1]: https://developer.okta.com/docs/api/getting_started/getting_a_token
 [2]: https://developer.okta.com/docs/reference/rate-limits/
