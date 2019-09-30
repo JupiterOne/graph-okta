@@ -839,10 +839,10 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^12.0.9"
 
-"@jupiterone/jupiter-managed-integration-sdk@^24.1.0":
-  version "24.1.0"
-  resolved "https://registry.yarnpkg.com/@jupiterone/jupiter-managed-integration-sdk/-/jupiter-managed-integration-sdk-24.1.0.tgz#ae46934f64985e58cf4b261c875b3c2c16744df0"
-  integrity sha512-UWHmyV3OoyDDaq90XKR2QsyRklm4T9B9yincmWRlZKZk4+BBbzjxymIl/ZCnSGKa6DoEY6pXICGIPPE5nbnBPw==
+"@jupiterone/jupiter-managed-integration-sdk@25.0.0-secretsmanager.0":
+  version "25.0.0-secretsmanager.0"
+  resolved "https://registry.yarnpkg.com/@jupiterone/jupiter-managed-integration-sdk/-/jupiter-managed-integration-sdk-25.0.0-secretsmanager.0.tgz#c1bdb98d52c406dcdfdcb9a187c4d81703c7829b"
+  integrity sha512-Vlc0hdNReIqOd33x4oH4Mfpwu4bsilEOWkEI2smcQvbVUcu7sCLFoUnGCI4YaNc2c+ysSLqSceoF8W64CskWpA==
 
 "@okta/okta-sdk-nodejs@^2.0.0":
   version "2.0.0"
@@ -920,6 +920,11 @@
   integrity sha512-ndoMMbGyuToTy4qB6Lex/inR98nPiNHacsgMPvy+zqMLgSxbt8VtWpDArpGp69h1fEDQHn1KB+9DWD++wgbwYA==
   dependencies:
     "@types/node" "*"
+
+"@types/gremlin@^3.4.2":
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@types/gremlin/-/gremlin-3.4.2.tgz#aa60347828bdc0bb7fb51c5e41f06e14deb7c38b"
+  integrity sha512-FAnOC1BwTxRFcVqZpbi4qx2Vc0Vu5v9jgY36NnFuxCul32ga6HR0kiYhhR5JG7b42Z1JWVgJHgVFIOPeThlOJQ==
 
 "@types/isomorphic-fetch@^0.0.35":
   version "0.0.35"
