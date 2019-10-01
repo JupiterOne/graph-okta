@@ -19,5 +19,5 @@ deploy:
   on:
     tags: true
     branch: master
-    repo: JupiterOne/jupiter-integration-okta
+    repo: JupiterOne/graph-okta
     node: '8'
