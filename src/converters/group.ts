@@ -61,8 +61,8 @@ export function createUserGroupEntity(
     lastMembershipUpdated: getTime(lastMembershipUpdated)!,
     objectClass,
     type,
-    profileName,
-    profileDescription,
+    name: profileName,
+    description: profileDescription,
   };
 
   return entity;

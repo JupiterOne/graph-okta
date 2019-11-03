@@ -52,8 +52,8 @@ export interface StandardizedOktaUserGroup extends EntityFromIntegration {
   lastMembershipUpdated: number;
   objectClass?: string[];
   type: string;
-  profileName: string;
-  profileDescription: string;
+  name: string;
+  description: string;
 }
 
 export interface StandardizedOktaApplication extends EntityFromIntegration {
