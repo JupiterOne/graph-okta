@@ -51,8 +51,8 @@ describe("creating group entity", () => {
       id: "id",
       lastMembershipUpdated: 1555969433000,
       lastUpdated: 1555969433000,
-      profileDescription: "description",
-      profileName: "name",
+      description: "description",
+      name: "name",
       type: "APP_GROUP",
       webLink: "/admin/group/id",
     });
@@ -97,8 +97,8 @@ describe("creating group entity", () => {
       id: "id",
       lastMembershipUpdated: 1555969433000,
       lastUpdated: 1555969433000,
-      profileDescription: "description",
-      profileName: "name",
+      description: "description",
+      name: "name",
       type: "just_type",
       webLink: "/admin/group/id",
     });
@@ -133,8 +133,8 @@ describe("creating group entity", () => {
       id: "id",
       lastMembershipUpdated: 1555969433000,
       lastUpdated: 1555969433000,
-      profileDescription: "description",
-      profileName: "name",
+      description: "description",
+      name: "name",
       type: "APP_GROUP",
       webLink: "/admin/group/id",
     };
