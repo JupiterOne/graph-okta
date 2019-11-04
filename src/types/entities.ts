@@ -2,6 +2,7 @@ import { EntityFromIntegration } from "@jupiterone/jupiter-managed-integration-s
 
 export interface StandardizedOktaAccount extends EntityFromIntegration {
   name: string;
+  accountId: string;
   webLink: string;
 }
 
