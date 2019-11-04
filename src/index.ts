@@ -30,6 +30,7 @@ const invocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
+          id: "account",
           name: "Account",
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
@@ -44,6 +45,7 @@ const invocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
+          id: "fetch-users",
           name: "Fetch Users",
           iterates: true,
           executionHandler: async (
@@ -66,6 +68,7 @@ const invocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
+          id: "groups",
           name: "Groups",
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
@@ -78,6 +81,7 @@ const invocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
+          id: "users",
           name: "Users",
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
@@ -90,6 +94,7 @@ const invocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
+          id: "applications",
           name: "Applications",
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,

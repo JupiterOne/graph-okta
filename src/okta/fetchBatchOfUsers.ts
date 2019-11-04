@@ -2,7 +2,6 @@ import { URL } from "url";
 
 import {
   IntegrationLogger,
-  IntegrationStepExecutionResult,
   IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
@@ -48,7 +47,7 @@ const BATCH_PAGES = process.env.OKTA_USERS_BATCH_PAGES
 export default async function fetchBatchOfUsers(
   executionContext: OktaExecutionContext,
   iterationState: IntegrationStepIterationState,
-): Promise<IntegrationStepExecutionResult> {
+): Promise<IntegrationStepIterationState> {
   const { okta, logger } = executionContext;
   const cache = executionContext.clients.getCache();
   const userCache = createUserCache(cache);
@@ -99,15 +98,13 @@ export default async function fetchBatchOfUsers(
   }
 
   return {
-    iterationState: {
-      ...iterationState,
-      finished,
-      state: {
-        after: extractAfterParam(listUsers.nextUri),
-        limit: PAGE_LIMIT,
-        pages: pagesProcessed,
-        count: userIds.length,
-      },
+    ...iterationState,
+    finished,
+    state: {
+      after: extractAfterParam(listUsers.nextUri),
+      limit: PAGE_LIMIT,
+      pages: pagesProcessed,
+      count: userIds.length,
     },
   };
 }
