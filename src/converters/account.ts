@@ -24,12 +24,15 @@ export function createAccountEntity(
     displayName += " (preview)";
   }
 
+  const accountId = config.oktaOrgUrl.replace(/^https?:\/\//, "");
+
   return {
     _type: ACCOUNT_ENTITY_TYPE,
-    _key: config.oktaOrgUrl,
+    _key: `okta_account_${accountId}`,
     _class: "Account",
     name: data.name,
     displayName,
+    accountId,
     webLink: config.oktaOrgUrl,
   };
 }
