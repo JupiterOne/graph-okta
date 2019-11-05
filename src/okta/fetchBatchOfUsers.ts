@@ -1,10 +1,8 @@
-import { URL } from "url";
-
 import {
   IntegrationLogger,
   IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
-
+import { URL } from "url";
 import {
   OktaClient,
   OktaFactor,
@@ -13,13 +11,8 @@ import {
   OktaUserGroup,
 } from "../okta/types";
 import { OktaExecutionContext } from "../types";
-import { appendFetchSuccess } from "../util/fetchSuccess";
 import retryIfRateLimited from "../util/retryIfRateLimited";
-import {
-  createUserCache,
-  OktaUserCacheData,
-  OktaUserCacheEntry,
-} from "./cache";
+import { OktaCacheState, OktaUserCacheData, OktaUserCacheEntry } from "./types";
 
 /**
  * The number of users to request per Okta users API call (pagination `limit`).
@@ -50,29 +43,30 @@ export default async function fetchBatchOfUsers(
 ): Promise<IntegrationStepIterationState> {
   const { okta, logger } = executionContext;
   const cache = executionContext.clients.getCache();
-  const userCache = createUserCache(cache);
+  const userCache = cache.iterableCache<OktaUserCacheEntry, OktaCacheState>(
+    "users",
+  );
 
   const userQueryParams: OktaQueryParams = {
     after: iterationState.state.after,
     limit: String(PAGE_LIMIT),
   };
 
-  const userIds =
-    iterationState.iteration > 0 ? (await userCache.getIds())! : [];
   const userCacheEntries: OktaUserCacheEntry[] = [];
 
   let pagesProcessed = 0;
+  let count = iterationState.state.count || 0;
 
   const listUsers = await okta.listUsers(userQueryParams);
   await retryIfRateLimited(logger, () =>
     listUsers.each((user: OktaUser) => {
-      userIds.push(user.id);
-
       return (async () => {
         userCacheEntries.push({
           key: user.id,
           data: await fetchUserData(user, okta, logger),
         });
+
+        count++;
 
         const moreItemsInCurrentPage = listUsers.currentItems.length > 0;
         if (!moreItemsInCurrentPage) {
@@ -87,15 +81,10 @@ export default async function fetchBatchOfUsers(
     }),
   );
 
-  await Promise.all([
-    userCache.putIds(userIds),
-    userCache.putEntries(userCacheEntries),
-  ]);
+  await userCache.putEntries(userCacheEntries);
 
   const finished = typeof listUsers.nextUri !== "string";
-  if (finished) {
-    appendFetchSuccess(cache, "users");
-  }
+  await userCache.putState({ fetchCompleted: finished });
 
   return {
     ...iterationState,
@@ -104,7 +93,7 @@ export default async function fetchBatchOfUsers(
       after: extractAfterParam(listUsers.nextUri),
       limit: PAGE_LIMIT,
       pages: pagesProcessed,
-      count: userIds.length,
+      count,
     },
   };
 }
@@ -138,7 +127,10 @@ async function fetchUserData(
   };
 }
 
-// https://lifeomic.okta.com/api/v1/users?after=00ubfjQEMYBLRUWIEDKK
+/*
+ * Extracts cursor 00ubfjQEMYBLRUWIEDKK from
+ * https://lifeomic.okta.com/api/v1/users?after=00ubfjQEMYBLRUWIEDKK
+ */
 function extractAfterParam(
   nextUri: string | undefined,
 ): string | null | undefined {
