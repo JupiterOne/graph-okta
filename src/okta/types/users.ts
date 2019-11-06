@@ -1,3 +1,5 @@
+import { OktaResource } from ".";
+
 // tslint:disable-next-line:no-empty-interface
 export interface OktaPasswordCredential {}
 
@@ -18,8 +20,7 @@ export interface OktaAuthenticationIntegration {
   name: string;
 }
 
-export interface OktaUser {
-  id: string;
+export interface OktaUser extends OktaResource {
   status: string;
   created: string;
   activated: string;

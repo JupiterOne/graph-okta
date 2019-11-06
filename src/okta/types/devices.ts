@@ -1,5 +1,6 @@
-export interface OktaFactor {
-  id: string;
+import { OktaResource } from ".";
+
+export interface OktaFactor extends OktaResource {
   factorType: string;
   provider: string;
   vendorName?: string;
