@@ -39,7 +39,7 @@ export default async function fetchBatchOfResources<
   executionContext: OktaExecutionContext;
   iterationState: IntegrationStepIterationState;
   /**
-   * The environment variable for the number of resources to request per Okta users
+   * The environment variable for the number of resources to request per Okta
    * API call (pagination `limit`).
    */
   pageLimitVariable: string;
@@ -80,23 +80,23 @@ export default async function fetchBatchOfResources<
     limit: String(pageLimit),
   };
 
-  const listUsers = await fetchCollection(queryParams);
+  const listResources = await fetchCollection(queryParams);
   await retryIfRateLimited(logger, () =>
-    listUsers.each((user: Resource) => {
+    listResources.each((res: Resource) => {
       return (async () => {
         cacheEntries.push({
-          key: user.id,
-          data: await fetchData(user, okta, logger),
+          key: res.id,
+          data: await fetchData(res, okta, logger),
         });
 
         count++;
 
-        const moreItemsInCurrentPage = listUsers.currentItems.length > 0;
+        const moreItemsInCurrentPage = listResources.currentItems.length > 0;
         if (!moreItemsInCurrentPage) {
           pagesProcessed++;
         }
 
-        // Prevent the listUsers collection from loading another page by
+        // Prevent the listResources collection from loading another page by
         // returning `false` once all items of `BATCH_PAGES` have been
         // processed.
         return pagesProcessed !== batchPages;
@@ -106,14 +106,14 @@ export default async function fetchBatchOfResources<
 
   await resourceCache.putEntries(cacheEntries);
 
-  const finished = typeof listUsers.nextUri !== "string";
+  const finished = typeof listResources.nextUri !== "string";
   await resourceCache.putState({ fetchCompleted: finished });
 
   return {
     ...iterationState,
     finished,
     state: {
-      after: extractAfterParam(listUsers.nextUri),
+      after: extractAfterParam(listResources.nextUri),
       limit: pageLimit,
       pages: pagesProcessed,
       count,
