@@ -1,8 +1,8 @@
 import {
+  IntegrationError,
   IntegrationExecutionResult,
   IntegrationRelationship,
 } from "@jupiterone/jupiter-managed-integration-sdk";
-
 import {
   ACCOUNT_APPLICATION_RELATIONSHIP_TYPE,
   APPLICATION_ENTITY_TYPE,
@@ -16,18 +16,13 @@ import {
   GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
   USER_IAM_ROLE_RELATIONSHIP_TYPE,
 } from "../converters";
-import {
-  OktaApplication,
-  OktaApplicationGroup,
-  OktaApplicationUser,
-} from "../okta/types";
+import { OktaApplicationCacheEntry, OktaCacheState } from "../okta/types";
 import {
   OktaExecutionContext,
   StandardizedOktaAccountApplicationRelationship,
   StandardizedOktaApplication,
 } from "../types";
 import getOktaAccountInfo from "../util/getOktaAccountInfo";
-import retryIfRateLimited from "../util/retryIfRateLimited";
 
 /**
  * Synchronizes Okta applications. This must be executed after
@@ -40,11 +35,19 @@ export default async function synchronizeApplications(
   const {
     instance,
     instance: { config },
-    okta,
     graph,
     persister,
-    logger,
   } = executionContext;
+  const cache = executionContext.clients.getCache();
+  const applicationsCache = cache.iterableCache<
+    OktaApplicationCacheEntry,
+    OktaCacheState
+  >("applications");
+
+  const applicationsState = await applicationsCache.getState();
+  if (!applicationsState || !applicationsState.fetchCompleted) {
+    throw new IntegrationError("Application fetching did not complete");
+  }
 
   const oktaAccountInfo = getOktaAccountInfo(instance);
   const accountEntity = createAccountEntity(config, oktaAccountInfo);
@@ -54,40 +57,29 @@ export default async function synchronizeApplications(
   const newApplicationGroupAndGroupRoleRelationships: IntegrationRelationship[] = [];
   const newApplicationUserAndUserRoleRelationships: IntegrationRelationship[] = [];
 
-  const applicationsCollection = await okta.listApplications();
-  await retryIfRateLimited(logger, () =>
-    applicationsCollection.each((app: OktaApplication) => {
-      const applicationEntity = createApplicationEntity(instance, app);
-      newApplications.push(applicationEntity);
-      newAccountApplicationRelationships.push(
-        createAccountApplicationRelationship(accountEntity, applicationEntity),
+  applicationsCache.forEach(entry => {
+    const applicationEntity = createApplicationEntity(
+      instance,
+      entry.data!.application,
+    );
+    newApplications.push(applicationEntity);
+
+    newAccountApplicationRelationships.push(
+      createAccountApplicationRelationship(accountEntity, applicationEntity),
+    );
+
+    for (const group of entry.data!.applicationGroups) {
+      newApplicationGroupAndGroupRoleRelationships.push(
+        ...createApplicationGroupRelationships(applicationEntity, group),
       );
-    }),
-  );
+    }
 
-  for (const applicationEntity of newApplications) {
-    const applicationGroups = await okta.listApplicationGroupAssignments(
-      applicationEntity.id,
-    );
-    await retryIfRateLimited(logger, () =>
-      applicationGroups.each((group: OktaApplicationGroup) => {
-        newApplicationGroupAndGroupRoleRelationships.push(
-          ...createApplicationGroupRelationships(applicationEntity, group),
-        );
-      }),
-    );
-
-    const applicationUsersCollection = await okta.listApplicationUsers(
-      applicationEntity.id,
-    );
-    await retryIfRateLimited(logger, () =>
-      applicationUsersCollection.each((user: OktaApplicationUser) => {
-        newApplicationUserAndUserRoleRelationships.push(
-          ...createApplicationUserRelationships(applicationEntity, user),
-        );
-      }),
-    );
-  }
+    for (const user of entry.data!.applicationUsers) {
+      newApplicationUserAndUserRoleRelationships.push(
+        ...createApplicationUserRelationships(applicationEntity, user),
+      );
+    }
+  });
 
   const [
     oldApplications,

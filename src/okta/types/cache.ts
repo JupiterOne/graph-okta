@@ -1,4 +1,5 @@
-import { OktaFactor, OktaUser, OktaUserGroup } from ".";
+import { OktaApplication, OktaFactor, OktaUser, OktaUserGroup } from ".";
+import { OktaApplicationGroup, OktaApplicationUser } from "./applications";
 
 export interface OktaUserCacheData {
   user: OktaUser;
@@ -9,6 +10,17 @@ export interface OktaUserCacheData {
 export interface OktaUserCacheEntry {
   key: string;
   data?: OktaUserCacheData;
+}
+
+export interface OktaApplicationCacheData {
+  application: OktaApplication;
+  applicationGroups: OktaApplicationGroup[];
+  applicationUsers: OktaApplicationUser[];
+}
+
+export interface OktaApplicationCacheEntry {
+  key: string;
+  data?: OktaApplicationCacheData;
 }
 
 export interface OktaCacheState {

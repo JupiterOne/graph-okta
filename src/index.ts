@@ -6,6 +6,7 @@ import {
 
 import initializeContext from "./initializeContext";
 import invocationValidator from "./invocationValidator";
+import fetchBatchOfApplications from "./okta/fetchBatchOfApplications";
 import fetchBatchOfUsers from "./okta/fetchBatchOfUsers";
 import synchronizeAccount from "./synchronizers/synchronizeAccount";
 import synchronizeApplications from "./synchronizers/synchronizeApplications";
@@ -58,6 +59,29 @@ const invocationConfig: IntegrationInvocationConfig = {
               );
             }
             return fetchBatchOfUsers(
+              await initializeContext(executionContext),
+              iterationState,
+            );
+          },
+        },
+      ],
+    },
+    {
+      steps: [
+        {
+          id: "fetch-applications",
+          name: "Fetch Applications",
+          iterates: true,
+          executionHandler: async (
+            executionContext: IntegrationStepExecutionContext,
+          ) => {
+            const iterationState = executionContext.event.iterationState;
+            if (!iterationState) {
+              throw new IntegrationError(
+                "Expected iterationState not found in event!",
+              );
+            }
+            return fetchBatchOfApplications(
               await initializeContext(executionContext),
               iterationState,
             );
