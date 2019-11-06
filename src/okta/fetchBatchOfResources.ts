@@ -39,7 +39,7 @@ export default async function fetchBatchOfResources<
   executionContext: OktaExecutionContext;
   iterationState: IntegrationStepIterationState;
   /**
-   * The environment variable for the number of users to request per Okta users
+   * The environment variable for the number of resources to request per Okta users
    * API call (pagination `limit`).
    */
   pageLimitVariable: string;
