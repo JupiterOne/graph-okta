@@ -12,3 +12,7 @@ export interface OktaAccountInfo {
   name: string;
   preview: boolean;
 }
+
+export interface OktaResource {
+  id: string;
+}

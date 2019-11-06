@@ -1,3 +1,5 @@
+import { OktaResource } from ".";
+
 export interface AppSettings {
   [key: string]: any;
 }
@@ -18,8 +20,7 @@ export interface OktaApplicationLinks {
   [key: string]: OktaApplicationLink | OktaApplicationLink[];
 }
 
-export interface OktaApplication {
-  id: string;
+export interface OktaApplication extends OktaResource {
   name: string;
   label: string;
   status: string;
@@ -33,8 +34,7 @@ export interface OktaApplication {
   links?: OktaApplicationLinks;
 }
 
-export interface OktaApplicationUser {
-  id: string;
+export interface OktaApplicationUser extends OktaResource {
   externalId?: string;
   created: string;
   lastUpdated: string;
@@ -76,8 +76,7 @@ export interface OktaApplicationUserProfile {
   samlRoles?: string[];
 }
 
-export interface OktaApplicationGroup {
-  id: string;
+export interface OktaApplicationGroup extends OktaResource {
   lastUpdated: string;
   priority?: number;
   profile?: any;
