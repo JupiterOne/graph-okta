@@ -16,7 +16,11 @@ import {
   GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
   USER_IAM_ROLE_RELATIONSHIP_TYPE,
 } from "../converters";
-import { OktaApplicationCacheEntry, OktaCacheState } from "../okta/types";
+import {
+  OktaApplicationCacheEntry,
+  OktaApplicationUserCacheEntry,
+  OktaCacheState,
+} from "../okta/types";
 import {
   OktaExecutionContext,
   StandardizedOktaAccountApplicationRelationship,
@@ -39,20 +43,29 @@ export default async function synchronizeApplications(
     persister,
   } = executionContext;
   const cache = executionContext.clients.getCache();
+
   const applicationsCache = cache.iterableCache<
     OktaApplicationCacheEntry,
     OktaCacheState
   >("applications");
-
   const applicationsState = await applicationsCache.getState();
   if (!applicationsState || !applicationsState.fetchCompleted) {
     throw new IntegrationError("Application fetching did not complete");
   }
 
+  const applicationUsersCache = cache.iterableCache<
+    OktaApplicationUserCacheEntry,
+    OktaCacheState
+  >("application_users");
+  const applicationUsersState = await applicationUsersCache.getState();
+  if (!applicationUsersState || !applicationUsersState.fetchCompleted) {
+    throw new IntegrationError("Application users fetching did not complete");
+  }
+
   const oktaAccountInfo = getOktaAccountInfo(instance);
   const accountEntity = createAccountEntity(config, oktaAccountInfo);
 
-  const newApplications: StandardizedOktaApplication[] = [];
+  const newApplications: { [id: string]: StandardizedOktaApplication } = {};
   const newAccountApplicationRelationships: StandardizedOktaAccountApplicationRelationship[] = [];
   const newApplicationGroupAndGroupRoleRelationships: IntegrationRelationship[] = [];
   const newApplicationUserAndUserRoleRelationships: IntegrationRelationship[] = [];
@@ -62,7 +75,7 @@ export default async function synchronizeApplications(
       instance,
       entry.data!.application,
     );
-    newApplications.push(applicationEntity);
+    newApplications[applicationEntity.id] = applicationEntity;
 
     newAccountApplicationRelationships.push(
       createAccountApplicationRelationship(accountEntity, applicationEntity),
@@ -73,12 +86,16 @@ export default async function synchronizeApplications(
         ...createApplicationGroupRelationships(applicationEntity, group),
       );
     }
+  });
 
-    for (const user of entry.data!.applicationUsers) {
-      newApplicationUserAndUserRoleRelationships.push(
-        ...createApplicationUserRelationships(applicationEntity, user),
-      );
-    }
+  applicationUsersCache.forEach(entry => {
+    const application = newApplications[entry.data!.applicationId];
+    newApplicationUserAndUserRoleRelationships.push(
+      ...createApplicationUserRelationships(
+        application,
+        entry.data!.applicationUser,
+      ),
+    );
   });
 
   const [
@@ -99,7 +116,12 @@ export default async function synchronizeApplications(
 
   return {
     operations: await persister.publishPersisterOperations([
-      [...persister.processEntities(oldApplications, newApplications)],
+      [
+        ...persister.processEntities(
+          oldApplications,
+          Object.values(newApplications),
+        ),
+      ],
       [
         ...persister.processRelationships(
           oldAccountApplicationRelationships,

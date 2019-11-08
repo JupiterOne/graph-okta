@@ -15,12 +15,21 @@ export interface OktaUserCacheEntry {
 export interface OktaApplicationCacheData {
   application: OktaApplication;
   applicationGroups: OktaApplicationGroup[];
-  applicationUsers: OktaApplicationUser[];
 }
 
 export interface OktaApplicationCacheEntry {
   key: string;
   data?: OktaApplicationCacheData;
+}
+
+export interface OktaApplicationUserCacheData {
+  applicationId: string;
+  applicationUser: OktaApplicationUser;
+}
+
+export interface OktaApplicationUserCacheEntry {
+  key: string;
+  data?: OktaApplicationUserCacheData;
 }
 
 export interface OktaCacheState {

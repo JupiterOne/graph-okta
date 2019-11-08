@@ -2,16 +2,36 @@ import {
   IntegrationError,
   IntegrationInvocationConfig,
   IntegrationStepExecutionContext,
+  IntegrationStepExecutionResult,
+  IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
-
 import initializeContext from "./initializeContext";
 import invocationValidator from "./invocationValidator";
 import fetchBatchOfApplications from "./okta/fetchBatchOfApplications";
+import fetchBatchOfApplicationUsers from "./okta/fetchBatchOfApplicationUsers";
 import fetchBatchOfUsers from "./okta/fetchBatchOfUsers";
 import synchronizeAccount from "./synchronizers/synchronizeAccount";
 import synchronizeApplications from "./synchronizers/synchronizeApplications";
 import synchronizeGroups from "./synchronizers/synchronizeGroups";
 import synchronizeUsers from "./synchronizers/synchronizeUsers";
+import { OktaExecutionContext } from "./types";
+
+function fetchResourceWith(
+  func: (
+    context: OktaExecutionContext,
+    state: IntegrationStepIterationState,
+  ) => Promise<IntegrationStepIterationState>,
+): (
+  context: IntegrationStepExecutionContext,
+) => Promise<IntegrationStepExecutionResult> {
+  return async (executionContext: IntegrationStepExecutionContext) => {
+    const iterationState = executionContext.event.iterationState;
+    if (!iterationState) {
+      throw new IntegrationError("Expected iterationState not found in event!");
+    }
+    return func(await initializeContext(executionContext), iterationState);
+  };
+}
 
 const invocationConfig: IntegrationInvocationConfig = {
   instanceConfigFields: {
@@ -49,20 +69,7 @@ const invocationConfig: IntegrationInvocationConfig = {
           id: "fetch-users",
           name: "Fetch Users",
           iterates: true,
-          executionHandler: async (
-            executionContext: IntegrationStepExecutionContext,
-          ) => {
-            const iterationState = executionContext.event.iterationState;
-            if (!iterationState) {
-              throw new IntegrationError(
-                "Expected iterationState not found in event!",
-              );
-            }
-            return fetchBatchOfUsers(
-              await initializeContext(executionContext),
-              iterationState,
-            );
-          },
+          executionHandler: fetchResourceWith(fetchBatchOfUsers),
         },
       ],
     },
@@ -72,20 +79,17 @@ const invocationConfig: IntegrationInvocationConfig = {
           id: "fetch-applications",
           name: "Fetch Applications",
           iterates: true,
-          executionHandler: async (
-            executionContext: IntegrationStepExecutionContext,
-          ) => {
-            const iterationState = executionContext.event.iterationState;
-            if (!iterationState) {
-              throw new IntegrationError(
-                "Expected iterationState not found in event!",
-              );
-            }
-            return fetchBatchOfApplications(
-              await initializeContext(executionContext),
-              iterationState,
-            );
-          },
+          executionHandler: fetchResourceWith(fetchBatchOfApplications),
+        },
+      ],
+    },
+    {
+      steps: [
+        {
+          id: "fetch-application-users",
+          name: "Fetch Application Users",
+          iterates: true,
+          executionHandler: fetchResourceWith(fetchBatchOfApplicationUsers),
         },
       ],
     },

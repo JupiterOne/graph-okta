@@ -9,7 +9,6 @@ import {
   OktaApplication,
   OktaApplicationCacheData,
   OktaApplicationGroup,
-  OktaApplicationUser,
   OktaClient,
   OktaQueryParams,
 } from "./types";
@@ -32,7 +31,6 @@ export default async function fetchBatchOfApplications(
       logger: IntegrationLogger,
     ): Promise<OktaApplicationCacheData> => {
       const applicationGroups: OktaApplicationGroup[] = [];
-      const applicationUsers: OktaApplicationUser[] = [];
 
       const listApplicationGroups = await okta.listApplicationGroupAssignments(
         application.id,
@@ -43,19 +41,9 @@ export default async function fetchBatchOfApplications(
         }),
       );
 
-      const listApplicationUsers = await okta.listApplicationUsers(
-        application.id,
-      );
-      await retryIfRateLimited(logger, () =>
-        listApplicationUsers.each((user: OktaApplicationUser) => {
-          applicationUsers.push(user);
-        }),
-      );
-
       return {
         application,
         applicationGroups,
-        applicationUsers,
       };
     },
   });

@@ -67,6 +67,7 @@ export interface OktaClient {
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/apps/#list-users-assigned-to-application
   listApplicationUsers: (
     appId: string,
+    queryParameters?: OktaQueryParams,
   ) => Promise<OktaCollection<OktaApplicationUser>>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/apps/#list-groups-assigned-to-application
