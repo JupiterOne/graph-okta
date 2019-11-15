@@ -61,7 +61,7 @@ export interface StandardizedOktaApplication extends EntityFromIntegration {
   isMultiInstanceApp: boolean;
   isSAMLApp: boolean;
   appVendorName?: string;
-  appAccountType?: string;
+  appAccountType?: string | string[];
   appAccountId?: string;
   id: string;
   name: string;
