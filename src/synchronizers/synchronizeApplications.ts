@@ -70,7 +70,7 @@ export default async function synchronizeApplications(
   const newApplicationGroupAndGroupRoleRelationships: IntegrationRelationship[] = [];
   const newApplicationUserAndUserRoleRelationships: IntegrationRelationship[] = [];
 
-  applicationsCache.forEach(entry => {
+  await applicationsCache.forEach(entry => {
     const applicationEntity = createApplicationEntity(
       instance,
       entry.data!.application,
@@ -88,7 +88,7 @@ export default async function synchronizeApplications(
     }
   });
 
-  applicationUsersCache.forEach(entry => {
+  await applicationUsersCache.forEach(entry => {
     const application = newApplications[entry.data!.applicationId];
     newApplicationUserAndUserRoleRelationships.push(
       ...createApplicationUserRelationships(

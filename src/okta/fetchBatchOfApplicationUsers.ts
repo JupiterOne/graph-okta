@@ -60,10 +60,10 @@ export default async function fetchBatchOfApplicationUsers(
     );
 
     await retryIfRateLimited(logger, () =>
-      listApplicationUsers.each((applicationUser: OktaApplicationUser) => {
-        return (async () => {
+      listApplicationUsers.each(
+        async (applicationUser: OktaApplicationUser) => {
           cacheEntries.push({
-            key: applicationUser.id,
+            key: `app/${applicationId}/user/${applicationUser.id}`,
             data: {
               applicationId,
               applicationUser,
@@ -83,14 +83,14 @@ export default async function fetchBatchOfApplicationUsers(
           // returning `false` once all items of `BATCH_PAGES` have been
           // processed.
           return pagesProcessed !== batchPages;
-        })();
-      }),
+        },
+      ),
     );
 
     const applicationComplete =
       typeof listApplicationUsers.nextUri !== "string";
     if (applicationComplete) {
-      applicationIndex = entryIndex + 1;
+      applicationIndex = entryIndex;
       fetchCompleted = entryIndex === totalEntries - 1;
     } else {
       // We need to stop iteration through the applications if the users for the
