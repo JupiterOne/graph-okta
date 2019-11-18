@@ -60,11 +60,14 @@ export interface OktaClient {
   listUserGroups: (userId: string) => Promise<OktaCollection<OktaUserGroup>>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/apps/#list-applications
-  listApplications: () => Promise<OktaCollection<OktaApplication>>;
+  listApplications: (
+    queryParameters?: OktaQueryParams,
+  ) => Promise<OktaCollection<OktaApplication>>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/apps/#list-users-assigned-to-application
   listApplicationUsers: (
     appId: string,
+    queryParameters?: OktaQueryParams,
   ) => Promise<OktaCollection<OktaApplicationUser>>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/apps/#list-groups-assigned-to-application

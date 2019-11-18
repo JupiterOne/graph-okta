@@ -3,7 +3,6 @@ import {
   IntegrationLogger,
   IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
-import { URL } from "url";
 import {
   OktaClient,
   OktaCollection,
@@ -11,6 +10,7 @@ import {
   OktaResource,
 } from "../okta/types";
 import { OktaExecutionContext } from "../types";
+import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 import { OktaCacheState } from "./types";
 
@@ -82,25 +82,23 @@ export default async function fetchBatchOfResources<
 
   const listResources = await fetchCollection(queryParams);
   await retryIfRateLimited(logger, () =>
-    listResources.each((res: Resource) => {
-      return (async () => {
-        cacheEntries.push({
-          key: res.id,
-          data: await fetchData(res, okta, logger),
-        });
+    listResources.each(async (res: Resource) => {
+      cacheEntries.push({
+        key: res.id,
+        data: await fetchData(res, okta, logger),
+      });
 
-        count++;
+      count++;
 
-        const moreItemsInCurrentPage = listResources.currentItems.length > 0;
-        if (!moreItemsInCurrentPage) {
-          pagesProcessed++;
-        }
+      const moreItemsInCurrentPage = listResources.currentItems.length > 0;
+      if (!moreItemsInCurrentPage) {
+        pagesProcessed++;
+      }
 
-        // Prevent the listResources collection from loading another page by
-        // returning `false` once all items of `BATCH_PAGES` have been
-        // processed.
-        return pagesProcessed !== batchPages;
-      })();
+      // Prevent the listResources collection from loading another page by
+      // returning `false` once all items of `BATCH_PAGES` have been
+      // processed.
+      return pagesProcessed !== batchPages;
     }),
   );
 
@@ -113,23 +111,10 @@ export default async function fetchBatchOfResources<
     ...iterationState,
     finished,
     state: {
-      after: extractAfterParam(listResources.nextUri),
+      after: extractCursorFromNextUri(listResources.nextUri),
       limit: pageLimit,
       pages: pagesProcessed,
       count,
     },
   };
-}
-
-/*
- * Extracts cursor 00ubfjQEMYBLRUWIEDKK from
- * https://lifeomic.okta.com/api/v1/users?after=00ubfjQEMYBLRUWIEDKK
- */
-function extractAfterParam(
-  nextUri: string | undefined,
-): string | null | undefined {
-  if (nextUri) {
-    const url = new URL(nextUri);
-    return url.searchParams.get("after");
-  }
 }
