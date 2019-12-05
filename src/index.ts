@@ -16,6 +16,8 @@ import synchronizeGroups from "./synchronizers/synchronizeGroups";
 import synchronizeUsers from "./synchronizers/synchronizeUsers";
 import { OktaExecutionContext } from "./types";
 
+export { default as eventsApp } from "./events";
+
 function fetchResourceWith(
   func: (
     context: OktaExecutionContext,
@@ -137,4 +139,4 @@ const invocationConfig: IntegrationInvocationConfig = {
   ],
 };
 
-export default invocationConfig;
+export { invocationConfig };

@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/graph-okta",
-  "version": "1.4.7",
+  "version": "1.5.0-beta.0",
   "description": "A JupiterOne managed integration for https://www.okta.com",
   "main": "dist/index.js",
   "repository": "https://github.com/jupiterone/graph-okta",
@@ -14,6 +14,7 @@
   },
   "scripts": {
     "start": "ts-node --require dotenv/config tools/execute.ts | bunyan",
+    "start:events": "ts-node tools/startEventsServer.ts | bunyan",
     "start:containers": "docker-compose up -d",
     "stop:containers": "docker-compose down",
     "prebuild": "yarn test",
@@ -29,7 +30,12 @@
   },
   "dependencies": {
     "@jupiterone/jupiter-managed-integration-sdk": "^28.2.1",
+    "@lifeomic/alpha": "^1.1.0",
+    "@lifeomic/koa": "^10.0.1",
     "@okta/okta-sdk-nodejs": "^2.0.0",
+    "bunyan": "^1.8.12",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
     "lodash.startcase": "^4.4.0",
     "promise-retry": "^1.1.1"
   },
@@ -45,11 +51,13 @@
     "@types/gremlin": "^3.4.2",
     "@types/isomorphic-fetch": "^0.0.35",
     "@types/jest": "^24.0.0",
+    "@types/koa": "^2.11.0",
+    "@types/koa-bodyparser": "^4.3.0",
+    "@types/koa-router": "^7.0.42",
     "@types/lodash.startcase": "^4.4.6",
     "@types/nock": "^10.0.3",
     "@types/node": "~8.10.0",
     "@types/uuid": "^3.4.4",
-    "bunyan": "^1.8.12",
     "dotenv": "^8.0.0",
     "fs-extra": "^8.0.1",
     "husky": "^2.3.0",

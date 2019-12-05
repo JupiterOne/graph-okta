@@ -1,6 +1,6 @@
 /* tslint:disable:no-console */
 import { executeIntegrationLocal } from "@jupiterone/jupiter-managed-integration-sdk";
-import invocationConfig from "../src/index";
+import { invocationConfig } from "../src/index";
 
 const integrationConfig = {
   oktaApiKey: process.env.OKTA_LOCAL_EXECUTION_API_KEY,
