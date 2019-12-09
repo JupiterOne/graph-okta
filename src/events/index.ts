@@ -1,16 +1,16 @@
 import { createLogger } from "bunyan";
-import { Context } from "koa";
+import Koa, { Context } from "koa";
 import bodyParser from "koa-bodyparser";
 import Router from "koa-router";
+import serverless from "serverless-http";
 
-import { LifeOmicApp } from "@lifeomic/koa";
 import verifyRequest from "./verifyRequest";
 
 const logger = createLogger({
   name: "jupiter-integration-okta-events",
 });
 
-const app = new LifeOmicApp(logger);
+const app = new Koa();
 const privateRouter = new Router({
   prefix: "/private",
 });
@@ -57,4 +57,6 @@ app
   .use(publicRouter.routes())
   .use(publicRouter.allowedMethods());
 
-export default app;
+export { app };
+
+export default serverless(app);
