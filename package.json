@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/graph-okta",
-  "version": "1.5.0-beta.0",
+  "version": "1.5.0-beta.1",
   "description": "A JupiterOne managed integration for https://www.okta.com",
   "main": "dist/index.js",
   "repository": "https://github.com/jupiterone/graph-okta",
@@ -31,13 +31,14 @@
   "dependencies": {
     "@jupiterone/jupiter-managed-integration-sdk": "^28.2.1",
     "@lifeomic/alpha": "^1.1.0",
-    "@lifeomic/koa": "^10.0.1",
     "@okta/okta-sdk-nodejs": "^2.0.0",
     "bunyan": "^1.8.12",
+    "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
     "lodash.startcase": "^4.4.0",
-    "promise-retry": "^1.1.1"
+    "promise-retry": "^1.1.1",
+    "serverless-http": "^2.3.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
