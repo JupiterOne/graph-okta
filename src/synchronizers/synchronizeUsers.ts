@@ -51,7 +51,7 @@ export default async function synchronizeUsers(
   const newUserMFADeviceRelationships: StandardizedOktaUserFactorRelationship[] = [];
   const newGroupUserRelationships: StandardizedOktaUserGroupRelationship[] = [];
 
-  usersCache.forEach(entry => {
+  usersCache.forEach(({ entry }) => {
     const userEntity = createUserEntity(config, entry.data!.user);
     newUsers.push(userEntity);
 
