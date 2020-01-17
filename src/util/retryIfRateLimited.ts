@@ -24,6 +24,8 @@ export default async function retryIfRateLimited(
     try {
       return await func();
     } catch (err) {
+      logger.trace({ err }, "Encountered API error");
+
       if (err.status === 429) {
         logger.info({ err }, "Hit API rate limit, waiting to retry ...");
         // const rateLimitReset = err.headers._headers['x-rate-limit-reset'];
