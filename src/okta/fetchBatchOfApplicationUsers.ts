@@ -1,4 +1,8 @@
-import { IntegrationStepIterationState } from "@jupiterone/jupiter-managed-integration-sdk";
+import {
+  IntegrationError,
+  IntegrationStepIterationState,
+} from "@jupiterone/jupiter-managed-integration-sdk";
+
 import { OktaExecutionContext } from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
 import retryIfRateLimited from "../util/retryIfRateLimited";
@@ -15,6 +19,12 @@ export default async function fetchBatchOfApplicationUsers(
   iterationState: IntegrationStepIterationState,
 ): Promise<IntegrationStepIterationState> {
   const { okta, logger } = executionContext;
+
+  if (iterationState.iteration > 0 && iterationState.state.count === 0) {
+    throw new IntegrationError(
+      Error("Iterating but haven't fetching any application users"),
+    );
+  }
 
   const pageLimit = process.env.OKTA_APPLICATION_USERS_PAGE_LIMIT
     ? Number(process.env.OKTA_APPLICATION_USERS_PAGE_LIMIT)
