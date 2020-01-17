@@ -22,7 +22,7 @@ export default async function fetchBatchOfApplicationUsers(
 
   if (iterationState.iteration > 0 && iterationState.state.count === 0) {
     throw new IntegrationError(
-      Error("Iterating but haven't fetching any application users"),
+      Error("Iterating but haven't fetched any application users"),
     );
   }
 
