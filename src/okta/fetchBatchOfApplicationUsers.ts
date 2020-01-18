@@ -1,7 +1,4 @@
-import {
-  IntegrationError,
-  IntegrationStepIterationState,
-} from "@jupiterone/jupiter-managed-integration-sdk";
+import { IntegrationStepIterationState } from "@jupiterone/jupiter-managed-integration-sdk";
 
 import { OktaExecutionContext } from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
@@ -19,12 +16,6 @@ export default async function fetchBatchOfApplicationUsers(
   iterationState: IntegrationStepIterationState,
 ): Promise<IntegrationStepIterationState> {
   const { okta, logger } = executionContext;
-
-  if (iterationState.iteration > 0 && iterationState.state.count === 0) {
-    throw new IntegrationError(
-      Error("Iterating but haven't fetched any application users"),
-    );
-  }
 
   const pageLimit = process.env.OKTA_APPLICATION_USERS_PAGE_LIMIT
     ? Number(process.env.OKTA_APPLICATION_USERS_PAGE_LIMIT)
@@ -45,14 +36,15 @@ export default async function fetchBatchOfApplicationUsers(
 
   const cacheEntries: OktaApplicationUserCacheEntry[] = [];
 
-  // Should be maintained across applications so that we know the total number
-  // of pages processed.
-  let pagesProcessed = 0;
-
   let count = iterationState.state.count || 0;
   let after = iterationState.state.after;
   let applicationIndex = iterationState.state.applicationIndex || 0;
 
+  // Track number of pages (API calls) made in current iteration.
+  let pagesProcessed = 0;
+
+  // Indicates when all application users for all applications have been
+  // fetched.
   let fetchCompleted = false;
 
   logger.trace(
@@ -60,13 +52,14 @@ export default async function fetchBatchOfApplicationUsers(
       count,
       after,
       applicationIndex,
-      pagesProcessed,
       pageLimit,
       batchPages,
     },
     "Fetching batch of application users...",
   );
 
+  // Work through as many applications as possible, limited only by the number
+  // of pages (API calls) that are allowed in single iteration.
   await applicationCache.forEach(
     async ({ entry, entryIndex, totalEntries }) => {
       const applicationId = entry.data!.application.id;
@@ -76,21 +69,27 @@ export default async function fetchBatchOfApplicationUsers(
         limit: String(pageLimit),
       };
 
+      logger.trace(
+        {
+          applicationIndex,
+          applicationId,
+          queryParams,
+        },
+        "Fetching batch of pages of users for application...",
+      );
+
+      // Create application user iterator for current applicationIndex, picking
+      // up at the page represented by the last obtained pagination token.
       const listApplicationUsers = await okta.listApplicationUsers(
         applicationId,
         queryParams,
       );
 
-      logger.trace(
-        {
-          applicationId,
-          queryParams,
-        },
-        "Fetching batch of pages for application...",
-      );
+      // Track number of users seen for the application.
+      let userCountForApplication = 0;
 
-      await retryIfRateLimited(logger, () =>
-        listApplicationUsers.each(
+      await retryIfRateLimited(logger, () => {
+        return listApplicationUsers.each(
           async (applicationUser: OktaApplicationUser) => {
             cacheEntries.push({
               key: `app/${applicationId}/user/${applicationUser.id}`,
@@ -100,53 +99,72 @@ export default async function fetchBatchOfApplicationUsers(
               },
             });
 
+            userCountForApplication++;
             count++;
 
             const moreItemsInCurrentPage =
               listApplicationUsers.currentItems.length > 0;
+
             if (!moreItemsInCurrentPage) {
               pagesProcessed++;
-              after = extractCursorFromNextUri(listApplicationUsers.nextUri);
             }
 
-            // Prevent the listResources collection from loading another page by
-            // returning `false` once all items of `BATCH_PAGES` have been
-            // processed.
-            return pagesProcessed !== batchPages;
+            logger.trace(
+              {
+                applicationIndex,
+                applicationId,
+                pagesProcessed,
+                applicationUserId: applicationUser.id,
+              },
+              "Processed user for application",
+            );
+
+            // Continue paginating users for the current applicationIndex as
+            // long as batchPages has not been reached.
+            const continuePaginatingApplicationUsers =
+              pagesProcessed !== batchPages;
+
+            return continuePaginatingApplicationUsers;
           },
-        ),
-      );
+        );
+      });
+
+      // Increment pagesProcessed when there were no users for an application.
+      if (userCountForApplication === 0) {
+        pagesProcessed++;
+      }
+
+      // Clear used pagination token and capture the next one.
+      after = extractCursorFromNextUri(listApplicationUsers.nextUri);
+
+      // The current applicationIndex has no more users when no pagination
+      // token.
+      const applicationComplete = typeof after !== "string";
 
       logger.trace(
         {
           applicationId,
-          count,
+          applicationIndex,
+          applicationComplete,
           pagesProcessed,
+          count,
           after,
         },
-        "Finished fetching batch of pages for application.",
+        "Finished fetching batch of users for application.",
       );
 
-      const applicationComplete =
-        typeof listApplicationUsers.nextUri !== "string";
       if (applicationComplete) {
-        logger.trace(
-          {
-            applicationId,
-            count,
-            pagesProcessed,
-            after,
-          },
-          "Finished fetching all pages for application.",
-        );
+        // Move to the next application
+        applicationIndex = entryIndex + 1;
 
-        applicationIndex = entryIndex;
+        // Indicate all fetching is complete when there are no more applications
+        // to work through
         fetchCompleted = entryIndex === totalEntries - 1;
-      } else {
-        // We need to stop iteration through the applications if the users for the
-        // current application were not fully processed.
-        return true;
       }
+
+      // Stop iteration of everything if we've processed the number of pages
+      // allowed. Iteration will stop naturally when there are no more entries.
+      return pagesProcessed >= batchPages;
     },
     {
       skip: applicationIndex,
@@ -162,15 +180,13 @@ export default async function fetchBatchOfApplicationUsers(
     state: {
       after,
       applicationIndex,
-      limit: pageLimit,
-      pages: pagesProcessed,
       count,
     },
   };
 
   logger.trace(
     nextIterationState,
-    "Finished fetching batch of application users.",
+    "Finished one iteration of fetching application users.",
   );
 
   return nextIterationState;
