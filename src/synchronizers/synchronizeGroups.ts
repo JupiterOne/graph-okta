@@ -66,6 +66,18 @@ export default async function synchronizeGroups(
     graph.findRelationshipsByType(ACCOUNT_GROUP_RELATIONSHIP_TYPE),
   ]);
 
+  logger.info(
+    {
+      newOktaManagedUserGroups: newOktaManagedUserGroups.length,
+      oldOktaManagedUserGroups: oldOktaManagedUserGroups.length,
+      oldAppManagedUserGroups: oldAppManagedUserGroups.length,
+      newAppManagedUserGroups: newAppManagedUserGroups.length,
+      oldAccountGroupRelationships: oldAccountGroupRelationships.length,
+      newAccountGroupRelationships: newAccountGroupRelationships.length,
+    },
+    "Synchronizing groups...",
+  );
+
   return {
     operations: await persister.publishPersisterOperations([
       [
