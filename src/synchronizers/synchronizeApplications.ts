@@ -39,6 +39,7 @@ export default async function synchronizeApplications(
   const {
     instance,
     instance: { config },
+    logger,
     graph,
     persister,
   } = executionContext;
@@ -113,6 +114,26 @@ export default async function synchronizeApplications(
     graph.findRelationshipsByType(APPLICATION_USER_RELATIONSHIP_TYPE),
     graph.findRelationshipsByType(USER_IAM_ROLE_RELATIONSHIP_TYPE),
   ]);
+
+  logger.info(
+    {
+      newApplications: newApplications.length,
+      oldApplications: oldApplications.length,
+      newAccountApplicationRelationships:
+        newAccountApplicationRelationships.length,
+      oldAccountApplicationRelationships:
+        oldAccountApplicationRelationships.length,
+      newApplicationGroupAndGroupRoleRelationships:
+        newApplicationGroupAndGroupRoleRelationships.length,
+      oldApplicationGroupRelationships: oldApplicationGroupRelationships.length,
+      oldGroupIAMRoleRelationships: oldGroupIAMRoleRelationships.length,
+      newApplicationUserAndUserRoleRelationships:
+        newApplicationUserAndUserRoleRelationships.length,
+      oldApplicationUserRelationships: oldApplicationUserRelationships.length,
+      oldUserIAMRoleRelationships: oldUserIAMRoleRelationships.length,
+    },
+    "Synchronizing applications...",
+  );
 
   return {
     operations: await persister.publishPersisterOperations([

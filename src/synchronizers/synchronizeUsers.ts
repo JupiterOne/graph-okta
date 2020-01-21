@@ -33,6 +33,7 @@ export default async function synchronizeUsers(
 ): Promise<IntegrationExecutionResult> {
   const {
     instance: { config },
+    logger,
     graph,
     persister,
   } = executionContext;
@@ -82,6 +83,20 @@ export default async function synchronizeUsers(
     graph.findRelationshipsByType(USER_MFA_DEVICE_RELATIONSHIP_TYPE),
     graph.findRelationshipsByType(GROUP_USER_RELATIONSHIP_TYPE),
   ]);
+
+  logger.info(
+    {
+      newUsers: newUsers.length,
+      newMFADevices: newMFADevices.length,
+      newUserMFADeviceRelationships: newUserMFADeviceRelationships.length,
+      newGroupUserRelationships: newGroupUserRelationships.length,
+      oldUsers: oldUsers.length,
+      oldMFADevices: oldMFADevices.length,
+      oldUserMFADeviceRelationships: oldUserMFADeviceRelationships.length,
+      oldGroupUserRelationships: oldGroupUserRelationships.length,
+    },
+    "Synchronizing users...",
+  );
 
   return {
     operations: await persister.publishPersisterOperations([
