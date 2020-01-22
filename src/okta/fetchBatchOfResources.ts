@@ -64,6 +64,8 @@ export default async function fetchBatchOfResources<
     : 2;
 
   const { okta, logger } = executionContext;
+  const resourceLogger = logger.child({ resource });
+
   const cache = executionContext.clients.getCache();
   const resourceCache = cache.iterableCache<
     IntegrationCacheEntry,
@@ -73,7 +75,7 @@ export default async function fetchBatchOfResources<
   const cacheEntries: IntegrationCacheEntry[] = [];
 
   let pagesProcessed = 0;
-  let count = iterationState.state.count || 0;
+  let seen = iterationState.state.seen || 0;
 
   const queryParams: OktaQueryParams = {
     after: iterationState.state.after,
@@ -81,14 +83,14 @@ export default async function fetchBatchOfResources<
   };
 
   const listResources = await fetchCollection(queryParams);
-  await retryIfRateLimited(logger, () =>
+  await retryIfRateLimited(resourceLogger, () =>
     listResources.each(async (res: Resource) => {
       cacheEntries.push({
         key: res.id,
-        data: await fetchData(res, okta, logger),
+        data: await fetchData(res, okta, resourceLogger),
       });
 
-      count++;
+      seen++;
 
       const moreItemsInCurrentPage = listResources.currentItems.length > 0;
       if (!moreItemsInCurrentPage) {
@@ -102,19 +104,30 @@ export default async function fetchBatchOfResources<
     }),
   );
 
-  await resourceCache.putEntries(cacheEntries);
-
   const finished = typeof listResources.nextUri !== "string";
-  await resourceCache.putState({ fetchCompleted: finished });
 
-  return {
+  const putEntriesKeys = await resourceCache.putEntries(cacheEntries);
+  const cacheState = await resourceCache.putState({
+    seen,
+    putEntriesKeys,
+    fetchCompleted: finished,
+  });
+
+  const nextIterationState = {
     ...iterationState,
     finished,
     state: {
       after: extractCursorFromNextUri(listResources.nextUri),
       limit: pageLimit,
       pages: pagesProcessed,
-      count,
+      seen,
     },
   };
+
+  resourceLogger.trace(
+    { nextIterationState, cacheState },
+    "Completed one iteration",
+  );
+
+  return nextIterationState;
 }
