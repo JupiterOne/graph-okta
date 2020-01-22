@@ -33,7 +33,7 @@ function fetchResourceWith(
   };
 }
 
-const invocationConfig: IntegrationInvocationConfig = {
+export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
   instanceConfigFields: {
     oktaOrgUrl: {
       type: "string",
@@ -136,5 +136,3 @@ const invocationConfig: IntegrationInvocationConfig = {
     },
   ],
 };
-
-export default invocationConfig;

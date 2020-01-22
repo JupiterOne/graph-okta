@@ -36,7 +36,7 @@ export default async function fetchBatchOfApplicationUsers(
 
   const cacheEntries: OktaApplicationUserCacheEntry[] = [];
 
-  let count = iterationState.state.count || 0;
+  let seen = iterationState.state.seen || 0;
   let after = iterationState.state.after;
   let applicationIndex = iterationState.state.applicationIndex || 0;
 
@@ -49,7 +49,7 @@ export default async function fetchBatchOfApplicationUsers(
 
   logger.trace(
     {
-      count,
+      seen,
       after,
       applicationIndex,
       pageLimit,
@@ -85,8 +85,7 @@ export default async function fetchBatchOfApplicationUsers(
         queryParams,
       );
 
-      // Track number of users seen for the application.
-      let userCountForApplication = 0;
+      let usersSeenForApplication = 0;
 
       await retryIfRateLimited(logger, () => {
         return listApplicationUsers.each(
@@ -99,8 +98,8 @@ export default async function fetchBatchOfApplicationUsers(
               },
             });
 
-            userCountForApplication++;
-            count++;
+            usersSeenForApplication++;
+            seen++;
 
             const moreItemsInCurrentPage =
               listApplicationUsers.currentItems.length > 0;
@@ -130,7 +129,7 @@ export default async function fetchBatchOfApplicationUsers(
       });
 
       // Increment pagesProcessed when there were no users for an application.
-      if (userCountForApplication === 0) {
+      if (usersSeenForApplication === 0) {
         pagesProcessed++;
       }
 
@@ -147,7 +146,7 @@ export default async function fetchBatchOfApplicationUsers(
           applicationIndex,
           applicationComplete,
           pagesProcessed,
-          count,
+          seen,
           after,
         },
         "Finished fetching batch of users for application.",
@@ -171,8 +170,12 @@ export default async function fetchBatchOfApplicationUsers(
     },
   );
 
-  await applicationUserCache.putEntries(cacheEntries);
-  await applicationUserCache.putState({ fetchCompleted });
+  const putEntriesKeys = await applicationUserCache.putEntries(cacheEntries);
+  const cacheState = await applicationUserCache.putState({
+    seen,
+    putEntriesKeys,
+    fetchCompleted,
+  });
 
   const nextIterationState = {
     ...iterationState,
@@ -180,14 +183,11 @@ export default async function fetchBatchOfApplicationUsers(
     state: {
       after,
       applicationIndex,
-      count,
+      seen,
     },
   };
 
-  logger.trace(
-    nextIterationState,
-    "Finished one iteration of fetching application users.",
-  );
+  logger.trace({ nextIterationState, cacheState }, "Completed one iteration");
 
   return nextIterationState;
 }

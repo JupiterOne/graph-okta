@@ -33,5 +33,15 @@ export interface OktaApplicationUserCacheEntry {
 }
 
 export interface OktaCacheState {
+  /**
+   * Number of resources seen from resource API.
+   */
+  seen: number;
+
+  /**
+   * Number of keys reported by `cache.putEntries()`.
+   */
+  putEntriesKeys: number;
+
   fetchCompleted: boolean;
 }
