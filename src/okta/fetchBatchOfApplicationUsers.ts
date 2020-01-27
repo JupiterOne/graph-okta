@@ -1,4 +1,7 @@
-import { IntegrationStepIterationState } from "@jupiterone/jupiter-managed-integration-sdk";
+import {
+  IntegrationError,
+  IntegrationStepIterationState,
+} from "@jupiterone/jupiter-managed-integration-sdk";
 
 import { OktaExecutionContext } from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
@@ -17,6 +20,17 @@ export default async function fetchBatchOfApplicationUsers(
 ): Promise<IntegrationStepIterationState> {
   const { okta, logger } = executionContext;
 
+  const cache = executionContext.clients.getCache();
+  const applicationCache = cache.iterableCache<
+    OktaApplicationCacheEntry,
+    OktaCacheState
+  >("applications");
+
+  const applicationsState = await applicationCache.getState();
+  if (!applicationsState || !applicationsState.fetchCompleted) {
+    throw new IntegrationError("Application fetching did not complete");
+  }
+
   const pageLimit = process.env.OKTA_APPLICATION_USERS_PAGE_LIMIT
     ? Number(process.env.OKTA_APPLICATION_USERS_PAGE_LIMIT)
     : 200;
@@ -24,11 +38,6 @@ export default async function fetchBatchOfApplicationUsers(
     ? Number(process.env.OKTA_APPLICATION_USERS_BATCH_PAGES)
     : 2;
 
-  const cache = executionContext.clients.getCache();
-  const applicationCache = cache.iterableCache<
-    OktaApplicationCacheEntry,
-    OktaCacheState
-  >("applications");
   const applicationUserCache = cache.iterableCache<
     OktaApplicationUserCacheEntry,
     OktaCacheState
@@ -169,6 +178,11 @@ export default async function fetchBatchOfApplicationUsers(
       skip: applicationIndex,
     },
   );
+
+  // Terminate iteration when there were no applications
+  if (applicationIndex === 0) {
+    fetchCompleted = true;
+  }
 
   const putEntriesKeys = await applicationUserCache.putEntries(cacheEntries);
   const cacheState = await applicationUserCache.putState({
