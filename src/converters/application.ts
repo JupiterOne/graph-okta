@@ -53,10 +53,10 @@ export function createApplicationEntity(
         ? data._links.logo[0].href
         : data._links.logo.href;
     }
-    if (data._links.applinks) {
-      const link = Array.isArray(data._links.applinks)
-        ? data._links.applinks.find(l => l.name === "login")
-        : data._links.applinks;
+    if (data._links.appLinks) {
+      const link = Array.isArray(data._links.appLinks)
+        ? data._links.appLinks.find(l => l.name === "login")
+        : data._links.appLinks;
       loginUrl = link && link.href;
     }
   }
