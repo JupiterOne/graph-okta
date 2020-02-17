@@ -44,6 +44,23 @@ export function createApplicationEntity(
     `/admin/app/${data.name}/instance/${data.id}`,
   );
 
+  let imageUrl;
+  let loginUrl;
+
+  if (data._links) {
+    if (data._links.logo) {
+      imageUrl = Array.isArray(data._links.logo)
+        ? data._links.logo[0].href
+        : data._links.logo.href;
+    }
+    if (data._links.applinks) {
+      const link = Array.isArray(data._links.applinks)
+        ? data._links.applinks.find(l => l.name === "login")
+        : data._links.applinks;
+      loginUrl = link && link.href;
+    }
+  }
+
   const oktaAccountInfo = getOktaAccountInfo(instance);
   const appShortName = buildAppShortName(oktaAccountInfo, data.name);
 
@@ -51,6 +68,7 @@ export function createApplicationEntity(
     _key: data.id,
     _type: APPLICATION_ENTITY_TYPE,
     _class: "Application",
+    _rawData: [{ name: "default", rawData: data }],
     displayName: data.label || data.name || data.id,
     id: data.id,
     name: data.name || data.label,
@@ -67,6 +85,8 @@ export function createApplicationEntity(
     isMultiInstanceApp: isMultiInstanceApp(appShortName),
     isSAMLApp: !!data.signOnMode && data.signOnMode.startsWith("SAML"),
     webLink,
+    imageUrl,
+    loginUrl,
   };
 
   const appSettings = data.settings && data.settings.app;

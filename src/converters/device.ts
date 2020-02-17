@@ -10,12 +10,7 @@ export function createMFADeviceEntity(
     _key: data.id,
     _type: MFA_DEVICE_ENTITY_TYPE,
     _class: ["Key", "AccessKey"],
-    _rawData: [
-      {
-        name: "default",
-        rawData: data,
-      },
-    ],
+    _rawData: [{ name: "default", rawData: data }],
     displayName: `${data.provider} ${data.factorType}`,
     id: data.id,
     factorType: data.factorType,

@@ -82,6 +82,8 @@ export interface StandardizedOktaApplication extends EntityFromIntegration {
   awsSessionDuration?: number;
   githubOrg?: string;
   appDomain?: string;
+  imageUrl?: string;
+  loginUrl?: string;
 }
 
 export interface StandardizedOktaFactor extends EntityFromIntegration {

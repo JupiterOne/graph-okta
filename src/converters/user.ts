@@ -55,12 +55,7 @@ export function createUserEntity(
     _key: id,
     _type: USER_ENTITY_TYPE,
     _class: "User",
-    _rawData: [
-      {
-        name: "default",
-        rawData: data,
-      },
-    ],
+    _rawData: [{ name: "default", rawData: data }],
     id,
     webLink,
     displayName: login,
