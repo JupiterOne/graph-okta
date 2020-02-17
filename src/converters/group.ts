@@ -47,12 +47,7 @@ export function createUserGroupEntity(
     _key: data.id,
     _type: entityType,
     _class: "UserGroup",
-    _rawData: [
-      {
-        name: "default",
-        rawData: data,
-      },
-    ],
+    _rawData: [{ name: "default", rawData: data }],
     id,
     webLink,
     displayName: profileName,

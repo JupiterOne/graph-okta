@@ -17,7 +17,13 @@ export interface OktaApplicationLink {
 }
 
 export interface OktaApplicationLinks {
-  [key: string]: OktaApplicationLink | OktaApplicationLink[];
+  help?: OktaApplicationLink | OktaApplicationLink[];
+  metadata?: OktaApplicationLink | OktaApplicationLink[];
+  applinks?: OktaApplicationLink | OktaApplicationLink[];
+  groups?: OktaApplicationLink | OktaApplicationLink[];
+  logo?: OktaApplicationLink | OktaApplicationLink[];
+  users?: OktaApplicationLink | OktaApplicationLink[];
+  deactivate?: OktaApplicationLink | OktaApplicationLink[];
 }
 
 export interface OktaApplication extends OktaResource {
@@ -31,7 +37,7 @@ export interface OktaApplication extends OktaResource {
   visibility?: any;
   features?: string[];
   settings?: OktaApplicationSettings;
-  links?: OktaApplicationLinks;
+  _links?: OktaApplicationLinks;
 }
 
 export interface OktaApplicationUser extends OktaResource {
