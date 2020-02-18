@@ -19,7 +19,7 @@ export interface OktaApplicationLink {
 export interface OktaApplicationLinks {
   help?: OktaApplicationLink | OktaApplicationLink[];
   metadata?: OktaApplicationLink | OktaApplicationLink[];
-  applinks?: OktaApplicationLink | OktaApplicationLink[];
+  appLinks?: OktaApplicationLink | OktaApplicationLink[];
   groups?: OktaApplicationLink | OktaApplicationLink[];
   logo?: OktaApplicationLink | OktaApplicationLink[];
   users?: OktaApplicationLink | OktaApplicationLink[];

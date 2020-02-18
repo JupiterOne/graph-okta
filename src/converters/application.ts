@@ -49,14 +49,13 @@ export function createApplicationEntity(
 
   if (data._links) {
     if (data._links.logo) {
-      imageUrl = Array.isArray(data._links.logo)
-        ? data._links.logo[0].href
-        : data._links.logo.href;
+      imageUrl = [data._links.logo].flat()[0].href;
     }
-    if (data._links.applinks) {
-      const link = Array.isArray(data._links.applinks)
-        ? data._links.applinks.find(l => l.name === "login")
-        : data._links.applinks;
+
+    if (data._links.appLinks) {
+      const links = [data._links.appLinks].flat();
+      const link =
+        links.length > 1 ? links.find(l => l.name === "login") : links[0];
       loginUrl = link && link.href;
     }
   }
