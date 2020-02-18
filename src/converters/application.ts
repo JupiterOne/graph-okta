@@ -54,8 +54,7 @@ export function createApplicationEntity(
 
     if (data._links.appLinks) {
       const links = [data._links.appLinks].flat();
-      const link =
-        links.length > 1 ? links.find(l => l.name === "login") : links[0];
+      const link = links.find(l => l.name === "login") || links[0];
       loginUrl = link && link.href;
     }
   }
