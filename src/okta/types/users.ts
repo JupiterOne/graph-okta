@@ -42,6 +42,8 @@ export interface OktaUserProfile {
   login: string;
   tenant: string[];
   email: string;
+  location?: string;
+  title?: string;
   userType?: string;
   employeeType?: string;
   employeeNumber?: string;
