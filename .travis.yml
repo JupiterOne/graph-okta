@@ -1,7 +1,7 @@
 language: node_js
 node_js:
-  - '8'
   - '10'
+  - '12'
 
 notifications:
   email:
@@ -20,4 +20,4 @@ deploy:
     tags: true
     branch: master
     repo: JupiterOne/graph-okta
-    node: '8'
+    node: '12'
