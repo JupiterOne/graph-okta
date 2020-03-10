@@ -33,6 +33,8 @@ export interface StandardizedOktaUser extends EntityFromIntegration {
   login: string;
   tenant: string[];
   email: string;
+  location?: string;
+  title?: string;
   userType?: string;
   employeeType?: string;
   employeeNumber?: string;

@@ -1,3 +1,5 @@
+import { convertProperties } from "@jupiterone/jupiter-managed-integration-sdk";
+
 import * as url from "url";
 
 import { OktaUser, OktaUserCredentials } from "../okta/types";
@@ -26,22 +28,7 @@ export function createUserEntity(
     lastLogin,
     lastUpdated,
     passwordChanged,
-    profile: {
-      firstName,
-      lastName,
-      mobilePhone,
-      secondEmail,
-      login,
-      tenant,
-      email,
-      userType,
-      employeeType,
-      generic,
-      manager,
-      managerId,
-      bitbucketUsername,
-      githubUsername,
-    },
+    profile,
     credentials,
   } = data;
 
@@ -52,15 +39,17 @@ export function createUserEntity(
 
   const emailProperties = convertCredentialEmails(credentials);
   const entity: StandardizedOktaUser = {
+    ...convertProperties(profile),
+    ...emailProperties,
     _key: id,
     _type: USER_ENTITY_TYPE,
     _class: "User",
     _rawData: [{ name: "default", rawData: data }],
     id,
     webLink,
-    displayName: login,
-    name: `${firstName} ${lastName}`,
-    username: login.split("@")[0],
+    displayName: profile.login,
+    name: `${profile.firstName} ${profile.lastName}`,
+    username: profile.login.split("@")[0],
     status,
     active: status === "ACTIVE",
     created: getTime(created)!,
@@ -69,21 +58,6 @@ export function createUserEntity(
     lastLogin: getTime(lastLogin),
     lastUpdated: getTime(lastUpdated)!,
     passwordChanged: getTime(passwordChanged),
-    firstName,
-    lastName,
-    mobilePhone,
-    secondEmail,
-    login,
-    tenant,
-    email,
-    userType,
-    employeeType,
-    generic,
-    manager,
-    managerId,
-    bitbucketUsername,
-    githubUsername,
-    ...emailProperties,
   };
 
   return entity;
