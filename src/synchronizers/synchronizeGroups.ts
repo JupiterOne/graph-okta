@@ -1,4 +1,7 @@
-import { IntegrationExecutionResult } from "@jupiterone/jupiter-managed-integration-sdk";
+import {
+  IntegrationExecutionResult,
+  IntegrationInstanceAuthorizationError,
+} from "@jupiterone/jupiter-managed-integration-sdk";
 
 import {
   ACCOUNT_GROUP_RELATIONSHIP_TYPE,
@@ -8,7 +11,7 @@ import {
   createUserGroupEntity,
   USER_GROUP_ENTITY_TYPE,
 } from "../converters";
-import { OktaUserGroup } from "../okta/types";
+import { OktaCollection, OktaUserGroup } from "../okta/types";
 import {
   OktaExecutionContext,
   StandardizedOktaAccountGroupRelationship,
@@ -41,7 +44,17 @@ export default async function synchronizeGroups(
   const newAppManagedUserGroups: StandardizedOktaUserGroup[] = [];
   const newAccountGroupRelationships: StandardizedOktaAccountGroupRelationship[] = [];
 
-  const groupsCollection = await okta.listGroups();
+  let groupsCollection: OktaCollection<OktaUserGroup>;
+  try {
+    groupsCollection = await okta.listGroups();
+  } catch (err) {
+    if (err.status === 403) {
+      throw new IntegrationInstanceAuthorizationError(err, "groups");
+    } else {
+      throw err;
+    }
+  }
+
   await retryIfRateLimited(logger, () =>
     groupsCollection.each((group: OktaUserGroup) => {
       const groupEntity = createUserGroupEntity(config, group);

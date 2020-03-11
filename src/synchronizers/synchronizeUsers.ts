@@ -1,6 +1,7 @@
 import {
   IntegrationError,
   IntegrationExecutionResult,
+  IntegrationInstanceAuthorizationError,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import {
   createGroupUserRelationship,
@@ -45,6 +46,13 @@ export default async function synchronizeUsers(
   const usersState = await usersCache.getState();
   if (!usersState || !usersState.fetchCompleted) {
     throw new IntegrationError("User fetching did not complete");
+  }
+
+  if (usersState.encounteredAuthorizationError) {
+    throw new IntegrationInstanceAuthorizationError(
+      new Error("Users synchronization depends on Users ingestion"),
+      "users",
+    );
   }
 
   const newUsers: StandardizedOktaUser[] = [];

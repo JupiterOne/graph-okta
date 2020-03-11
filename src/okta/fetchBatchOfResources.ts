@@ -1,5 +1,6 @@
 import {
   IntegrationCacheEntry,
+  IntegrationInstanceAuthorizationError,
   IntegrationLogger,
   IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
@@ -82,7 +83,24 @@ export default async function fetchBatchOfResources<
     limit: String(pageLimit),
   };
 
-  const listResources = await fetchCollection(queryParams);
+  let listResources: OktaCollection<Resource>;
+  try {
+    listResources = await fetchCollection(queryParams);
+  } catch (err) {
+    if (err.status === 403) {
+      await resourceCache.putState({
+        seen,
+        putEntriesKeys: 0,
+        fetchCompleted: true,
+        encounteredAuthorizationError: true,
+      });
+
+      throw new IntegrationInstanceAuthorizationError(err, resource);
+    } else {
+      throw err;
+    }
+  }
+
   await retryIfRateLimited(resourceLogger, () =>
     listResources.each(async (res: Resource) => {
       cacheEntries.push({

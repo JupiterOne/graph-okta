@@ -1,6 +1,7 @@
 import {
   IntegrationError,
   IntegrationExecutionResult,
+  IntegrationInstanceAuthorizationError,
   IntegrationRelationship,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import {
@@ -61,6 +62,18 @@ export default async function synchronizeApplications(
   const applicationUsersState = await applicationUsersCache.getState();
   if (!applicationUsersState || !applicationUsersState.fetchCompleted) {
     throw new IntegrationError("Application users fetching did not complete");
+  }
+
+  if (
+    applicationsState.encounteredAuthorizationError ||
+    applicationUsersState.encounteredAuthorizationError
+  ) {
+    throw new IntegrationInstanceAuthorizationError(
+      new Error(
+        "Applications synchronization depends on Applications and Applications' Users ingestion",
+      ),
+      "applications",
+    );
   }
 
   const oktaAccountInfo = getOktaAccountInfo(instance);
