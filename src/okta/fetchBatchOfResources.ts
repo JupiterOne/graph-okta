@@ -87,6 +87,10 @@ export default async function fetchBatchOfResources<
   try {
     listResources = await fetchCollection(queryParams);
   } catch (err) {
+    logger.info(
+      { err },
+      "Encountered error while fetching collection for ${resource}",
+    );
     if (err.status === 403) {
       await resourceCache.putState({
         seen,

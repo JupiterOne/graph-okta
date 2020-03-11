@@ -48,6 +48,10 @@ export default async function synchronizeGroups(
   try {
     groupsCollection = await okta.listGroups();
   } catch (err) {
+    logger.info(
+      { err },
+      "Encountered error while fetching collection for groups",
+    );
     if (err.status === 403) {
       throw new IntegrationInstanceAuthorizationError(err, "groups");
     } else {
