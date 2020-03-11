@@ -107,6 +107,10 @@ export default async function fetchBatchOfApplicationUsers(
           queryParams,
         );
       } catch (err) {
+        logger.info(
+          { err },
+          "Encountered error while fetching collection for application_users",
+        );
         if (err.status === 403) {
           await applicationUserCache.putState({
             seen,
