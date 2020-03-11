@@ -44,4 +44,6 @@ export interface OktaCacheState {
   putEntriesKeys: number;
 
   fetchCompleted: boolean;
+
+  encounteredAuthorizationError?: boolean;
 }

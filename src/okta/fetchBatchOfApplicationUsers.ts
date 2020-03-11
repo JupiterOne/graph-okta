@@ -1,5 +1,6 @@
 import {
   IntegrationError,
+  IntegrationInstanceAuthorizationError,
   IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
@@ -11,6 +12,7 @@ import {
   OktaApplicationUser,
   OktaApplicationUserCacheEntry,
   OktaCacheState,
+  OktaCollection,
   OktaQueryParams,
 } from "./types";
 
@@ -29,6 +31,15 @@ export default async function fetchBatchOfApplicationUsers(
   const applicationsState = await applicationCache.getState();
   if (!applicationsState || !applicationsState.fetchCompleted) {
     throw new IntegrationError("Application fetching did not complete");
+  }
+
+  if (applicationsState.encounteredAuthorizationError) {
+    throw new IntegrationInstanceAuthorizationError(
+      new Error(
+        "Applications' Users ingestion depends on Applications ingestion",
+      ),
+      "application_users",
+    );
   }
 
   const pageLimit = process.env.OKTA_APPLICATION_USERS_PAGE_LIMIT
@@ -89,10 +100,29 @@ export default async function fetchBatchOfApplicationUsers(
 
       // Create application user iterator for current applicationIndex, picking
       // up at the page represented by the last obtained pagination token.
-      const listApplicationUsers = await okta.listApplicationUsers(
-        applicationId,
-        queryParams,
-      );
+      let listApplicationUsers: OktaCollection<OktaApplicationUser>;
+      try {
+        listApplicationUsers = await okta.listApplicationUsers(
+          applicationId,
+          queryParams,
+        );
+      } catch (err) {
+        if (err.status === 403) {
+          await applicationUserCache.putState({
+            seen,
+            putEntriesKeys: 0,
+            fetchCompleted: true,
+            encounteredAuthorizationError: true,
+          });
+
+          throw new IntegrationInstanceAuthorizationError(
+            err,
+            "application_users",
+          );
+        } else {
+          throw err;
+        }
+      }
 
       let usersSeenForApplication = 0;
 
