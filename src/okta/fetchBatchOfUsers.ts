@@ -10,6 +10,7 @@ import {
   OktaUserGroup,
 } from "../okta/types";
 import { OktaExecutionContext } from "../types";
+import logIfForbidden from "../util/logIfForbidden";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 import fetchBatchOfResources from "./fetchBatchOfResources";
 import { OktaUserCacheData } from "./types";
@@ -34,19 +35,31 @@ export default async function fetchBatchOfUsers(
       const factors: OktaFactor[] = [];
       const userGroups: OktaUserGroup[] = [];
 
-      const listFactors = await okta.listFactors(user.id);
-      await retryIfRateLimited(logger, () =>
-        listFactors.each((factor: OktaFactor) => {
-          factors.push(factor);
-        }),
-      );
+      await logIfForbidden({
+        logger,
+        resource: `user_factors`,
+        func: async () => {
+          const listFactors = await okta.listFactors(user.id);
+          await retryIfRateLimited(logger, () =>
+            listFactors.each((factor: OktaFactor) => {
+              factors.push(factor);
+            }),
+          );
+        },
+      });
 
-      const listUserGroups = await okta.listUserGroups(user.id);
-      await retryIfRateLimited(logger, () =>
-        listUserGroups.each((group: OktaUserGroup) => {
-          userGroups.push(group);
-        }),
-      );
+      await logIfForbidden({
+        logger,
+        resource: `user_groups`,
+        func: async () => {
+          const listUserGroups = await okta.listUserGroups(user.id);
+          await retryIfRateLimited(logger, () =>
+            listUserGroups.each((group: OktaUserGroup) => {
+              userGroups.push(group);
+            }),
+          );
+        },
+      });
 
       return {
         user,

@@ -3,6 +3,7 @@ import {
   IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import { OktaExecutionContext } from "../types";
+import logIfForbidden from "../util/logIfForbidden";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 import fetchBatchOfResources from "./fetchBatchOfResources";
 import {
@@ -32,14 +33,20 @@ export default async function fetchBatchOfApplications(
     ): Promise<OktaApplicationCacheData> => {
       const applicationGroups: OktaApplicationGroup[] = [];
 
-      const listApplicationGroups = await okta.listApplicationGroupAssignments(
-        application.id,
-      );
-      await retryIfRateLimited(logger, () =>
-        listApplicationGroups.each((group: OktaApplicationGroup) => {
-          applicationGroups.push(group);
-        }),
-      );
+      await logIfForbidden({
+        logger,
+        resource: `application_groups`,
+        func: async () => {
+          const listApplicationGroups = await okta.listApplicationGroupAssignments(
+            application.id,
+          );
+          await retryIfRateLimited(logger, () =>
+            listApplicationGroups.each((group: OktaApplicationGroup) => {
+              applicationGroups.push(group);
+            }),
+          );
+        },
+      });
 
       return {
         application,
