@@ -6,13 +6,13 @@ import {
 
 import { OktaExecutionContext } from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
+import logIfForbidden from "../util/logIfForbidden";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 import {
   OktaApplicationCacheEntry,
   OktaApplicationUser,
   OktaApplicationUserCacheEntry,
   OktaCacheState,
-  OktaCollection,
   OktaQueryParams,
 } from "./types";
 
@@ -100,18 +100,17 @@ export default async function fetchBatchOfApplicationUsers(
 
       // Create application user iterator for current applicationIndex, picking
       // up at the page represented by the last obtained pagination token.
-      let listApplicationUsers: OktaCollection<OktaApplicationUser>;
-      try {
-        listApplicationUsers = await okta.listApplicationUsers(
-          applicationId,
-          queryParams,
-        );
-      } catch (err) {
-        logger.info(
-          { err },
-          "Encountered error while fetching collection for application_users",
-        );
-        if (err.status === 403) {
+      const listApplicationUsers = await okta.listApplicationUsers(
+        applicationId,
+        queryParams,
+      );
+
+      let usersSeenForApplication = 0;
+
+      await logIfForbidden({
+        logger,
+        resource: "application_users",
+        onForbidden: async err => {
           await applicationUserCache.putState({
             seen,
             putEntriesKeys: 0,
@@ -123,52 +122,49 @@ export default async function fetchBatchOfApplicationUsers(
             err,
             "application_users",
           );
-        } else {
-          throw err;
-        }
-      }
+        },
+        func: async () => {
+          await retryIfRateLimited(logger, () => {
+            return listApplicationUsers.each(
+              async (applicationUser: OktaApplicationUser) => {
+                cacheEntries.push({
+                  key: `app/${applicationId}/user/${applicationUser.id}`,
+                  data: {
+                    applicationId,
+                    applicationUser,
+                  },
+                });
 
-      let usersSeenForApplication = 0;
+                usersSeenForApplication++;
+                seen++;
 
-      await retryIfRateLimited(logger, () => {
-        return listApplicationUsers.each(
-          async (applicationUser: OktaApplicationUser) => {
-            cacheEntries.push({
-              key: `app/${applicationId}/user/${applicationUser.id}`,
-              data: {
-                applicationId,
-                applicationUser,
+                const moreItemsInCurrentPage =
+                  listApplicationUsers.currentItems.length > 0;
+
+                if (!moreItemsInCurrentPage) {
+                  pagesProcessed++;
+                }
+
+                logger.trace(
+                  {
+                    applicationIndex,
+                    applicationId,
+                    pagesProcessed,
+                    applicationUserId: applicationUser.id,
+                  },
+                  "Processed user for application",
+                );
+
+                // Continue paginating users for the current applicationIndex as
+                // long as batchPages has not been reached.
+                const continuePaginatingApplicationUsers =
+                  pagesProcessed !== batchPages;
+
+                return continuePaginatingApplicationUsers;
               },
-            });
-
-            usersSeenForApplication++;
-            seen++;
-
-            const moreItemsInCurrentPage =
-              listApplicationUsers.currentItems.length > 0;
-
-            if (!moreItemsInCurrentPage) {
-              pagesProcessed++;
-            }
-
-            logger.trace(
-              {
-                applicationIndex,
-                applicationId,
-                pagesProcessed,
-                applicationUserId: applicationUser.id,
-              },
-              "Processed user for application",
             );
-
-            // Continue paginating users for the current applicationIndex as
-            // long as batchPages has not been reached.
-            const continuePaginatingApplicationUsers =
-              pagesProcessed !== batchPages;
-
-            return continuePaginatingApplicationUsers;
-          },
-        );
+          });
+        },
       });
 
       // Increment pagesProcessed when there were no users for an application.

@@ -12,6 +12,7 @@ import {
 } from "../okta/types";
 import { OktaExecutionContext } from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
+import logIfForbidden from "../util/logIfForbidden";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 import { OktaCacheState } from "./types";
 
@@ -83,15 +84,12 @@ export default async function fetchBatchOfResources<
     limit: String(pageLimit),
   };
 
-  let listResources: OktaCollection<Resource>;
-  try {
-    listResources = await fetchCollection(queryParams);
-  } catch (err) {
-    logger.info(
-      { err },
-      "Encountered error while fetching collection for ${resource}",
-    );
-    if (err.status === 403) {
+  const listResources = await fetchCollection(queryParams);
+
+  await logIfForbidden({
+    logger: resourceLogger,
+    resource,
+    onForbidden: async err => {
       await resourceCache.putState({
         seen,
         putEntriesKeys: 0,
@@ -100,31 +98,30 @@ export default async function fetchBatchOfResources<
       });
 
       throw new IntegrationInstanceAuthorizationError(err, resource);
-    } else {
-      throw err;
-    }
-  }
+    },
+    func: async () => {
+      await retryIfRateLimited(resourceLogger, () =>
+        listResources.each(async (res: Resource) => {
+          cacheEntries.push({
+            key: res.id,
+            data: await fetchData(res, okta, resourceLogger),
+          });
 
-  await retryIfRateLimited(resourceLogger, () =>
-    listResources.each(async (res: Resource) => {
-      cacheEntries.push({
-        key: res.id,
-        data: await fetchData(res, okta, resourceLogger),
-      });
+          seen++;
 
-      seen++;
+          const moreItemsInCurrentPage = listResources.currentItems.length > 0;
+          if (!moreItemsInCurrentPage) {
+            pagesProcessed++;
+          }
 
-      const moreItemsInCurrentPage = listResources.currentItems.length > 0;
-      if (!moreItemsInCurrentPage) {
-        pagesProcessed++;
-      }
-
-      // Prevent the listResources collection from loading another page by
-      // returning `false` once all items of `BATCH_PAGES` have been
-      // processed.
-      return pagesProcessed !== batchPages;
-    }),
-  );
+          // Prevent the listResources collection from loading another page by
+          // returning `false` once all items of `BATCH_PAGES` have been
+          // processed.
+          return pagesProcessed !== batchPages;
+        }),
+      );
+    },
+  });
 
   const finished = typeof listResources.nextUri !== "string";
 

@@ -28,6 +28,8 @@ export default async function retryIfRateLimited(
 
       if (err.status === 429) {
         logger.info({ err }, "Hit API rate limit, waiting to retry ...");
+        // TODO: respect rate limit headers returned by Okta
+
         // const rateLimitReset = err.headers._headers['x-rate-limit-reset'];
         // if (rateLimitReset && rateLimitReset.length) {
         //   const timeout =

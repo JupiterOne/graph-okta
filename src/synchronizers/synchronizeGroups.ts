@@ -11,13 +11,14 @@ import {
   createUserGroupEntity,
   USER_GROUP_ENTITY_TYPE,
 } from "../converters";
-import { OktaCollection, OktaUserGroup } from "../okta/types";
+import { OktaUserGroup } from "../okta/types";
 import {
   OktaExecutionContext,
   StandardizedOktaAccountGroupRelationship,
   StandardizedOktaUserGroup,
 } from "../types";
 import getOktaAccountInfo from "../util/getOktaAccountInfo";
+import logIfForbidden from "../util/logIfForbidden";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 
 /**
@@ -44,34 +45,30 @@ export default async function synchronizeGroups(
   const newAppManagedUserGroups: StandardizedOktaUserGroup[] = [];
   const newAccountGroupRelationships: StandardizedOktaAccountGroupRelationship[] = [];
 
-  let groupsCollection: OktaCollection<OktaUserGroup>;
-  try {
-    groupsCollection = await okta.listGroups();
-  } catch (err) {
-    logger.info(
-      { err },
-      "Encountered error while fetching collection for groups",
-    );
-    if (err.status === 403) {
-      throw new IntegrationInstanceAuthorizationError(err, "groups");
-    } else {
-      throw err;
-    }
-  }
+  const groupsCollection = await okta.listGroups();
 
-  await retryIfRateLimited(logger, () =>
-    groupsCollection.each((group: OktaUserGroup) => {
-      const groupEntity = createUserGroupEntity(config, group);
-      newAccountGroupRelationships.push(
-        createAccountGroupRelationship(accountEntity, groupEntity),
+  await logIfForbidden({
+    logger,
+    resource: "groups",
+    onForbidden: err => {
+      throw new IntegrationInstanceAuthorizationError(err, "groups");
+    },
+    func: async () => {
+      await retryIfRateLimited(logger, () =>
+        groupsCollection.each((group: OktaUserGroup) => {
+          const groupEntity = createUserGroupEntity(config, group);
+          newAccountGroupRelationships.push(
+            createAccountGroupRelationship(accountEntity, groupEntity),
+          );
+          if (groupEntity._type === USER_GROUP_ENTITY_TYPE) {
+            newOktaManagedUserGroups.push(groupEntity);
+          } else {
+            newAppManagedUserGroups.push(groupEntity);
+          }
+        }),
       );
-      if (groupEntity._type === USER_GROUP_ENTITY_TYPE) {
-        newOktaManagedUserGroups.push(groupEntity);
-      } else {
-        newAppManagedUserGroups.push(groupEntity);
-      }
-    }),
-  );
+    },
+  });
 
   const [
     oldOktaManagedUserGroups,
