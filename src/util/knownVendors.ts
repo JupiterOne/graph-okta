@@ -149,12 +149,14 @@ export function getAccountName(appName: string): string | string[] {
  *   in J1.
  */
 export function isMultiInstanceApp(appName: string): boolean {
-  if (
-    appName === "aws" ||
-    appName === "githubcloud" ||
-    appName === "gcp" ||
-    appName === "google"
-  ) {
+  const multiInstanceApps = [
+    "aws",
+    "githubcloud",
+    "gcp",
+    "google",
+    "office365",
+  ];
+  if (multiInstanceApps.includes(appName)) {
     return true;
   } else {
     return false;
