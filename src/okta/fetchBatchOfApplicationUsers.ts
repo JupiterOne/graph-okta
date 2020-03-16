@@ -27,6 +27,10 @@ export default async function fetchBatchOfApplicationUsers(
     OktaApplicationCacheEntry,
     OktaCacheState
   >("applications");
+  const applicationUserCache = cache.iterableCache<
+    OktaApplicationUserCacheEntry,
+    OktaCacheState
+  >("application_users");
 
   const applicationsState = await applicationCache.getState();
   if (!applicationsState || !applicationsState.fetchCompleted) {
@@ -34,6 +38,13 @@ export default async function fetchBatchOfApplicationUsers(
   }
 
   if (applicationsState.encounteredAuthorizationError) {
+    await applicationUserCache.putState({
+      seen: 0,
+      putEntriesKeys: 0,
+      fetchCompleted: true,
+      encounteredAuthorizationError: true,
+    });
+
     throw new IntegrationInstanceAuthorizationError(
       new Error(
         "Applications' Users ingestion depends on Applications ingestion",
@@ -48,11 +59,6 @@ export default async function fetchBatchOfApplicationUsers(
   const batchPages = process.env.OKTA_APPLICATION_USERS_BATCH_PAGES
     ? Number(process.env.OKTA_APPLICATION_USERS_BATCH_PAGES)
     : 2;
-
-  const applicationUserCache = cache.iterableCache<
-    OktaApplicationUserCacheEntry,
-    OktaCacheState
-  >("application_users");
 
   const cacheEntries: OktaApplicationUserCacheEntry[] = [];
 
