@@ -50,7 +50,7 @@ export function createUserEntity(
     displayName: profile.login,
     name: `${profile.firstName} ${profile.lastName}`,
     username: profile.login.split("@")[0],
-    email: profile.email.toLocaleLowerCase(),
+    email: profile.email.toLowerCase(),
     status,
     active: status === "ACTIVE",
     created: getTime(created)!,
