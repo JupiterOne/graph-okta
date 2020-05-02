@@ -91,6 +91,7 @@ export interface StandardizedOktaApplication extends EntityFromIntegration {
 export interface StandardizedOktaFactor extends EntityFromIntegration {
   active: boolean;
   id: string;
+  type?: string | null;
   factorType: string;
   provider: string;
   vendorName?: string;
