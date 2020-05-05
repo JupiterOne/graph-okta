@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import { OktaUser } from "../okta/types";
 import {
   OktaIntegrationConfig,

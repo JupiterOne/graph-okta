@@ -50,7 +50,7 @@ export default async function synchronizeGroups(
   await logIfForbidden({
     logger,
     resource: "groups",
-    onForbidden: err => {
+    onForbidden: (err) => {
       throw new IntegrationInstanceAuthorizationError(err, "groups");
     },
     func: async () => {
@@ -73,12 +73,14 @@ export default async function synchronizeGroups(
   const [
     oldOktaManagedUserGroups,
     oldAppManagedUserGroups,
-    oldAccountGroupRelationships,
   ] = await Promise.all([
     graph.findEntitiesByType(USER_GROUP_ENTITY_TYPE),
     graph.findEntitiesByType(APP_USER_GROUP_ENTITY_TYPE),
-    graph.findRelationshipsByType(ACCOUNT_GROUP_RELATIONSHIP_TYPE),
   ]);
+
+  const oldAccountGroupRelationships = await graph.findRelationshipsByType(
+    ACCOUNT_GROUP_RELATIONSHIP_TYPE,
+  );
 
   logger.info(
     {

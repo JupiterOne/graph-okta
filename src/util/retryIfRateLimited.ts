@@ -1,6 +1,6 @@
 import { IntegrationLogger } from "@jupiterone/jupiter-managed-integration-sdk";
 
-// tslint:disable-next-line:no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const promiseRetry = require("promise-retry");
 
 const RETRY_OPTIONS = {

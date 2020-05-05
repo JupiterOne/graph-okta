@@ -116,7 +116,7 @@ export default async function fetchBatchOfApplicationUsers(
       await logIfForbidden({
         logger,
         resource: "application_users",
-        onForbidden: async err => {
+        onForbidden: async (err) => {
           await applicationUserCache.putState({
             seen,
             putEntriesKeys: 0,

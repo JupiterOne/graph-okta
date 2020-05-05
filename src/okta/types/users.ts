@@ -1,7 +1,6 @@
 import { OktaResource } from ".";
 
-// tslint:disable-next-line:no-empty-interface
-export interface OktaPasswordCredential {}
+export type OktaPasswordCredential = string;
 
 export interface OktaEmailCredential {
   value: string;
@@ -30,6 +29,7 @@ export interface OktaUser extends OktaResource {
   passwordChanged?: string;
   profile: OktaUserProfile;
   credentials?: OktaUserCredentials;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _links?: any;
 }
 

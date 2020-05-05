@@ -64,7 +64,7 @@ export default async function invocationValidator(
   const usersCollection = await client.listUsers({ limit: "1" });
 
   try {
-    await usersCollection.each(u => {
+    await usersCollection.each((u) => {
       return false; // stop iteration
     });
   } catch (err) {

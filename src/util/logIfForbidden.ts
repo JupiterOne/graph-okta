@@ -5,7 +5,9 @@ export default async function logIfForbidden({
   resource,
   func,
   // tslint:disable-next-line:no-empty
-  onForbidden = async () => {},
+  onForbidden = async (): Promise<void> => {
+    // no-op
+  },
 }: {
   logger: IntegrationLogger;
   resource: string;

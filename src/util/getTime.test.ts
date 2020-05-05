@@ -1,7 +1,7 @@
 import getTime from "./getTime";
 
 test("should return number from string", () => {
-  const testData: string = "2019-04-22T21:43:53.000Z";
+  const testData = "2019-04-22T21:43:53.000Z";
   expect(getTime(testData)).toEqual(1555969433000);
 });
 

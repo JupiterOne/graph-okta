@@ -89,7 +89,7 @@ export default async function fetchBatchOfResources<
   await logIfForbidden({
     logger: resourceLogger,
     resource,
-    onForbidden: async err => {
+    onForbidden: async (err) => {
       await resourceCache.putState({
         seen,
         putEntriesKeys: 0,
@@ -143,7 +143,7 @@ export default async function fetchBatchOfResources<
     },
   };
 
-  resourceLogger.trace(
+  resourceLogger.info(
     { nextIterationState, cacheState },
     "Completed one iteration",
   );

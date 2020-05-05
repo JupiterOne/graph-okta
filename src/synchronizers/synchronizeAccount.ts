@@ -29,15 +29,14 @@ export default async function synchronizeAccount(
   const ssoService = createSSOServiceEntity(account);
   const mfaService = createMFAServiceEntity(account);
 
-  const [
-    oldAccounts,
-    oldServices,
-    oldAccountServiceRelationships,
-  ] = await Promise.all([
+  const [oldAccounts, oldServices] = await Promise.all([
     graph.findEntitiesByType(ACCOUNT_ENTITY_TYPE),
     graph.findEntitiesByType(SERVICE_ENTITY_TYPE),
-    graph.findRelationshipsByType(ACCOUNT_SERVICE_RELATIONSHIP_TYPE),
   ]);
+
+  const oldAccountServiceRelationships = await graph.findRelationshipsByType(
+    ACCOUNT_SERVICE_RELATIONSHIP_TYPE,
+  );
 
   const newAccounts = [account];
   const newServices = [ssoService, mfaService];
