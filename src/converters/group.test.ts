@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import { OktaUserGroup } from "../okta/types";
 import {
   OktaIntegrationConfig,
@@ -105,7 +106,7 @@ describe("creating group entity", () => {
   });
 });
 
-describe("creating group entity", () => {
+describe("creating group entity differently", () => {
   test("with APP_GROUP type", () => {
     const group: StandardizedOktaUserGroup = {
       _class: "UserGroup",

@@ -1,5 +1,5 @@
-// tslint:disable:no-var-requires
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { IntegrationLogger } from "@jupiterone/jupiter-managed-integration-sdk";
 import { OktaClient } from "./types";
 
@@ -22,7 +22,6 @@ export default function createOktaClient(
 
   defaultRequestExecutor.on(
     "backoff",
-    // @ts-ignore
     (request: any, response: any, requestId: any, delayMs: any) => {
       logger.info(
         {

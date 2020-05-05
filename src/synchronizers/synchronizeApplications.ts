@@ -112,15 +112,16 @@ export default async function synchronizeApplications(
     );
   });
 
+  const oldApplications = await graph.findEntitiesByType(
+    APPLICATION_ENTITY_TYPE,
+  );
   const [
-    oldApplications,
     oldAccountApplicationRelationships,
     oldApplicationGroupRelationships,
     oldGroupIAMRoleRelationships,
     oldApplicationUserRelationships,
     oldUserIAMRoleRelationships,
   ] = await Promise.all([
-    graph.findEntitiesByType(APPLICATION_ENTITY_TYPE),
     graph.findRelationshipsByType(ACCOUNT_APPLICATION_RELATIONSHIP_TYPE),
     graph.findRelationshipsByType(APPLICATION_GROUP_RELATIONSHIP_TYPE),
     graph.findRelationshipsByType(GROUP_IAM_ROLE_RELATIONSHIP_TYPE),

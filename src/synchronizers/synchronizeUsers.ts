@@ -80,14 +80,15 @@ export default async function synchronizeUsers(
     }
   });
 
+  const [oldUsers, oldMFADevices] = await Promise.all([
+    graph.findEntitiesByType(USER_ENTITY_TYPE),
+    graph.findEntitiesByType(MFA_DEVICE_ENTITY_TYPE),
+  ]);
+
   const [
-    oldUsers,
-    oldMFADevices,
     oldUserMFADeviceRelationships,
     oldGroupUserRelationships,
   ] = await Promise.all([
-    graph.findEntitiesByType(USER_ENTITY_TYPE),
-    graph.findEntitiesByType(MFA_DEVICE_ENTITY_TYPE),
     graph.findRelationshipsByType(USER_MFA_DEVICE_RELATIONSHIP_TYPE),
     graph.findRelationshipsByType(GROUP_USER_RELATIONSHIP_TYPE),
   ]);

@@ -114,7 +114,7 @@ test("oktaOrgUrl vanity url not found (404)", async () => {
   const oktaOrgUrl = "https://abc.okta.com:443";
 
   const { nockDone } = await nock.back("vanity-url-not-found.json", {
-    before: def => (def.scope = oktaOrgUrl),
+    before: (def) => (def.scope = oktaOrgUrl),
   });
 
   const config: Partial<OktaIntegrationConfig> = {
@@ -141,7 +141,7 @@ test("unauthorized account", async () => {
   const oktaOrgUrl = "https://dev-589921.oktapreview.com";
 
   const { nockDone } = await nock.back("unauthorized.json", {
-    before: def => (def.scope = oktaOrgUrl),
+    before: (def) => (def.scope = oktaOrgUrl),
   });
 
   const config: Partial<OktaIntegrationConfig> = {
@@ -168,7 +168,7 @@ test("valid oktapreview.com account", async () => {
   const oktaOrgUrl = "https://dev-589921.oktapreview.com";
 
   const { nockDone } = await nock.back("valid-oktapreview.json", {
-    before: def => (def.scope = oktaOrgUrl),
+    before: (def) => (def.scope = oktaOrgUrl),
   });
 
   const config: Partial<OktaIntegrationConfig> = {
@@ -193,7 +193,7 @@ test("valid okta.com account", async () => {
   const oktaOrgUrl = "https://dev-589921.okta.com";
 
   const { nockDone } = await nock.back("valid-okta.json", {
-    before: def => (def.scope = oktaOrgUrl),
+    before: (def) => (def.scope = oktaOrgUrl),
   });
 
   const config: Partial<OktaIntegrationConfig> = {
