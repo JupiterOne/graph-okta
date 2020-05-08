@@ -1,6 +1,5 @@
 # JupiterOne Managed Integration for Okta
 
-[![Build Status](https://travis-ci.org/JupiterOne/graph-okta.svg?branch=master)](https://travis-ci.org/JupterOne/graph-okta)
 [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=JupiterOne/graph-okta)](https://dependabot.com)
 
 A JupiterOne integration ingests information such as configurations and other
