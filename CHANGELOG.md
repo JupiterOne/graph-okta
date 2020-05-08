@@ -25,4 +25,5 @@ and this project adheres to
 
 ### Changed
 
-- `instanceConfigFields.json` now specifies an `apiKey` config field.
+- Move from Travis to GitHub Actions to allow for tagging releases in branches
+  and publishing after merge to master.

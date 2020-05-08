@@ -25,7 +25,8 @@
     "lint:md": "remark .",
     "lint:ts": "eslint . --cache --fix --ext .ts,.tsx",
     "format": "yarn prettier --write '**/*.{ts,js,json,md}'",
-    "test": "jest"
+    "test": "jest",
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "@jupiterone/jupiter-managed-integration-sdk": "^33.7.6",
