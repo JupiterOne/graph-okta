@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.6.10 - 2020-05-08
+
 ### Added
 
 - `logger.info` around `fetchBatchOfApplicationUsers`, `fetchBatchOfResources`
