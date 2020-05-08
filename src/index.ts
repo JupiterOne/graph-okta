@@ -24,7 +24,9 @@ function fetchResourceWith(
 ): (
   context: IntegrationStepExecutionContext,
 ) => Promise<IntegrationStepExecutionResult> {
-  return async (executionContext: IntegrationStepExecutionContext) => {
+  return async (
+    executionContext: IntegrationStepExecutionContext,
+  ): Promise<IntegrationStepExecutionResult> => {
     const iterationState = executionContext.event.iterationState;
     if (!iterationState) {
       throw new IntegrationError("Expected iterationState not found in event!");
@@ -55,7 +57,7 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
           name: "Account",
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
-          ) => {
+          ): Promise<IntegrationStepExecutionResult> => {
             return synchronizeAccount(
               await initializeContext(executionContext),
             );
@@ -100,7 +102,7 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
           name: "Groups",
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
-          ) => {
+          ): Promise<IntegrationStepExecutionResult> => {
             return synchronizeGroups(await initializeContext(executionContext));
           },
         },
@@ -113,7 +115,7 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
           name: "Users",
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
-          ) => {
+          ): Promise<IntegrationStepExecutionResult> => {
             return synchronizeUsers(await initializeContext(executionContext));
           },
         },
@@ -126,7 +128,7 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
           name: "Applications",
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
-          ) => {
+          ): Promise<IntegrationStepExecutionResult> => {
             return synchronizeApplications(
               await initializeContext(executionContext),
             );

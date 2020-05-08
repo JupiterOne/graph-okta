@@ -57,7 +57,7 @@ export default async function fetchBatchOfResources<
     okta: OktaClient,
     logger: IntegrationLogger,
   ) => Promise<CacheData>;
-}) {
+}): Promise<IntegrationStepIterationState> {
   const pageLimit = process.env[pageLimitVariable]
     ? Number(process.env[pageLimitVariable])
     : 200;
@@ -112,6 +112,10 @@ export default async function fetchBatchOfResources<
           const moreItemsInCurrentPage = listResources.currentItems.length > 0;
           if (!moreItemsInCurrentPage) {
             pagesProcessed++;
+            resourceLogger.info(
+              { resource: { type: resource, pagesProcessed } },
+              "Fetching page of resources completed.",
+            );
           }
 
           // Prevent the listResources collection from loading another page by

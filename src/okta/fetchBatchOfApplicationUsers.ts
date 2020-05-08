@@ -73,7 +73,7 @@ export default async function fetchBatchOfApplicationUsers(
   // fetched.
   let fetchCompleted = false;
 
-  logger.trace(
+  logger.info(
     {
       seen,
       after,
@@ -95,7 +95,7 @@ export default async function fetchBatchOfApplicationUsers(
         limit: String(pageLimit),
       };
 
-      logger.trace(
+      logger.info(
         {
           applicationIndex,
           applicationId,
@@ -185,7 +185,7 @@ export default async function fetchBatchOfApplicationUsers(
       // token.
       const applicationComplete = typeof after !== "string";
 
-      logger.trace(
+      logger.info(
         {
           applicationId,
           applicationIndex,
@@ -237,7 +237,7 @@ export default async function fetchBatchOfApplicationUsers(
     },
   };
 
-  logger.trace({ nextIterationState, cacheState }, "Completed one iteration");
+  logger.info({ nextIterationState, cacheState }, "Completed one iteration");
 
   return nextIterationState;
 }
