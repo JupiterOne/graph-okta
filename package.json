@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/graph-okta",
-  "version": "1.6.9",
+  "version": "1.6.10",
   "description": "A JupiterOne managed integration for https://www.okta.com",
   "main": "dist/index.js",
   "repository": "https://github.com/jupiterone/graph-okta",
@@ -25,10 +25,11 @@
     "lint:md": "remark .",
     "lint:ts": "eslint . --cache --fix --ext .ts,.tsx",
     "format": "yarn prettier --write '**/*.{ts,js,json,md}'",
-    "test": "jest"
+    "test": "jest",
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@jupiterone/jupiter-managed-integration-sdk": "^33.7.5",
+    "@jupiterone/jupiter-managed-integration-sdk": "^33.7.6",
     "@okta/okta-sdk-nodejs": "^2.0.0",
     "lodash.startcase": "^4.4.0",
     "promise-retry": "^1.1.1"
@@ -51,6 +52,7 @@
     "@types/uuid": "^3.4.4",
     "@typescript-eslint/eslint-plugin": "^2.28.0",
     "@typescript-eslint/parser": "^2.28.0",
+    "aws-sdk": "^2.672.0",
     "bunyan": "^1.8.12",
     "dotenv": "^8.0.0",
     "eslint": "^6.8.0",
