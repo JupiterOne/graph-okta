@@ -114,7 +114,7 @@ export function getVendorName(appName: string): string {
 export function getAccountName(appName: string): string | string[] {
   if (appName === "atlassianjirabitbucket") {
     return ["jira_account", "bitbucket_team"];
-  } else if (appName === "ciscomeraki") {
+  } else if (appName === "ciscomeraki" || appName === 'meraki') {
     return "cisco_meraki_account";
   } else if (appName.includes("wordpress")) {
     return "wordpress_account";
