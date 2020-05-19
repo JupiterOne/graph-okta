@@ -1,5 +1,8 @@
 import * as url from "url";
 
+// https://developer.okta.com/docs/guides/find-your-domain/overview/
+const OKTA_DOMAINS = ["okta.com", "oktapreview.com", "okta-emea.com"];
+
 export default function isValidOktaOrgUrl(orgUrl: string): boolean {
   if (!orgUrl) {
     return false;
@@ -16,5 +19,5 @@ export default function isValidOktaOrgUrl(orgUrl: string): boolean {
     splitHostname[splitHostname.length - 2] +
     "." +
     splitHostname[splitHostname.length - 1];
-  return baseHost === "okta.com" || baseHost === "oktapreview.com";
+  return OKTA_DOMAINS.includes(baseHost);
 }

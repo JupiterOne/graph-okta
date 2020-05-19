@@ -8,6 +8,22 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.6.12 - 2020-05-19
+
+### Fixed
+
+- `"okta-emea.com"` was not considerd a valid Okta url domain
+
+## 1.6.11 - 2020-05-12
+
+### Added
+
+- `.gitleaks.toml` configuration to whitelist .lock files
+
+### Fixed
+
+- `'meraki'` app name was not recognized as a `cisco_meraki_account`
+
 ## 1.6.10 - 2020-05-08
 
 ### Added

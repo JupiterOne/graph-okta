@@ -1,25 +1,27 @@
 import isValidOktaOrgUrl from "./isValidOktaOrgUrl";
 
-test("should return true for valid okta org url", () => {
-  expect(isValidOktaOrgUrl("https://abc.okta.com/")).toEqual(true);
-});
+for (const url of [
+  "https://abc.okta.com/",
+  "https://abc.oktapreview.com/",
+  "https://abc.okta-emea.com",
+]) {
+  test(`valid okta org url: ${url}`, () => {
+    expect(isValidOktaOrgUrl(url)).toEqual(true);
+  });
+}
 
-test("should return true for valid oktapreview org url", () => {
-  expect(isValidOktaOrgUrl("https://abc.oktapreview.com/")).toEqual(true);
-});
+for (const url of [
+  "https://abc.mochiokta.com/",
+  "https://abc.sobaoktapreview.com/",
+  "https://abc.cookieokta-emea.com",
+  "https://anything.custom.com",
+]) {
+  test(`invalid okta org url: ${url}`, () => {
+    expect(isValidOktaOrgUrl(url)).toEqual(false);
+  });
+}
 
-test("should return false for invalid okta org url", () => {
-  expect(isValidOktaOrgUrl("https://abc.mochiokta.com/")).toEqual(false);
-});
-
-test("should return false for invalid oktapreview org url", () => {
-  expect(isValidOktaOrgUrl("https://abc.sobaoktapreview.com/")).toEqual(false);
-});
-
-test("should throw for invalid oktapreview org url", () => {
-  expect(isValidOktaOrgUrl("https://abc.sobaoktapreview.com/")).toEqual(false);
-});
-
-test("should return false for falsy org url", () => {
+test("falsy org url", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   expect(isValidOktaOrgUrl(undefined as any)).toEqual(false);
 });
