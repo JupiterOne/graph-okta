@@ -8,6 +8,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.6.13 - 2020-05-19
+
+### Fixed
+
+- A step that runs a long time and doesn't use the gremlin client would fail
+  with an error during closing an expired connection.
+
 ## 1.6.12 - 2020-05-19
 
 ### Fixed
