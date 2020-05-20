@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/graph-okta",
-  "version": "1.6.12",
+  "version": "1.6.13",
   "description": "A JupiterOne managed integration for https://www.okta.com",
   "main": "dist/index.js",
   "repository": "https://github.com/jupiterone/graph-okta",
@@ -29,7 +29,7 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@jupiterone/jupiter-managed-integration-sdk": "^33.7.6",
+    "@jupiterone/jupiter-managed-integration-sdk": "^33.7.8",
     "@okta/okta-sdk-nodejs": "^2.0.0",
     "lodash.startcase": "^4.4.0",
     "promise-retry": "^1.1.1"
