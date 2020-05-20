@@ -1020,10 +1020,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
-"@jupiterone/jupiter-managed-integration-sdk@^33.7.6":
-  version "33.7.6"
-  resolved "https://registry.yarnpkg.com/@jupiterone/jupiter-managed-integration-sdk/-/jupiter-managed-integration-sdk-33.7.6.tgz#5dc9bdf6691ebfa2626ccc89b43aab15cdbafa29"
-  integrity sha512-XDhpQj82iaDgG8tFKzNrqHpMENTHgVuHkphL+aeNCbU5ExD//jSoFXskvk8vFZxta5gyKt1xF0tf/GcaEaj3cQ==
+"@jupiterone/jupiter-managed-integration-sdk@^33.7.8":
+  version "33.7.8"
+  resolved "https://registry.yarnpkg.com/@jupiterone/jupiter-managed-integration-sdk/-/jupiter-managed-integration-sdk-33.7.8.tgz#bdfa9d696728335737e22efdb6519263169cb0a2"
+  integrity sha512-bRz3FgIKEZNOFQIEHbnbnpd2YbJMUyD6hVaxEuXOTLVEz+xhvKt5QpXuEkqLKAapJ1DBAOCueIf/avcJUeNTwA==
 
 "@okta/okta-sdk-nodejs@^2.0.0":
   version "2.0.1"
