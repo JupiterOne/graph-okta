@@ -15,7 +15,7 @@ export function createSSOServiceEntity(
     name: "SSO",
     displayName: "Okta SSO",
     category: "security",
-    function: "sso",
+    function: "SSO",
     controlDomain: "identity-access",
   };
 }
@@ -30,7 +30,7 @@ export function createMFAServiceEntity(
     name: "MFA",
     displayName: "Okta MFA",
     category: "security",
-    function: "mfa",
+    function: "MFA",
     controlDomain: "identity-access",
   };
 }
