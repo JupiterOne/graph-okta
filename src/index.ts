@@ -9,7 +9,7 @@ import initializeContext from "./initializeContext";
 import invocationValidator from "./invocationValidator";
 import fetchBatchOfApplications from "./okta/fetchBatchOfApplications";
 import fetchBatchOfApplicationUsers from "./okta/fetchBatchOfApplicationUsers";
-import fetchBatchOfUsers from "./okta/fetchBatchOfUsers";
+import fetchBatchOfUsers, { fetchBatchOfDeprovisionedUsers } from "./okta/fetchBatchOfUsers";
 import synchronizeAccount from "./synchronizers/synchronizeAccount";
 import synchronizeApplications from "./synchronizers/synchronizeApplications";
 import synchronizeGroups from "./synchronizers/synchronizeGroups";
@@ -72,6 +72,12 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
           name: "Fetch Users",
           iterates: true,
           executionHandler: fetchResourceWith(fetchBatchOfUsers),
+        },
+        {
+          id: "fetch-deprovisioned-users",
+          name: "Fetch Deprovisioned Users",
+          iterates: true,
+          executionHandler: fetchResourceWith(fetchBatchOfDeprovisionedUsers),
         },
       ],
     },
