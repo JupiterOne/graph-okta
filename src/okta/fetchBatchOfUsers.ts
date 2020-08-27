@@ -26,8 +26,7 @@ export default async function fetchBatchOfUsers(
     iterationState,
     pageLimitVariable: "OKTA_USERS_PAGE_LIMIT",
     batchPagesVariable: "OKTA_USERS_BATCH_PAGES",
-    fetchCollection: () => 
-      executionContext.okta.listUsers(queryParams),
+    fetchCollection: () => executionContext.okta.listUsers(queryParams),
     fetchData: async (
       user: OktaUser,
       okta: OktaClient,
@@ -77,5 +76,5 @@ export async function fetchBatchOfDeprovisionedUsers(
 ): Promise<IntegrationStepIterationState> {
   return fetchBatchOfUsers(executionContext, iterationState, {
     filter: 'status eq "DEPROVISIONED"',
-  })
+  });
 }
