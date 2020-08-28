@@ -9,7 +9,8 @@ import initializeContext from "./initializeContext";
 import invocationValidator from "./invocationValidator";
 import fetchBatchOfApplications from "./okta/fetchBatchOfApplications";
 import fetchBatchOfApplicationUsers from "./okta/fetchBatchOfApplicationUsers";
-import fetchBatchOfUsers, {
+import {
+  fetchBatchOfUsers,
   fetchBatchOfDeprovisionedUsers,
 } from "./okta/fetchBatchOfUsers";
 import synchronizeAccount from "./synchronizers/synchronizeAccount";
