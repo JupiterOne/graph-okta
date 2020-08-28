@@ -15,7 +15,7 @@ import retryIfRateLimited from "../util/retryIfRateLimited";
 import fetchBatchOfResources from "./fetchBatchOfResources";
 import { OktaUserCacheData } from "./types";
 
-export default async function fetchBatchOfUsers(
+export async function fetchBatchOfUsers(
   executionContext: OktaExecutionContext,
   iterationState: IntegrationStepIterationState,
   queryParams?: OktaQueryParams,
