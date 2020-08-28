@@ -18,7 +18,7 @@ import {
   StandardizedOktaUserGroup,
 } from "../types";
 import getOktaAccountInfo from "../util/getOktaAccountInfo";
-import logIfForbidden from "../util/logIfForbidden";
+import logIfForbiddenOrNotFound from "../util/logIfForbidden";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 
 /**
@@ -47,7 +47,7 @@ export default async function synchronizeGroups(
 
   const groupsCollection = await okta.listGroups();
 
-  await logIfForbidden({
+  await logIfForbiddenOrNotFound({
     logger,
     resource: "groups",
     onForbidden: (err) => {

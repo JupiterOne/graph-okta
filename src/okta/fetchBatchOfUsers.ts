@@ -10,7 +10,7 @@ import {
   OktaUserGroup,
 } from "../okta/types";
 import { OktaExecutionContext } from "../types";
-import logIfForbidden from "../util/logIfForbidden";
+import logIfForbiddenOrNotFound from "../util/logIfForbidden";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 import fetchBatchOfResources from "./fetchBatchOfResources";
 import { OktaUserCacheData } from "./types";
@@ -35,7 +35,7 @@ export async function fetchBatchOfUsers(
       const factors: OktaFactor[] = [];
       const userGroups: OktaUserGroup[] = [];
 
-      await logIfForbidden({
+      await logIfForbiddenOrNotFound({
         logger,
         resource: `user_factors`,
         func: async () => {
@@ -48,7 +48,7 @@ export async function fetchBatchOfUsers(
         },
       });
 
-      await logIfForbidden({
+      await logIfForbiddenOrNotFound({
         logger,
         resource: `user_groups`,
         func: async () => {

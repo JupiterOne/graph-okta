@@ -1,6 +1,6 @@
 import { IntegrationLogger } from "@jupiterone/jupiter-managed-integration-sdk";
 
-export default async function logIfForbidden({
+export default async function logIfForbiddenOrNotFound({
   logger,
   resource,
   func,
@@ -17,7 +17,7 @@ export default async function logIfForbidden({
   try {
     await func();
   } catch (err) {
-    if (err.status === 403) {
+    if (err.status === 403 || err.status === 404) {
       // TODO: log an event visible to the user so they know that their entity
       // will be partially deflated and what permissions they need to grant to
       // fix the issue.

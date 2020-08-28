@@ -12,7 +12,7 @@ import {
 } from "../okta/types";
 import { OktaExecutionContext } from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
-import logIfForbidden from "../util/logIfForbidden";
+import logIfForbiddenOrNotFound from "../util/logIfForbidden";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 import { OktaCacheState } from "./types";
 
@@ -86,7 +86,7 @@ export default async function fetchBatchOfResources<
 
   const listResources = await fetchCollection(queryParams);
 
-  await logIfForbidden({
+  await logIfForbiddenOrNotFound({
     logger: resourceLogger,
     resource,
     onForbidden: async (err) => {

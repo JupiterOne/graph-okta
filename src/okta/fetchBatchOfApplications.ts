@@ -3,7 +3,7 @@ import {
   IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import { OktaExecutionContext } from "../types";
-import logIfForbidden from "../util/logIfForbidden";
+import logIfForbiddenOrNotFound from "../util/logIfForbidden";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 import fetchBatchOfResources from "./fetchBatchOfResources";
 import {
@@ -33,7 +33,7 @@ export default async function fetchBatchOfApplications(
     ): Promise<OktaApplicationCacheData> => {
       const applicationGroups: OktaApplicationGroup[] = [];
 
-      await logIfForbidden({
+      await logIfForbiddenOrNotFound({
         logger,
         resource: `application_groups`,
         func: async () => {
