@@ -6,7 +6,7 @@ import {
 
 import { OktaExecutionContext } from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
-import logIfForbidden from "../util/logIfForbidden";
+import logIfForbiddenOrNotFound from "../util/logIfForbidden";
 import retryIfRateLimited from "../util/retryIfRateLimited";
 import {
   OktaApplicationCacheEntry,
@@ -113,7 +113,7 @@ export default async function fetchBatchOfApplicationUsers(
 
       let usersSeenForApplication = 0;
 
-      await logIfForbidden({
+      await logIfForbiddenOrNotFound({
         logger,
         resource: "application_users",
         onForbidden: async (err) => {
