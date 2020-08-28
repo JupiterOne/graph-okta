@@ -18,6 +18,7 @@ import { OktaUserCacheData } from "./types";
 export default async function fetchBatchOfUsers(
   executionContext: OktaExecutionContext,
   iterationState: IntegrationStepIterationState,
+  queryParams?: OktaQueryParams,
 ): Promise<IntegrationStepIterationState> {
   return fetchBatchOfResources({
     resource: "users",
@@ -25,8 +26,7 @@ export default async function fetchBatchOfUsers(
     iterationState,
     pageLimitVariable: "OKTA_USERS_PAGE_LIMIT",
     batchPagesVariable: "OKTA_USERS_BATCH_PAGES",
-    fetchCollection: (queryParams?: OktaQueryParams) =>
-      executionContext.okta.listUsers(queryParams),
+    fetchCollection: () => executionContext.okta.listUsers(queryParams),
     fetchData: async (
       user: OktaUser,
       okta: OktaClient,
@@ -67,5 +67,14 @@ export default async function fetchBatchOfUsers(
         userGroups,
       };
     },
+  });
+}
+
+export async function fetchBatchOfDeprovisionedUsers(
+  executionContext: OktaExecutionContext,
+  iterationState: IntegrationStepIterationState,
+): Promise<IntegrationStepIterationState> {
+  return fetchBatchOfUsers(executionContext, iterationState, {
+    filter: 'status eq "DEPROVISIONED"',
   });
 }

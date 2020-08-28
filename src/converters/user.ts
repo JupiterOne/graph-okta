@@ -54,11 +54,17 @@ export function createUserEntity(
     status,
     active: status === "ACTIVE",
     created: getTime(created)!,
+    createdOn: getTime(created)!,
     activated: getTime(activated)!,
+    activatedOn: getTime(activated)!,
     statusChanged: getTime(statusChanged),
+    statusChangedOn: getTime(statusChanged),
     lastLogin: getTime(lastLogin),
+    lastLoginOn: getTime(lastLogin),
     lastUpdated: getTime(lastUpdated)!,
+    lastUpdatedOn: getTime(lastUpdated)!,
     passwordChanged: getTime(passwordChanged),
+    passwordChangedOn: getTime(passwordChanged),
   };
 
   return entity;
