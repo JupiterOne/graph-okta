@@ -16,7 +16,7 @@ type InputFunction = () => Promise<any>;
 /**
  * A utility function for retrying functions that hit a rate limit error
  */
-export default async function retryIfRateLimited(
+export default async function retryApiCall(
   logger: IntegrationLogger,
   func: InputFunction,
 ): Promise<any> {
@@ -42,6 +42,9 @@ export default async function retryIfRateLimited(
         //   RETRY_OPTIONS.minTimeout = timeout;
         //   RETRY_OPTIONS.maxTimeout = timeout + 1000;
         // }
+        retry(err);
+      } else if (err.code === "ETIMEDOUT") {
+        logger.info({ err }, "Encountered ETIMEDOUT in API call; retrying.");
         retry(err);
       } else {
         throw err;

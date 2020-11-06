@@ -19,7 +19,7 @@ import {
 } from "../types";
 import getOktaAccountInfo from "../util/getOktaAccountInfo";
 import logIfForbiddenOrNotFound from "../util/logIfForbidden";
-import retryIfRateLimited from "../util/retryIfRateLimited";
+import retryApiCall from "../util/retryApiCall";
 
 /**
  * Synchronizes Okta user groups, whether managed by Okta or external
@@ -54,7 +54,7 @@ export default async function synchronizeGroups(
       throw new IntegrationInstanceAuthorizationError(err, "groups");
     },
     func: async () => {
-      await retryIfRateLimited(logger, () =>
+      await retryApiCall(logger, () =>
         groupsCollection.each((group: OktaUserGroup) => {
           const groupEntity = createUserGroupEntity(config, group);
           newAccountGroupRelationships.push(

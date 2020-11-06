@@ -7,7 +7,7 @@ import {
 import { OktaExecutionContext } from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
 import logIfForbiddenOrNotFound from "../util/logIfForbidden";
-import retryIfRateLimited from "../util/retryIfRateLimited";
+import retryApiCall from "../util/retryApiCall";
 import {
   OktaApplicationCacheEntry,
   OktaApplicationUser,
@@ -130,7 +130,7 @@ export default async function fetchBatchOfApplicationUsers(
           );
         },
         func: async () => {
-          await retryIfRateLimited(logger, () => {
+          await retryApiCall(logger, () => {
             return listApplicationUsers.each(
               async (applicationUser: OktaApplicationUser) => {
                 cacheEntries.push({
