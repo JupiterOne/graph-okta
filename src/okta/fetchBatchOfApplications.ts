@@ -4,7 +4,7 @@ import {
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import { OktaExecutionContext } from "../types";
 import logIfForbiddenOrNotFound from "../util/logIfForbidden";
-import retryIfRateLimited from "../util/retryIfRateLimited";
+import retryApiCall from "../util/retryApiCall";
 import fetchBatchOfResources from "./fetchBatchOfResources";
 import {
   OktaApplication,
@@ -40,7 +40,7 @@ export default async function fetchBatchOfApplications(
           const listApplicationGroups = await okta.listApplicationGroupAssignments(
             application.id,
           );
-          await retryIfRateLimited(logger, () =>
+          await retryApiCall(logger, () =>
             listApplicationGroups.each((group: OktaApplicationGroup) => {
               applicationGroups.push(group);
             }),

@@ -45,7 +45,11 @@ export default async function synchronizeUsers(
 
   const usersState = await usersCache.getState();
   if (!usersState || !usersState.fetchCompleted) {
-    throw new IntegrationError("User fetching did not complete");
+    throw new IntegrationError({
+      message:
+        "Step 'Users' dependency failed, cannot ingest application users: 'fetch-users'",
+      expose: true,
+    });
   }
 
   if (usersState.encounteredAuthorizationError) {

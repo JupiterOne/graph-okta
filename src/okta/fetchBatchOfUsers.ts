@@ -11,7 +11,7 @@ import {
 } from "../okta/types";
 import { OktaExecutionContext } from "../types";
 import logIfForbiddenOrNotFound from "../util/logIfForbidden";
-import retryIfRateLimited from "../util/retryIfRateLimited";
+import retryApiCall from "../util/retryApiCall";
 import fetchBatchOfResources from "./fetchBatchOfResources";
 import { OktaUserCacheData } from "./types";
 
@@ -40,7 +40,7 @@ export async function fetchBatchOfUsers(
         resource: `user_factors`,
         func: async () => {
           const listFactors = await okta.listFactors(user.id);
-          await retryIfRateLimited(logger, () =>
+          await retryApiCall(logger, () =>
             listFactors.each((factor: OktaFactor) => {
               factors.push(factor);
             }),
@@ -53,7 +53,7 @@ export async function fetchBatchOfUsers(
         resource: `user_groups`,
         func: async () => {
           const listUserGroups = await okta.listUserGroups(user.id);
-          await retryIfRateLimited(logger, () =>
+          await retryApiCall(logger, () =>
             listUserGroups.each((group: OktaUserGroup) => {
               userGroups.push(group);
             }),

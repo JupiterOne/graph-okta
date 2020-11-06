@@ -13,7 +13,7 @@ import {
 import { OktaExecutionContext } from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
 import logIfForbiddenOrNotFound from "../util/logIfForbidden";
-import retryIfRateLimited from "../util/retryIfRateLimited";
+import retryApiCall from "../util/retryApiCall";
 import { OktaCacheState } from "./types";
 
 /**
@@ -100,7 +100,7 @@ export default async function fetchBatchOfResources<
       throw new IntegrationInstanceAuthorizationError(err, resource);
     },
     func: async () => {
-      await retryIfRateLimited(resourceLogger, () =>
+      await retryApiCall(resourceLogger, () =>
         listResources.each(async (res: Resource) => {
           cacheEntries.push({
             key: res.id,

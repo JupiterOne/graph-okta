@@ -7,7 +7,7 @@ import {
 import { OktaExecutionContext } from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
 import logIfForbiddenOrNotFound from "../util/logIfForbidden";
-import retryIfRateLimited from "../util/retryIfRateLimited";
+import retryApiCall from "../util/retryApiCall";
 import {
   OktaApplicationCacheEntry,
   OktaApplicationUser,
@@ -34,7 +34,11 @@ export default async function fetchBatchOfApplicationUsers(
 
   const applicationsState = await applicationCache.getState();
   if (!applicationsState || !applicationsState.fetchCompleted) {
-    throw new IntegrationError("Application fetching did not complete");
+    throw new IntegrationError({
+      message:
+        "Step 'Fetch Application Users' dependency failed, cannot ingest application users: 'fetch-applications'",
+      expose: true,
+    });
   }
 
   if (applicationsState.encounteredAuthorizationError) {
@@ -130,7 +134,7 @@ export default async function fetchBatchOfApplicationUsers(
           );
         },
         func: async () => {
-          await retryIfRateLimited(logger, () => {
+          await retryApiCall(logger, () => {
             return listApplicationUsers.each(
               async (applicationUser: OktaApplicationUser) => {
                 cacheEntries.push({
