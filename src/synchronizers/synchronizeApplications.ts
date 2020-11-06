@@ -52,7 +52,11 @@ export default async function synchronizeApplications(
   >("applications");
   const applicationsState = await applicationsCache.getState();
   if (!applicationsState || !applicationsState.fetchCompleted) {
-    throw new IntegrationError("Application fetching did not complete");
+    throw new IntegrationError({
+      message:
+        "Step 'Applications' dependency failed, cannot ingest application users: 'fetch-applications'",
+      expose: true,
+    });
   }
 
   const applicationUsersCache = cache.iterableCache<
@@ -61,7 +65,11 @@ export default async function synchronizeApplications(
   >("application_users");
   const applicationUsersState = await applicationUsersCache.getState();
   if (!applicationUsersState || !applicationUsersState.fetchCompleted) {
-    throw new IntegrationError("Application users fetching did not complete");
+    throw new IntegrationError({
+      message:
+        "Step 'Applications' dependency failed, cannot ingest application users: 'fetch-application-users'",
+      expose: true,
+    });
   }
 
   if (

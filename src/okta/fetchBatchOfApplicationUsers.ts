@@ -34,7 +34,11 @@ export default async function fetchBatchOfApplicationUsers(
 
   const applicationsState = await applicationCache.getState();
   if (!applicationsState || !applicationsState.fetchCompleted) {
-    throw new IntegrationError("Application fetching did not complete");
+    throw new IntegrationError({
+      message:
+        "Step 'Fetch Application Users' dependency failed, cannot ingest application users: 'fetch-applications'",
+      expose: true,
+    });
   }
 
   if (applicationsState.encounteredAuthorizationError) {
