@@ -39,11 +39,13 @@ jobs:
 
     steps:
       - name: Setup Node
+        id: setup-node
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
 
       - name: Check out repo
+        id: check-out
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
@@ -51,18 +53,20 @@ jobs:
       # Fetch tags and describe the commit before the merge commit
       # to see if it's a version publish
       - name: Fetch tags
+        id: fetch-tags
         run: |
           git fetch --tags
           if git describe --exact-match --match "v*.*.*" HEAD^2
           then
             echo "Found version commit tag. Publishing."
-            echo "::set-env name=publish::true"
+            echo "::set-output name=publish::true"
           else
             echo "Version commit tag not found. Not publishing."
           fi
 
       - name: Publish
-        if: env.publish == 'true'
+        id: publish
+        if: steps.fetch-tags.outputs.publish == 'true'
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         run: |
