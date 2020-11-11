@@ -13,6 +13,8 @@ const RETRY_OPTIONS = {
 
 type InputFunction = () => Promise<any>;
 
+const NON_RETRYABLE_CODES: string[] = [];
+
 /**
  * A utility function for retrying functions that hit a rate limit error
  */
@@ -22,7 +24,8 @@ export default async function retryApiCall(
 ): Promise<any> {
   return promiseRetry(async (retry: any) => {
     try {
-      return await func();
+      const response = await func();
+      return response;
     } catch (err) {
       logger.trace({ err }, "Encountered API error");
 
@@ -43,11 +46,12 @@ export default async function retryApiCall(
         //   RETRY_OPTIONS.maxTimeout = timeout + 1000;
         // }
         retry(err);
-      } else if (err.code === "ETIMEDOUT") {
-        logger.info({ err }, "Encountered ETIMEDOUT in API call; retrying.");
-        retry(err);
-      } else {
+      } else if (NON_RETRYABLE_CODES.includes(err.code)) {
+        logger.info({ err }, `Encountered ${err.code} in API call; exiting.`);
         throw err;
+      } else {
+        logger.info({ err }, `Encountered ${err.code} in API call; retrying.`);
+        retry(err);
       }
     }
   }, RETRY_OPTIONS);
