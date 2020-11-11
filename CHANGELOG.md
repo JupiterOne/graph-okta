@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.7.3 - 2020-11-09
+
 ### Fixed
 
 - Retry all API errors including `ECONNRESET`
