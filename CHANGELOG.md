@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.7.4 - 2020-11-11
+
+- Add warn/trace level logging to client calls
+
 ## 1.7.3 - 2020-11-09
 
 ### Fixed
