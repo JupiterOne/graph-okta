@@ -45,11 +45,13 @@ export default async function synchronizeUsers(
 
   const usersState = await usersCache.getState();
   if (!usersState || !usersState.fetchCompleted) {
-    throw new IntegrationError({
-      message:
-        "Step 'Users' dependency failed, cannot ingest application users: 'fetch-users'",
-      expose: true,
-    });
+    return {
+      error: new IntegrationError({
+        message:
+          "Step 'Users' dependency failed, cannot ingest application users: 'fetch-users'",
+        expose: true,
+      }),
+    };
   }
 
   if (usersState.encounteredAuthorizationError) {

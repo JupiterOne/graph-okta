@@ -11,6 +11,7 @@ and this project adheres to
 ### Fixed
 
 - Retry all API errors including `ECONNRESET`
+- Return `IntegrationError` instead of throwing when step dependencies fail
 
 ## 1.7.2 - 2020-11-06
 
