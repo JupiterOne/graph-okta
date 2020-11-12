@@ -47,19 +47,14 @@ export default function createOktaClient(
   defaultRequestExecutor.on("request", (request: any) => {
     logger.trace(
       {
-        request,
+        url: request.url,
       },
       "Okta client initiated request",
     );
   });
 
   defaultRequestExecutor.on("response", (response: any) => {
-    logger.trace(
-      {
-        response,
-      },
-      "Okta client received response",
-    );
+    logger.trace("Okta client received response");
   });
 
   return new okta.Client({
