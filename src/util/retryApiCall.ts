@@ -6,6 +6,7 @@ const promiseRetry = require("promise-retry");
 const RETRY_OPTIONS = {
   retries: 10,
   factor: 2,
+  // TODO reduce min/max timeouts. Since API rate limits are handled by Okta client, these should be small.
   minTimeout: 15000,
   maxTimeout: 60000,
   randomize: true,
@@ -22,14 +23,17 @@ export default async function retryApiCall(
   logger: IntegrationLogger,
   func: InputFunction,
 ): Promise<any> {
-  return promiseRetry(async (retry: any) => {
+  return promiseRetry(async (retry: (args: any) => any, number: number) => {
+    logger.trace(`Attempt number ${number}`);
     try {
       const response = await func();
       return response;
     } catch (err) {
-      logger.trace({ err }, "Encountered API error");
+      logger.info({ err }, "Encountered API error");
 
       if (err.status === 429) {
+        // this is never encountered because of the Okta client's internal retry logic:
+        // https://github.com/okta/okta-sdk-nodejs/blob/master/src/default-request-executor.js#L87
         logger.info({ err }, "Hit API rate limit, waiting to retry ...");
         // TODO: respect rate limit headers returned by Okta
 
@@ -45,13 +49,13 @@ export default async function retryApiCall(
         //   RETRY_OPTIONS.minTimeout = timeout;
         //   RETRY_OPTIONS.maxTimeout = timeout + 1000;
         // }
-        retry(err);
+        await retry(err);
       } else if (NON_RETRYABLE_CODES.includes(err.code)) {
-        logger.info({ err }, `Encountered ${err.code} in API call; exiting.`);
+        logger.warn({ err }, `Encountered ${err.code} in API call; exiting.`);
         throw err;
       } else {
-        logger.info({ err }, `Encountered ${err.code} in API call; retrying.`);
-        retry(err);
+        logger.warn({ err }, `Encountered ${err.code} in API call; retrying.`);
+        await retry(err);
       }
     }
   }, RETRY_OPTIONS);

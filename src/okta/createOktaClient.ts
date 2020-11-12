@@ -44,10 +44,24 @@ export default function createOktaClient(
     );
   });
 
+  defaultRequestExecutor.on("request", (request: any) => {
+    logger.trace(
+      {
+        url: request.url,
+      },
+      "Okta client initiated request",
+    );
+  });
+
+  defaultRequestExecutor.on("response", (response: any) => {
+    logger.trace("Okta client received response");
+  });
+
   return new okta.Client({
     orgUrl,
     token,
     requestExecutor: defaultRequestExecutor,
+    // is this necessary? We're not re-calling the same APIs.
     cacheStore: new MemoryStore({
       keyLimit: 100000,
       expirationPoll: null,
