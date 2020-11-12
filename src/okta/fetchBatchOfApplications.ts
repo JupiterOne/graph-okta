@@ -24,7 +24,7 @@ export default async function fetchBatchOfApplications(
     iterationState,
     pageLimitVariable: "OKTA_APPLICATIONS_PAGE_LIMIT",
     batchPagesVariable: "OKTA_APPLICATIONS_BATCH_PAGES",
-    fetchCollection: (queryParams?: OktaQueryParams) =>
+    fetchCollection: (queryParams: OktaQueryParams) =>
       executionContext.okta.listApplications(queryParams),
     fetchData: async (
       application: OktaApplication,

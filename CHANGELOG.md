@@ -8,7 +8,15 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.7.5 - 2020-11-12
+
+### Fixed
+
+- Pass `iterationState.state.after` query parameter to `fetchBatchOfUsers`
+
 ## 1.7.4 - 2020-11-11
+
+### Changed
 
 - Add warn/trace level logging to client calls
 

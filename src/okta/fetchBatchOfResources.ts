@@ -50,7 +50,7 @@ export default async function fetchBatchOfResources<
    */
   batchPagesVariable: string;
   fetchCollection: (
-    queryParams?: OktaQueryParams,
+    queryParams: OktaQueryParams,
   ) => Promise<OktaCollection<Resource>>;
   fetchData: (
     item: Resource,
