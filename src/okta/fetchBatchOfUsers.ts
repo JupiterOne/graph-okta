@@ -18,7 +18,7 @@ import { OktaUserCacheData } from "./types";
 export async function fetchBatchOfUsers(
   executionContext: OktaExecutionContext,
   iterationState: IntegrationStepIterationState,
-  queryParams?: OktaQueryParams,
+  oktaQueryFilter?: Pick<OktaQueryParams, "filter">,
 ): Promise<IntegrationStepIterationState> {
   return fetchBatchOfResources({
     resource: "users",
@@ -26,7 +26,11 @@ export async function fetchBatchOfUsers(
     iterationState,
     pageLimitVariable: "OKTA_USERS_PAGE_LIMIT",
     batchPagesVariable: "OKTA_USERS_BATCH_PAGES",
-    fetchCollection: () => executionContext.okta.listUsers(queryParams),
+    fetchCollection: (queryParams: OktaQueryParams) =>
+      executionContext.okta.listUsers({
+        ...queryParams,
+        filter: oktaQueryFilter?.filter,
+      }),
     fetchData: async (
       user: OktaUser,
       okta: OktaClient,
