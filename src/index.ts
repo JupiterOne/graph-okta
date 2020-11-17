@@ -3,7 +3,6 @@ import {
   IntegrationInvocationConfig,
   IntegrationStepExecutionContext,
   IntegrationStepExecutionResult,
-  IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import initializeContext from "./initializeContext";
 import invocationValidator from "./invocationValidator";
@@ -17,13 +16,16 @@ import synchronizeAccount from "./synchronizers/synchronizeAccount";
 import synchronizeApplications from "./synchronizers/synchronizeApplications";
 import synchronizeGroups from "./synchronizers/synchronizeGroups";
 import synchronizeUsers from "./synchronizers/synchronizeUsers";
-import { OktaExecutionContext } from "./types";
+import {
+  OktaExecutionContext,
+  OktaIntegrationStepIterationState,
+} from "./types";
 
 function fetchResourceWith(
   func: (
     context: OktaExecutionContext,
-    state: IntegrationStepIterationState,
-  ) => Promise<IntegrationStepIterationState>,
+    state: OktaIntegrationStepIterationState,
+  ) => Promise<OktaIntegrationStepIterationState>,
 ): (
   context: IntegrationStepExecutionContext,
 ) => Promise<IntegrationStepExecutionResult> {

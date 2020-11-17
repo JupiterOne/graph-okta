@@ -1,8 +1,8 @@
+import { IntegrationLogger } from "@jupiterone/jupiter-managed-integration-sdk";
 import {
-  IntegrationLogger,
-  IntegrationStepIterationState,
-} from "@jupiterone/jupiter-managed-integration-sdk";
-import { OktaExecutionContext } from "../types";
+  OktaExecutionContext,
+  OktaIntegrationStepIterationState,
+} from "../types";
 import logIfForbiddenOrNotFound from "../util/logIfForbidden";
 import retryApiCall from "../util/retryApiCall";
 import fetchBatchOfResources from "./fetchBatchOfResources";
@@ -16,8 +16,8 @@ import {
 
 export default async function fetchBatchOfApplications(
   executionContext: OktaExecutionContext,
-  iterationState: IntegrationStepIterationState,
-): Promise<IntegrationStepIterationState> {
+  iterationState: OktaIntegrationStepIterationState,
+): Promise<OktaIntegrationStepIterationState> {
   return fetchBatchOfResources({
     resource: "applications",
     executionContext,
