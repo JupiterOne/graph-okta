@@ -2,7 +2,6 @@ import {
   IntegrationCacheEntry,
   IntegrationInstanceAuthorizationError,
   IntegrationLogger,
-  IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 import {
   OktaClient,
@@ -10,7 +9,10 @@ import {
   OktaQueryParams,
   OktaResource,
 } from "../okta/types";
-import { OktaExecutionContext } from "../types";
+import {
+  OktaExecutionContext,
+  OktaIntegrationStepIterationState,
+} from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
 import logIfForbiddenOrNotFound from "../util/logIfForbidden";
 import retryApiCall from "../util/retryApiCall";
@@ -39,7 +41,7 @@ export default async function fetchBatchOfResources<
 }: {
   resource: string;
   executionContext: OktaExecutionContext;
-  iterationState: IntegrationStepIterationState;
+  iterationState: OktaIntegrationStepIterationState;
   /**
    * The environment variable for the number of resources to request per Okta
    * API call (pagination `limit`).
@@ -57,7 +59,7 @@ export default async function fetchBatchOfResources<
     okta: OktaClient,
     logger: IntegrationLogger,
   ) => Promise<CacheData>;
-}): Promise<IntegrationStepIterationState> {
+}): Promise<OktaIntegrationStepIterationState> {
   const pageLimit = process.env[pageLimitVariable]
     ? Number(process.env[pageLimitVariable])
     : 200;

@@ -6,9 +6,10 @@ import { URL } from "url";
  */
 export default function extractCursorFromNextUri(
   nextUri: string | undefined,
-): string | null | undefined {
+): string | undefined {
   if (nextUri) {
     const url = new URL(nextUri);
-    return url.searchParams.get("after");
+    const after = url.searchParams.get("after");
+    if (after) return after;
   }
 }

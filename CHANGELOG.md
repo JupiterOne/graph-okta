@@ -8,6 +8,12 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.7.6 - 2020-11-17
+
+### Fixed
+
+- Stop retrying API calls 4xx HTTP status
+
 ## 1.7.5 - 2020-11-12
 
 ### Fixed

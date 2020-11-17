@@ -1,10 +1,12 @@
 import {
   IntegrationError,
   IntegrationInstanceAuthorizationError,
-  IntegrationStepIterationState,
 } from "@jupiterone/jupiter-managed-integration-sdk";
 
-import { OktaExecutionContext } from "../types";
+import {
+  OktaExecutionContext,
+  OktaIntegrationStepIterationState,
+} from "../types";
 import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
 import logIfForbiddenOrNotFound from "../util/logIfForbidden";
 import retryApiCall from "../util/retryApiCall";
@@ -18,8 +20,8 @@ import {
 
 export default async function fetchBatchOfApplicationUsers(
   executionContext: OktaExecutionContext,
-  iterationState: IntegrationStepIterationState,
-): Promise<IntegrationStepIterationState> {
+  iterationState: OktaIntegrationStepIterationState,
+): Promise<OktaIntegrationStepIterationState> {
   const { okta, logger } = executionContext;
 
   const cache = executionContext.clients.getCache();
