@@ -1,7 +1,4 @@
-import {
-  IntegrationLogger,
-  IntegrationStepIterationState,
-} from "@jupiterone/jupiter-managed-integration-sdk";
+import { IntegrationLogger } from "@jupiterone/jupiter-managed-integration-sdk";
 import {
   OktaClient,
   OktaFactor,
@@ -9,7 +6,10 @@ import {
   OktaUser,
   OktaUserGroup,
 } from "../okta/types";
-import { OktaExecutionContext } from "../types";
+import {
+  OktaExecutionContext,
+  OktaIntegrationStepIterationState,
+} from "../types";
 import logIfForbiddenOrNotFound from "../util/logIfForbidden";
 import retryApiCall from "../util/retryApiCall";
 import fetchBatchOfResources from "./fetchBatchOfResources";
@@ -17,9 +17,9 @@ import { OktaUserCacheData } from "./types";
 
 export async function fetchBatchOfUsers(
   executionContext: OktaExecutionContext,
-  iterationState: IntegrationStepIterationState,
+  iterationState: OktaIntegrationStepIterationState,
   oktaQueryFilter?: Pick<OktaQueryParams, "filter">,
-): Promise<IntegrationStepIterationState> {
+): Promise<OktaIntegrationStepIterationState> {
   return fetchBatchOfResources({
     resource: "users",
     executionContext,
@@ -76,8 +76,8 @@ export async function fetchBatchOfUsers(
 
 export async function fetchBatchOfDeprovisionedUsers(
   executionContext: OktaExecutionContext,
-  iterationState: IntegrationStepIterationState,
-): Promise<IntegrationStepIterationState> {
+  iterationState: OktaIntegrationStepIterationState,
+): Promise<OktaIntegrationStepIterationState> {
   return fetchBatchOfUsers(executionContext, iterationState, {
     filter: 'status eq "DEPROVISIONED"',
   });

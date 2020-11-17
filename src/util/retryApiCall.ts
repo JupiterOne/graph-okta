@@ -14,10 +14,8 @@ const RETRY_OPTIONS = {
 
 type InputFunction = () => Promise<any>;
 
-const NON_RETRYABLE_CODES: string[] = [];
-
 /**
- * A utility function for retrying functions that hit a rate limit error
+ * A utility function for retrying functions unless they return 4xx errors
  */
 export default async function retryApiCall(
   logger: IntegrationLogger,
@@ -31,27 +29,12 @@ export default async function retryApiCall(
     } catch (err) {
       logger.info({ err }, "Encountered API error");
 
-      if (err.status === 429) {
-        // this is never encountered because of the Okta client's internal retry logic:
-        // https://github.com/okta/okta-sdk-nodejs/blob/master/src/default-request-executor.js#L87
-        logger.info({ err }, "Hit API rate limit, waiting to retry ...");
-        // TODO: respect rate limit headers returned by Okta
-
-        // const rateLimitReset = err.headers._headers['x-rate-limit-reset'];
-        // if (rateLimitReset && rateLimitReset.length) {
-        //   const timeout =
-        //     new Date((rateLimitReset[0] as number) * 1000).getTime() -
-        //     Date.now();
-        //   logger.info(
-        //     { rateLimitReset },
-        //     `Setting retry time out to match x-rate-limit-reset: ${timeout}`
-        //   );
-        //   RETRY_OPTIONS.minTimeout = timeout;
-        //   RETRY_OPTIONS.maxTimeout = timeout + 1000;
-        // }
-        await retry(err);
-      } else if (NON_RETRYABLE_CODES.includes(err.code)) {
-        logger.warn({ err }, `Encountered ${err.code} in API call; exiting.`);
+      if (err.status >= 400 && err.status < 500) {
+        // While a 429 rate limit error code should be retried, rate limit retries are natively handled by the
+        // Okta client these requests use. Hence, there is no need for us to retry 429s.
+        //
+        // All other >= 400 error codes should not be retried.
+        logger.warn({ err }, `Encountered ${err.status} in API call; exiting`);
         throw err;
       } else {
         logger.warn({ err }, `Encountered ${err.code} in API call; retrying.`);
