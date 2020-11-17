@@ -15,7 +15,7 @@ const RETRY_OPTIONS = {
 type InputFunction = () => Promise<any>;
 
 /**
- * A utility function for retrying functions that hit a rate limit error
+ * A utility function for retrying functions unless they return 4xx errors
  */
 export default async function retryApiCall(
   logger: IntegrationLogger,
@@ -29,7 +29,7 @@ export default async function retryApiCall(
     } catch (err) {
       logger.info({ err }, "Encountered API error");
 
-      if (err.status >= 400) {
+      if (err.status >= 400 && err.status < 500) {
         // While a 429 rate limit error code should be retried, rate limit retries are natively handled by the
         // Okta client these requests use. Hence, there is no need for us to retry 429s.
         //

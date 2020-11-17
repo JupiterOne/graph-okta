@@ -10,7 +10,7 @@ and this project adheres to
 
 ### Fixed
 
-- Stop retrying API calls 4xx/5xx HTTP status
+- Stop retrying API calls 4xx HTTP status
 
 ## 1.7.5 - 2020-11-12
 
