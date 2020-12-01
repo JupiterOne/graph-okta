@@ -88,8 +88,8 @@ export function createUserMfaDeviceRelationship(
 
 function convertCredentialEmails(credentials?: OktaUserCredentials) {
   if (credentials && credentials.emails) {
-    const verifiedEmails = [];
-    const unverifiedEmails = [];
+    const verifiedEmails: string[] = [];
+    const unverifiedEmails: string[] = [];
 
     for (const e of credentials.emails) {
       const emailVal = e.value;

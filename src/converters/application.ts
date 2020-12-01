@@ -47,17 +47,15 @@ export function createApplicationEntity(
   let imageUrl;
   let loginUrl;
 
-  if (data._links) {
-    if (data._links.logo) {
+    if (data._links?.logo) {
       imageUrl = [data._links.logo].flat()[0].href;
     }
 
-    if (data._links.appLinks) {
+    if (data._links?.appLinks) {
       const links = [data._links.appLinks].flat();
       const link = links.find((l) => l.name === "login") || links[0];
       loginUrl = link && link.href;
     }
-  }
 
   const oktaAccountInfo = getOktaAccountInfo(instance);
   const appShortName = buildAppShortName(oktaAccountInfo, data.name);
@@ -200,7 +198,7 @@ function convertAWSRolesToRelationships(
   oktaPrincipal: OktaApplicationUser | OktaApplicationGroup,
   relationshipType: string,
 ): MappedRelationshipFromIntegration[] {
-  const relationships = [];
+  const relationships: MappedRelationshipFromIntegration[] = [];
   if (application.awsAccountId && oktaPrincipal.profile) {
     const profile = oktaPrincipal.profile;
     for (const role of profile.samlRoles || [profile.role]) {
