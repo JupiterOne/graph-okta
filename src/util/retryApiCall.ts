@@ -1,7 +1,7 @@
-import { IntegrationLogger } from "@jupiterone/jupiter-managed-integration-sdk";
+import { IntegrationLogger } from '@jupiterone/jupiter-managed-integration-sdk';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const promiseRetry = require("promise-retry");
+const promiseRetry = require('promise-retry');
 
 const RETRY_OPTIONS = {
   retries: 10,
@@ -17,7 +17,7 @@ type InputFunction = () => Promise<any>;
 /**
  * A utility function for retrying functions unless they return 4xx errors
  */
-export default async function retryApiCall(
+export default function retryApiCall(
   logger: IntegrationLogger,
   func: InputFunction,
 ): Promise<any> {
@@ -27,7 +27,7 @@ export default async function retryApiCall(
       const response = await func();
       return response;
     } catch (err) {
-      logger.info({ err }, "Encountered API error");
+      logger.info({ err }, 'Encountered API error');
 
       if (err.status >= 400 && err.status < 500) {
         // While a 429 rate limit error code should be retried, rate limit retries are natively handled by the

@@ -1,22 +1,22 @@
 import {
   IntegrationError,
   IntegrationInstanceAuthorizationError,
-} from "@jupiterone/jupiter-managed-integration-sdk";
+} from '@jupiterone/jupiter-managed-integration-sdk';
 
 import {
   OktaExecutionContext,
   OktaIntegrationStepIterationState,
-} from "../types";
-import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
-import logIfForbiddenOrNotFound from "../util/logIfForbidden";
-import retryApiCall from "../util/retryApiCall";
+} from '../types';
+import extractCursorFromNextUri from '../util/extractCursorFromNextUri';
+import logIfForbiddenOrNotFound from '../util/logIfForbidden';
+import retryApiCall from '../util/retryApiCall';
 import {
   OktaApplicationCacheEntry,
   OktaApplicationUser,
   OktaApplicationUserCacheEntry,
   OktaCacheState,
   OktaQueryParams,
-} from "./types";
+} from './types';
 
 export default async function fetchBatchOfApplicationUsers(
   executionContext: OktaExecutionContext,
@@ -28,11 +28,11 @@ export default async function fetchBatchOfApplicationUsers(
   const applicationCache = cache.iterableCache<
     OktaApplicationCacheEntry,
     OktaCacheState
-  >("applications");
+  >('applications');
   const applicationUserCache = cache.iterableCache<
     OktaApplicationUserCacheEntry,
     OktaCacheState
-  >("application_users");
+  >('application_users');
 
   const applicationsState = await applicationCache.getState();
   if (!applicationsState || !applicationsState.fetchCompleted) {
@@ -55,7 +55,7 @@ export default async function fetchBatchOfApplicationUsers(
       new Error(
         "Applications' Users ingestion depends on Applications ingestion",
       ),
-      "application_users",
+      'application_users',
     );
   }
 
@@ -87,7 +87,7 @@ export default async function fetchBatchOfApplicationUsers(
       pageLimit,
       batchPages,
     },
-    "Fetching batch of application users...",
+    'Fetching batch of application users...',
   );
 
   // Work through as many applications as possible, limited only by the number
@@ -107,7 +107,7 @@ export default async function fetchBatchOfApplicationUsers(
           applicationId,
           queryParams,
         },
-        "Fetching batch of pages of users for application...",
+        'Fetching batch of pages of users for application...',
       );
 
       // Create application user iterator for current applicationIndex, picking
@@ -121,7 +121,7 @@ export default async function fetchBatchOfApplicationUsers(
 
       await logIfForbiddenOrNotFound({
         logger,
-        resource: "application_users",
+        resource: 'application_users',
         onForbidden: async (err) => {
           await applicationUserCache.putState({
             seen,
@@ -132,13 +132,13 @@ export default async function fetchBatchOfApplicationUsers(
 
           throw new IntegrationInstanceAuthorizationError(
             err,
-            "application_users",
+            'application_users',
           );
         },
         func: async () => {
           await retryApiCall(logger, () => {
             return listApplicationUsers.each(
-              async (applicationUser: OktaApplicationUser) => {
+              (applicationUser: OktaApplicationUser) => {
                 cacheEntries.push({
                   key: `app/${applicationId}/user/${applicationUser.id}`,
                   data: {
@@ -164,7 +164,7 @@ export default async function fetchBatchOfApplicationUsers(
                     pagesProcessed,
                     applicationUserId: applicationUser.id,
                   },
-                  "Processed user for application",
+                  'Processed user for application',
                 );
 
                 // Continue paginating users for the current applicationIndex as
@@ -189,7 +189,7 @@ export default async function fetchBatchOfApplicationUsers(
 
       // The current applicationIndex has no more users when no pagination
       // token.
-      const applicationComplete = typeof after !== "string";
+      const applicationComplete = typeof after !== 'string';
 
       logger.info(
         {
@@ -200,7 +200,7 @@ export default async function fetchBatchOfApplicationUsers(
           seen,
           after,
         },
-        "Finished fetching batch of users for application.",
+        'Finished fetching batch of users for application.',
       );
 
       if (applicationComplete) {
@@ -243,7 +243,7 @@ export default async function fetchBatchOfApplicationUsers(
     },
   };
 
-  logger.info({ nextIterationState, cacheState }, "Completed one iteration");
+  logger.info({ nextIterationState, cacheState }, 'Completed one iteration');
 
   return nextIterationState;
 }
