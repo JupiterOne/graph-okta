@@ -4,7 +4,7 @@ import {
   Recording,
   SetupRecordingInput,
   RecordingEntry,
-} from './recordingBase';
+} from '@jupiterone/integration-sdk-testing';
 import { gunzipSync } from 'zlib';
 
 export { Recording };

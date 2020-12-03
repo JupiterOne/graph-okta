@@ -1,5 +1,5 @@
 import { setupOktaRecording, Recording } from '../../test/setup/recording';
-import { createMockIntegrationLogger } from '../../test/setup/logger';
+import { createMockIntegrationLogger } from '@jupiterone/integration-sdk-testing';
 import createOktaClient from './createOktaClient';
 import { OktaIntegrationConfig } from '../types';
 
