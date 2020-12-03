@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.8.0 - 2020-12-03
+
 ### Added
 
 - Added early rate limiting of the Okta client. Previously, the client continued
