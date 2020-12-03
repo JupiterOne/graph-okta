@@ -2,21 +2,21 @@ import {
   IntegrationCacheEntry,
   IntegrationInstanceAuthorizationError,
   IntegrationLogger,
-} from "@jupiterone/jupiter-managed-integration-sdk";
+} from '@jupiterone/jupiter-managed-integration-sdk';
 import {
   OktaClient,
   OktaCollection,
   OktaQueryParams,
   OktaResource,
-} from "../okta/types";
+} from '../okta/types';
 import {
   OktaExecutionContext,
   OktaIntegrationStepIterationState,
-} from "../types";
-import extractCursorFromNextUri from "../util/extractCursorFromNextUri";
-import logIfForbiddenOrNotFound from "../util/logIfForbidden";
-import retryApiCall from "../util/retryApiCall";
-import { OktaCacheState } from "./types";
+} from '../types';
+import extractCursorFromNextUri from '../util/extractCursorFromNextUri';
+import logIfForbiddenOrNotFound from '../util/logIfForbidden';
+import retryApiCall from '../util/retryApiCall';
+import { OktaCacheState } from './types';
 
 /**
  * An iterating execution handler that loads Okta resources and their associated
@@ -51,9 +51,7 @@ export default async function fetchBatchOfResources<
    * The environment variable for the number of pages to process per iteration.
    */
   batchPagesVariable: string;
-  fetchCollection: (
-    queryParams: OktaQueryParams,
-  ) => Promise<OktaCollection<Resource>>;
+  fetchCollection: (queryParams: OktaQueryParams) => OktaCollection<Resource>;
   fetchData: (
     item: Resource,
     okta: OktaClient,
@@ -86,7 +84,7 @@ export default async function fetchBatchOfResources<
     limit: String(pageLimit),
   };
 
-  const listResources = await fetchCollection(queryParams);
+  const listResources = fetchCollection(queryParams);
 
   await logIfForbiddenOrNotFound({
     logger: resourceLogger,
@@ -116,7 +114,7 @@ export default async function fetchBatchOfResources<
             pagesProcessed++;
             resourceLogger.info(
               { resource: { type: resource, pagesProcessed } },
-              "Fetching page of resources completed.",
+              'Fetching page of resources completed.',
             );
           }
 
@@ -129,7 +127,7 @@ export default async function fetchBatchOfResources<
     },
   });
 
-  const finished = typeof listResources.nextUri !== "string";
+  const finished = typeof listResources.nextUri !== 'string';
 
   const putEntriesKeys = await resourceCache.putEntries(cacheEntries);
   const cacheState = await resourceCache.putState({
@@ -151,7 +149,7 @@ export default async function fetchBatchOfResources<
 
   resourceLogger.info(
     { nextIterationState, cacheState },
-    "Completed one iteration",
+    'Completed one iteration',
   );
 
   return nextIterationState;

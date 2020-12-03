@@ -4,7 +4,6 @@ import { IntegrationExecutionContext } from '@jupiterone/jupiter-managed-integra
 
 import {
   OktaExecutionContext,
-  OktaIntegrationConfig,
   StandardizedOktaApplication,
   StandardizedOktaUser,
 } from './types';
@@ -12,8 +11,7 @@ import {
 export default function initializeContext(
   context: IntegrationExecutionContext,
 ): OktaExecutionContext {
-  const { oktaOrgUrl, oktaApiKey } = context.instance
-    .config as OktaIntegrationConfig;
+  const { config } = context.instance;
 
   const logger = context.logger.child({
     serializers: {
@@ -38,6 +36,6 @@ export default function initializeContext(
     ...context,
     ...context.clients.getClients(),
     logger,
-    okta: createOktaClient(logger, oktaOrgUrl, oktaApiKey),
+    okta: createOktaClient(logger, config),
   };
 }

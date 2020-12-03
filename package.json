@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/graph-okta",
-  "version": "1.7.6",
+  "version": "1.8.0",
   "description": "A JupiterOne managed integration for https://www.okta.com",
   "main": "dist/index.js",
   "repository": "https://github.com/jupiterone/graph-okta",
@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@jupiterone/integration-sdk-dev-tools": "^5.0.0",
+    "@jupiterone/integration-sdk-testing": "^5.0.0",
     "@types/bunyan": "^1.8.5",
     "@types/fs-extra": "^7.0.0",
     "@types/gremlin": "^3.4.2",
@@ -44,6 +45,7 @@
     "dotenv": "^8.2.0",
     "fs-extra": "^8.0.1",
     "nock": "^10.0.6",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "zlib": "^1.0.5"
   }
 }
