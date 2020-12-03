@@ -1,29 +1,29 @@
-import { IntegrationLogger } from "@jupiterone/jupiter-managed-integration-sdk";
+import { IntegrationLogger } from '@jupiterone/jupiter-managed-integration-sdk';
 import {
   OktaExecutionContext,
   OktaIntegrationStepIterationState,
-} from "../types";
-import logIfForbiddenOrNotFound from "../util/logIfForbidden";
-import retryApiCall from "../util/retryApiCall";
-import fetchBatchOfResources from "./fetchBatchOfResources";
+} from '../types';
+import logIfForbiddenOrNotFound from '../util/logIfForbidden';
+import retryApiCall from '../util/retryApiCall';
+import fetchBatchOfResources from './fetchBatchOfResources';
 import {
   OktaApplication,
   OktaApplicationCacheData,
   OktaApplicationGroup,
   OktaClient,
   OktaQueryParams,
-} from "./types";
+} from './types';
 
 export default async function fetchBatchOfApplications(
   executionContext: OktaExecutionContext,
   iterationState: OktaIntegrationStepIterationState,
 ): Promise<OktaIntegrationStepIterationState> {
   return fetchBatchOfResources({
-    resource: "applications",
+    resource: 'applications',
     executionContext,
     iterationState,
-    pageLimitVariable: "OKTA_APPLICATIONS_PAGE_LIMIT",
-    batchPagesVariable: "OKTA_APPLICATIONS_BATCH_PAGES",
+    pageLimitVariable: 'OKTA_APPLICATIONS_PAGE_LIMIT',
+    batchPagesVariable: 'OKTA_APPLICATIONS_BATCH_PAGES',
     fetchCollection: (queryParams: OktaQueryParams) =>
       executionContext.okta.listApplications(queryParams),
     fetchData: async (
@@ -37,7 +37,7 @@ export default async function fetchBatchOfApplications(
         logger,
         resource: `application_groups`,
         func: async () => {
-          const listApplicationGroups = await okta.listApplicationGroupAssignments(
+          const listApplicationGroups = okta.listApplicationGroupAssignments(
             application.id,
           );
           await retryApiCall(logger, () =>

@@ -3,23 +3,23 @@ import {
   IntegrationInvocationConfig,
   IntegrationStepExecutionContext,
   IntegrationStepExecutionResult,
-} from "@jupiterone/jupiter-managed-integration-sdk";
-import initializeContext from "./initializeContext";
-import invocationValidator from "./invocationValidator";
-import fetchBatchOfApplications from "./okta/fetchBatchOfApplications";
-import fetchBatchOfApplicationUsers from "./okta/fetchBatchOfApplicationUsers";
+} from '@jupiterone/jupiter-managed-integration-sdk';
+import initializeContext from './initializeContext';
+import invocationValidator from './invocationValidator';
+import fetchBatchOfApplications from './okta/fetchBatchOfApplications';
+import fetchBatchOfApplicationUsers from './okta/fetchBatchOfApplicationUsers';
 import {
   fetchBatchOfUsers,
   fetchBatchOfDeprovisionedUsers,
-} from "./okta/fetchBatchOfUsers";
-import synchronizeAccount from "./synchronizers/synchronizeAccount";
-import synchronizeApplications from "./synchronizers/synchronizeApplications";
-import synchronizeGroups from "./synchronizers/synchronizeGroups";
-import synchronizeUsers from "./synchronizers/synchronizeUsers";
+} from './okta/fetchBatchOfUsers';
+import synchronizeAccount from './synchronizers/synchronizeAccount';
+import synchronizeApplications from './synchronizers/synchronizeApplications';
+import synchronizeGroups from './synchronizers/synchronizeGroups';
+import synchronizeUsers from './synchronizers/synchronizeUsers';
 import {
   OktaExecutionContext,
   OktaIntegrationStepIterationState,
-} from "./types";
+} from './types';
 
 function fetchResourceWith(
   func: (
@@ -34,20 +34,20 @@ function fetchResourceWith(
   ): Promise<IntegrationStepExecutionResult> => {
     const iterationState = executionContext.event.iterationState;
     if (!iterationState) {
-      throw new IntegrationError("Expected iterationState not found in event!");
+      throw new IntegrationError('Expected iterationState not found in event!');
     }
-    return func(await initializeContext(executionContext), iterationState);
+    return func(initializeContext(executionContext), iterationState);
   };
 }
 
 export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
   instanceConfigFields: {
     oktaOrgUrl: {
-      type: "string",
+      type: 'string',
       mask: false,
     },
     oktaApiKey: {
-      type: "string",
+      type: 'string',
       mask: true,
     },
   },
@@ -58,14 +58,12 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
-          id: "account",
-          name: "Account",
+          id: 'account',
+          name: 'Account',
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
           ): Promise<IntegrationStepExecutionResult> => {
-            return synchronizeAccount(
-              await initializeContext(executionContext),
-            );
+            return synchronizeAccount(initializeContext(executionContext));
           },
         },
       ],
@@ -73,14 +71,14 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
-          id: "fetch-users",
-          name: "Fetch Users",
+          id: 'fetch-users',
+          name: 'Fetch Users',
           iterates: true,
           executionHandler: fetchResourceWith(fetchBatchOfUsers),
         },
         {
-          id: "fetch-deprovisioned-users",
-          name: "Fetch Deprovisioned Users",
+          id: 'fetch-deprovisioned-users',
+          name: 'Fetch Deprovisioned Users',
           iterates: true,
           executionHandler: fetchResourceWith(fetchBatchOfDeprovisionedUsers),
         },
@@ -89,8 +87,8 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
-          id: "fetch-applications",
-          name: "Fetch Applications",
+          id: 'fetch-applications',
+          name: 'Fetch Applications',
           iterates: true,
           executionHandler: fetchResourceWith(fetchBatchOfApplications),
         },
@@ -99,8 +97,8 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
-          id: "fetch-application-users",
-          name: "Fetch Application Users",
+          id: 'fetch-application-users',
+          name: 'Fetch Application Users',
           iterates: true,
           executionHandler: fetchResourceWith(fetchBatchOfApplicationUsers),
         },
@@ -109,12 +107,12 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
-          id: "groups",
-          name: "Groups",
+          id: 'groups',
+          name: 'Groups',
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
           ): Promise<IntegrationStepExecutionResult> => {
-            return synchronizeGroups(await initializeContext(executionContext));
+            return synchronizeGroups(initializeContext(executionContext));
           },
         },
       ],
@@ -122,12 +120,12 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
-          id: "users",
-          name: "Users",
+          id: 'users',
+          name: 'Users',
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
           ): Promise<IntegrationStepExecutionResult> => {
-            return synchronizeUsers(await initializeContext(executionContext));
+            return synchronizeUsers(initializeContext(executionContext));
           },
         },
       ],
@@ -135,14 +133,12 @@ export const stepFunctionsInvocationConfig: IntegrationInvocationConfig = {
     {
       steps: [
         {
-          id: "applications",
-          name: "Applications",
+          id: 'applications',
+          name: 'Applications',
           executionHandler: async (
             executionContext: IntegrationStepExecutionContext,
           ): Promise<IntegrationStepExecutionResult> => {
-            return synchronizeApplications(
-              await initializeContext(executionContext),
-            );
+            return synchronizeApplications(initializeContext(executionContext));
           },
         },
       ],

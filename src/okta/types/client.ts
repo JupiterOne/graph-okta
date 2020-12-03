@@ -2,10 +2,10 @@ import {
   OktaApplication,
   OktaApplicationGroup,
   OktaApplicationUser,
-} from "./applications";
-import { OktaFactor } from "./devices";
-import { OktaUserGroup } from "./groups";
-import { OktaUser } from "./users";
+} from './applications';
+import { OktaFactor } from './devices';
+import { OktaUserGroup } from './groups';
+import { OktaUser } from './users';
 
 export interface OktaCollection<T> {
   /**
@@ -23,7 +23,7 @@ export interface OktaCollection<T> {
    */
   nextUri?: string;
 
-  each: (cb: (item: T) => void) => any;
+  each: (cb: (item: T) => void) => Promise<void>;
 }
 
 export interface OktaQueryParams {
@@ -49,32 +49,30 @@ export interface OktaClient {
   close: () => void;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/groups/#list-groups
-  listGroups: () => Promise<OktaCollection<OktaUserGroup>>;
+  listGroups: () => OktaCollection<OktaUserGroup>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/users.html#list-users
-  listUsers: (
-    queryParameters?: OktaQueryParams,
-  ) => Promise<OktaCollection<OktaUser>>;
+  listUsers: (queryParameters?: OktaQueryParams) => OktaCollection<OktaUser>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/users/#get-member-groups
-  listUserGroups: (userId: string) => Promise<OktaCollection<OktaUserGroup>>;
+  listUserGroups: (userId: string) => OktaCollection<OktaUserGroup>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/apps/#list-applications
   listApplications: (
     queryParameters?: OktaQueryParams,
-  ) => Promise<OktaCollection<OktaApplication>>;
+  ) => OktaCollection<OktaApplication>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/apps/#list-users-assigned-to-application
   listApplicationUsers: (
     appId: string,
     queryParameters?: OktaQueryParams,
-  ) => Promise<OktaCollection<OktaApplicationUser>>;
+  ) => OktaCollection<OktaApplicationUser>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/apps/#list-groups-assigned-to-application
   listApplicationGroupAssignments: (
     appId: string,
-  ) => Promise<OktaCollection<OktaApplicationGroup>>;
+  ) => OktaCollection<OktaApplicationGroup>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/factors/#list-enrolled-factors
-  listFactors: (userId: string) => Promise<OktaCollection<OktaFactor>>;
+  listFactors: (userId: string) => OktaCollection<OktaFactor>;
 }

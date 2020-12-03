@@ -1,14 +1,14 @@
-import fetch from "isomorphic-fetch";
+import fetch from 'isomorphic-fetch';
 
 import {
   IntegrationInstanceAuthenticationError,
   IntegrationInstanceConfigError,
   IntegrationValidationContext,
-} from "@jupiterone/jupiter-managed-integration-sdk";
+} from '@jupiterone/jupiter-managed-integration-sdk';
 
-import createOktaClient from "./okta/createOktaClient";
-import { OktaIntegrationConfig } from "./types";
-import isValidOktaOrgUrl from "./util/isValidOktaOrgUrl";
+import createOktaClient from './okta/createOktaClient';
+import { OktaIntegrationConfig } from './types';
+import isValidOktaOrgUrl from './util/isValidOktaOrgUrl';
 
 // import createOktaClient from "./okta/createOktaClient";
 
@@ -39,7 +39,7 @@ export default async function invocationValidator(
     );
   }
 
-  const { oktaOrgUrl, oktaApiKey } = config;
+  const { oktaOrgUrl, oktaApiKey } = oktaInstanceConfig;
 
   if (!oktaOrgUrl || !isValidOktaOrgUrl(oktaOrgUrl)) {
     throw new IntegrationInstanceConfigError(
@@ -60,8 +60,8 @@ export default async function invocationValidator(
     );
   }
 
-  const client = createOktaClient(context.logger, oktaOrgUrl, oktaApiKey);
-  const usersCollection = await client.listUsers({ limit: "1" });
+  const client = createOktaClient(context.logger, oktaInstanceConfig);
+  const usersCollection = client.listUsers({ limit: '1' });
 
   try {
     await usersCollection.each((u) => {
