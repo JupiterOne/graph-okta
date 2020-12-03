@@ -8,6 +8,15 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Added early rate limiting of the Okta client. Previously, the client continued
+  to make API calls until it received a 429 (exhausting all of the client's rate
+  limit), then waited to retry based on response headers. Now, the client will
+  accept a `minimumRateLimitRemaining` argument (default=5). When the client
+  hits the `minimumRateLimitRemaining` value, it will wait to send the next
+  request based on response headers.
+
 ## 1.7.6 - 2020-11-17
 
 ### Fixed

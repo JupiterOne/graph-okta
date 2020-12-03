@@ -6,6 +6,7 @@ import {
 import { OktaFactor } from './devices';
 import { OktaUserGroup } from './groups';
 import { OktaUser } from './users';
+import { RequestExecutorWithEarlyRateLimiting } from '../createOktaClient';
 
 export interface OktaCollection<T> {
   /**
@@ -43,6 +44,7 @@ export interface OktaQueryParams {
  * See https://github.com/okta/okta-sdk-nodejs/blob/master/src/generated-client.js.
  */
 export interface OktaClient {
+  requestExecutor: RequestExecutorWithEarlyRateLimiting;
   orgUrl: string;
   token: string;
   cacheStore: any;
