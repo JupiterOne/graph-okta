@@ -1,31 +1,31 @@
-import { IntegrationLogger } from "@jupiterone/jupiter-managed-integration-sdk";
+import { IntegrationLogger } from '@jupiterone/jupiter-managed-integration-sdk';
 import {
   OktaClient,
   OktaFactor,
   OktaQueryParams,
   OktaUser,
   OktaUserGroup,
-} from "../okta/types";
+} from '../okta/types';
 import {
   OktaExecutionContext,
   OktaIntegrationStepIterationState,
-} from "../types";
-import logIfForbiddenOrNotFound from "../util/logIfForbidden";
-import retryApiCall from "../util/retryApiCall";
-import fetchBatchOfResources from "./fetchBatchOfResources";
-import { OktaUserCacheData } from "./types";
+} from '../types';
+import logIfForbiddenOrNotFound from '../util/logIfForbidden';
+import retryApiCall from '../util/retryApiCall';
+import fetchBatchOfResources from './fetchBatchOfResources';
+import { OktaUserCacheData } from './types';
 
 export async function fetchBatchOfUsers(
   executionContext: OktaExecutionContext,
   iterationState: OktaIntegrationStepIterationState,
-  oktaQueryFilter?: Pick<OktaQueryParams, "filter">,
+  oktaQueryFilter?: Pick<OktaQueryParams, 'filter'>,
 ): Promise<OktaIntegrationStepIterationState> {
   return fetchBatchOfResources({
-    resource: "users",
+    resource: 'users',
     executionContext,
     iterationState,
-    pageLimitVariable: "OKTA_USERS_PAGE_LIMIT",
-    batchPagesVariable: "OKTA_USERS_BATCH_PAGES",
+    pageLimitVariable: 'OKTA_USERS_PAGE_LIMIT',
+    batchPagesVariable: 'OKTA_USERS_BATCH_PAGES',
     fetchCollection: (queryParams: OktaQueryParams) =>
       executionContext.okta.listUsers({
         ...queryParams,
@@ -43,7 +43,7 @@ export async function fetchBatchOfUsers(
         logger,
         resource: `user_factors`,
         func: async () => {
-          const listFactors = await okta.listFactors(user.id);
+          const listFactors = okta.listFactors(user.id);
           await retryApiCall(logger, () =>
             listFactors.each((factor: OktaFactor) => {
               factors.push(factor);
@@ -56,7 +56,7 @@ export async function fetchBatchOfUsers(
         logger,
         resource: `user_groups`,
         func: async () => {
-          const listUserGroups = await okta.listUserGroups(user.id);
+          const listUserGroups = okta.listUserGroups(user.id);
           await retryApiCall(logger, () =>
             listUserGroups.each((group: OktaUserGroup) => {
               userGroups.push(group);

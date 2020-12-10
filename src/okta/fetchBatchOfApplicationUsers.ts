@@ -112,7 +112,7 @@ export default async function fetchBatchOfApplicationUsers(
 
       // Create application user iterator for current applicationIndex, picking
       // up at the page represented by the last obtained pagination token.
-      const listApplicationUsers = await okta.listApplicationUsers(
+      const listApplicationUsers = okta.listApplicationUsers(
         applicationId,
         queryParams,
       );
