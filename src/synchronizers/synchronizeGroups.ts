@@ -1,7 +1,7 @@
 import {
   IntegrationExecutionResult,
   IntegrationInstanceAuthorizationError,
-} from "@jupiterone/jupiter-managed-integration-sdk";
+} from '@jupiterone/jupiter-managed-integration-sdk';
 
 import {
   ACCOUNT_GROUP_RELATIONSHIP_TYPE,
@@ -10,16 +10,16 @@ import {
   createAccountGroupRelationship,
   createUserGroupEntity,
   USER_GROUP_ENTITY_TYPE,
-} from "../converters";
-import { OktaUserGroup } from "../okta/types";
+} from '../converters';
+import { OktaUserGroup } from '../okta/types';
 import {
   OktaExecutionContext,
   StandardizedOktaAccountGroupRelationship,
   StandardizedOktaUserGroup,
-} from "../types";
-import getOktaAccountInfo from "../util/getOktaAccountInfo";
-import logIfForbiddenOrNotFound from "../util/logIfForbidden";
-import retryApiCall from "../util/retryApiCall";
+} from '../types';
+import getOktaAccountInfo from '../util/getOktaAccountInfo';
+import logIfForbiddenOrNotFound from '../util/logIfForbidden';
+import retryApiCall from '../util/retryApiCall';
 
 /**
  * Synchronizes Okta user groups, whether managed by Okta or external
@@ -45,13 +45,13 @@ export default async function synchronizeGroups(
   const newAppManagedUserGroups: StandardizedOktaUserGroup[] = [];
   const newAccountGroupRelationships: StandardizedOktaAccountGroupRelationship[] = [];
 
-  const groupsCollection = await okta.listGroups();
+  const groupsCollection = okta.listGroups();
 
   await logIfForbiddenOrNotFound({
     logger,
-    resource: "groups",
+    resource: 'groups',
     onForbidden: (err) => {
-      throw new IntegrationInstanceAuthorizationError(err, "groups");
+      throw new IntegrationInstanceAuthorizationError(err, 'groups');
     },
     func: async () => {
       await retryApiCall(logger, () =>
@@ -91,25 +91,25 @@ export default async function synchronizeGroups(
       oldAccountGroupRelationships: oldAccountGroupRelationships.length,
       newAccountGroupRelationships: newAccountGroupRelationships.length,
     },
-    "Synchronizing groups...",
+    'Synchronizing groups...',
   );
 
   return {
     operations: await persister.publishPersisterOperations([
       [
-        ...persister.processEntities(
-          oldOktaManagedUserGroups,
-          newOktaManagedUserGroups,
-        ),
-        ...persister.processEntities(
-          oldAppManagedUserGroups,
-          newAppManagedUserGroups,
-        ),
+        ...persister.processEntities({
+          oldEntities: oldOktaManagedUserGroups,
+          newEntities: newOktaManagedUserGroups,
+        }),
+        ...persister.processEntities({
+          oldEntities: oldAppManagedUserGroups,
+          newEntities: newAppManagedUserGroups,
+        }),
       ],
-      persister.processRelationships(
-        oldAccountGroupRelationships,
-        newAccountGroupRelationships,
-      ),
+      persister.processRelationships({
+        oldRelationships: oldAccountGroupRelationships,
+        newRelationships: newAccountGroupRelationships,
+      }),
     ]),
   };
 }

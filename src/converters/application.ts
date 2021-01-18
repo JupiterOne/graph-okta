@@ -1,61 +1,67 @@
 import {
-  IntegrationInstance,
   IntegrationRelationship,
   MappedRelationshipFromIntegration,
   RelationshipDirection,
-} from "@jupiterone/jupiter-managed-integration-sdk";
-import * as url from "url";
+} from '@jupiterone/jupiter-managed-integration-sdk';
+import * as url from 'url';
 import {
   OktaApplication,
   OktaApplicationGroup,
   OktaApplicationUser,
-} from "../okta/types";
+} from '../okta/types';
 import {
   StandardizedOktaApplication,
   StandardizedOktaApplicationGroupRelationship,
   StandardizedOktaApplicationUserRelationship,
-} from "../types";
-import buildAppShortName from "../util/buildAppShortName";
-import getOktaAccountAdminUrl from "../util/getOktaAccountAdminUrl";
-import getOktaAccountInfo from "../util/getOktaAccountInfo";
+  OktaIntegrationConfig,
+} from '../types';
+import buildAppShortName from '../util/buildAppShortName';
+import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
+import getOktaAccountInfo from '../util/getOktaAccountInfo';
 import {
   getAccountName,
   getVendorName,
   isMultiInstanceApp,
-} from "../util/knownVendors";
+} from '../util/knownVendors';
 
-export const APPLICATION_ENTITY_TYPE = "okta_application";
+export const APPLICATION_ENTITY_TYPE = 'okta_application';
 export const APPLICATION_USER_RELATIONSHIP_TYPE =
-  "okta_user_assigned_application";
+  'okta_user_assigned_application';
 export const GROUP_IAM_ROLE_RELATIONSHIP_TYPE =
-  "okta_user_group_assigned_aws_iam_role";
+  'okta_user_group_assigned_aws_iam_role';
 export const USER_IAM_ROLE_RELATIONSHIP_TYPE =
-  "okta_user_assigned_aws_iam_role";
+  'okta_user_assigned_aws_iam_role';
 
 export const APPLICATION_GROUP_RELATIONSHIP_TYPE =
-  "okta_group_assigned_application";
+  'okta_group_assigned_application';
+
+interface IntegrationInstance {
+  id: string;
+  name: string;
+  config: object;
+}
 
 export function createApplicationEntity(
   instance: IntegrationInstance,
   data: OktaApplication,
 ): StandardizedOktaApplication {
   const webLink = url.resolve(
-    getOktaAccountAdminUrl(instance.config),
+    getOktaAccountAdminUrl(instance.config as OktaIntegrationConfig),
     `/admin/app/${data.name}/instance/${data.id}`,
   );
 
   let imageUrl;
   let loginUrl;
 
-    if (data._links?.logo) {
-      imageUrl = [data._links.logo].flat()[0].href;
-    }
+  if (data._links?.logo) {
+    imageUrl = [data._links.logo].flat()[0].href;
+  }
 
-    if (data._links?.appLinks) {
-      const links = [data._links.appLinks].flat();
-      const link = links.find((l) => l.name === "login") || links[0];
-      loginUrl = link && link.href;
-    }
+  if (data._links?.appLinks) {
+    const links = [data._links.appLinks].flat();
+    const link = links.find((l) => l.name === 'login') || links[0];
+    loginUrl = link && link.href;
+  }
 
   const oktaAccountInfo = getOktaAccountInfo(instance);
   const appShortName = buildAppShortName(oktaAccountInfo, data.name);
@@ -63,15 +69,15 @@ export function createApplicationEntity(
   const entity: StandardizedOktaApplication = {
     _key: data.id,
     _type: APPLICATION_ENTITY_TYPE,
-    _class: "Application",
-    _rawData: [{ name: "default", rawData: data }],
+    _class: 'Application',
+    _rawData: [{ name: 'default', rawData: data }],
     displayName: data.label || data.name || data.id,
     id: data.id,
     name: data.name || data.label,
     shortName: appShortName,
     label: data.label,
     status: data.status,
-    active: data.status === "ACTIVE",
+    active: data.status === 'ACTIVE',
     lastUpdated: data.lastUpdated,
     created: data.created,
     features: data.features,
@@ -79,7 +85,7 @@ export function createApplicationEntity(
     appVendorName: getVendorName(appShortName),
     appAccountType: getAccountName(appShortName),
     isMultiInstanceApp: isMultiInstanceApp(appShortName),
-    isSAMLApp: !!data.signOnMode && data.signOnMode.startsWith("SAML"),
+    isSAMLApp: !!data.signOnMode && data.signOnMode.startsWith('SAML'),
     webLink,
     imageUrl,
     loginUrl,
@@ -87,7 +93,7 @@ export function createApplicationEntity(
 
   const appSettings = data.settings && data.settings.app;
   if (appSettings) {
-    if (appSettings.awsEnvironmentType === "aws.amazon") {
+    if (appSettings.awsEnvironmentType === 'aws.amazon') {
       if (appSettings.identityProviderArn) {
         const awsAccountIdMatch = /^arn:aws:iam::([0-9]+):/.exec(
           appSettings.identityProviderArn,
@@ -126,10 +132,10 @@ export function createApplicationGroupRelationships(
   const relationship: StandardizedOktaApplicationGroupRelationship = {
     _key: `${group.id}|assigned|${application._key}`,
     _type: APPLICATION_GROUP_RELATIONSHIP_TYPE,
-    _class: "ASSIGNED",
+    _class: 'ASSIGNED',
     _fromEntityKey: group.id,
     _toEntityKey: application._key,
-    displayName: "ASSIGNED",
+    displayName: 'ASSIGNED',
     applicationId: application.id,
     groupId: group.id,
     // Array property not supported on the edge in Neptune
@@ -164,10 +170,10 @@ export function createApplicationUserRelationships(
   const relationship: StandardizedOktaApplicationUserRelationship = {
     _key: `${user.id}|assigned|${application._key}`,
     _type: APPLICATION_USER_RELATIONSHIP_TYPE,
-    _class: "ASSIGNED",
+    _class: 'ASSIGNED',
     _fromEntityKey: user.id,
     _toEntityKey: application._key,
-    displayName: "ASSIGNED",
+    displayName: 'ASSIGNED',
     applicationId: application.id,
     userId: user.id,
     userEmail: user.profile.email,
@@ -256,36 +262,36 @@ function mapAWSRoleAssignment({
     return {
       _key: `${sourceKey}|assigned|${awsAccountName}|${roleName}`,
       _type: relationshipType,
-      _class: "ASSIGNED",
+      _class: 'ASSIGNED',
       _mapping: {
         sourceEntityKey: sourceKey,
         relationshipDirection: RelationshipDirection.REVERSE,
-        targetFilterKeys: [["_type", "roleName", "tag.AccountName"]],
+        targetFilterKeys: [['_type', 'roleName', 'tag.AccountName']],
         targetEntity: {
-          _class: "AccessRole",
-          _type: "aws_iam_role",
+          _class: 'AccessRole',
+          _type: 'aws_iam_role',
           roleName,
           name: roleName,
           displayName: roleName,
-          "tag.AccountName": awsAccountName,
+          'tag.AccountName': awsAccountName,
         },
         skipTargetCreation: true,
       },
-      displayName: "ASSIGNED",
+      displayName: 'ASSIGNED',
     };
   } else if (role) {
     const roleArn = `arn:aws:iam::${awsAccountId}:role/${role}`;
     return {
       _key: `${sourceKey}|assigned|${roleArn}`,
       _type: relationshipType,
-      _class: "ASSIGNED",
+      _class: 'ASSIGNED',
       _mapping: {
         sourceEntityKey: sourceKey,
         relationshipDirection: RelationshipDirection.REVERSE,
-        targetFilterKeys: [["_type", "_key"]],
+        targetFilterKeys: [['_type', '_key']],
         targetEntity: {
-          _class: "AccessRole",
-          _type: "aws_iam_role",
+          _class: 'AccessRole',
+          _type: 'aws_iam_role',
           _key: roleArn,
           roleName: role,
           name: role,
@@ -293,7 +299,7 @@ function mapAWSRoleAssignment({
         },
         skipTargetCreation: true,
       },
-      displayName: "ASSIGNED",
+      displayName: 'ASSIGNED',
     };
   }
 }

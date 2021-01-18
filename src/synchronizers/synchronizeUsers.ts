@@ -2,7 +2,7 @@ import {
   IntegrationError,
   IntegrationExecutionResult,
   IntegrationInstanceAuthorizationError,
-} from "@jupiterone/jupiter-managed-integration-sdk";
+} from '@jupiterone/jupiter-managed-integration-sdk';
 import {
   createGroupUserRelationship,
   createMFADeviceEntity,
@@ -13,15 +13,15 @@ import {
   MFA_DEVICE_ENTITY_TYPE,
   USER_ENTITY_TYPE,
   USER_MFA_DEVICE_RELATIONSHIP_TYPE,
-} from "../converters";
-import { OktaCacheState, OktaUserCacheEntry } from "../okta/types";
+} from '../converters';
+import { OktaCacheState, OktaUserCacheEntry } from '../okta/types';
 import {
   OktaExecutionContext,
   StandardizedOktaFactor,
   StandardizedOktaUser,
   StandardizedOktaUserFactorRelationship,
   StandardizedOktaUserGroupRelationship,
-} from "../types";
+} from '../types';
 
 /**
  * Synchronizes Okta users, including their MFA devices and relationships to
@@ -40,7 +40,7 @@ export default async function synchronizeUsers(
   } = executionContext;
   const cache = executionContext.clients.getCache();
   const usersCache = cache.iterableCache<OktaUserCacheEntry, OktaCacheState>(
-    "users",
+    'users',
   );
 
   const usersState = await usersCache.getState();
@@ -54,8 +54,8 @@ export default async function synchronizeUsers(
 
   if (usersState.encounteredAuthorizationError) {
     throw new IntegrationInstanceAuthorizationError(
-      new Error("Users synchronization depends on Users ingestion"),
-      "users",
+      new Error('Users synchronization depends on Users ingestion'),
+      'users',
     );
   }
 
@@ -108,24 +108,30 @@ export default async function synchronizeUsers(
       oldUserMFADeviceRelationships: oldUserMFADeviceRelationships.length,
       oldGroupUserRelationships: oldGroupUserRelationships.length,
     },
-    "Synchronizing users...",
+    'Synchronizing users...',
   );
 
   return {
     operations: await persister.publishPersisterOperations([
       [
-        ...persister.processEntities(oldUsers, newUsers),
-        ...persister.processEntities(oldMFADevices, newMFADevices),
+        ...persister.processEntities({
+          oldEntities: oldUsers,
+          newEntities: newUsers,
+        }),
+        ...persister.processEntities({
+          oldEntities: oldMFADevices,
+          newEntities: newMFADevices,
+        }),
       ],
       [
-        ...persister.processRelationships(
-          oldUserMFADeviceRelationships,
-          newUserMFADeviceRelationships,
-        ),
-        ...persister.processRelationships(
-          oldGroupUserRelationships,
-          newGroupUserRelationships,
-        ),
+        ...persister.processRelationships({
+          oldRelationships: oldUserMFADeviceRelationships,
+          newRelationships: newUserMFADeviceRelationships,
+        }),
+        ...persister.processRelationships({
+          oldRelationships: oldGroupUserRelationships,
+          newRelationships: newGroupUserRelationships,
+        }),
       ],
     ]),
   };
