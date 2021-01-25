@@ -1,6 +1,8 @@
 /* tslint:disable:no-console */
-import { executeIntegrationLocal } from "@jupiterone/jupiter-managed-integration-sdk";
-import { stepFunctionsInvocationConfig } from "../src/index";
+process.env.JUPITERONE_RUNTIME_ENVIRONMENT = 'LOCAL';
+
+import { executeIntegrationLocal } from '@jupiterone/jupiter-managed-integration-sdk';
+import { stepFunctionsInvocationConfig } from '../src/index';
 
 const integrationConfig = {
   oktaApiKey: process.env.OKTA_LOCAL_EXECUTION_API_KEY,

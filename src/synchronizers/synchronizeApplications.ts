@@ -3,7 +3,7 @@ import {
   IntegrationExecutionResult,
   IntegrationInstanceAuthorizationError,
   IntegrationRelationship,
-} from "@jupiterone/jupiter-managed-integration-sdk";
+} from '@jupiterone/jupiter-managed-integration-sdk';
 import {
   ACCOUNT_APPLICATION_RELATIONSHIP_TYPE,
   APPLICATION_ENTITY_TYPE,
@@ -16,18 +16,18 @@ import {
   createApplicationUserRelationships,
   GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
   USER_IAM_ROLE_RELATIONSHIP_TYPE,
-} from "../converters";
+} from '../converters';
 import {
   OktaApplicationCacheEntry,
   OktaApplicationUserCacheEntry,
   OktaCacheState,
-} from "../okta/types";
+} from '../okta/types';
 import {
   OktaExecutionContext,
   StandardizedOktaAccountApplicationRelationship,
   StandardizedOktaApplication,
-} from "../types";
-import getOktaAccountInfo from "../util/getOktaAccountInfo";
+} from '../types';
+import getOktaAccountInfo from '../util/getOktaAccountInfo';
 
 /**
  * Synchronizes Okta applications. This must be executed after
@@ -49,7 +49,7 @@ export default async function synchronizeApplications(
   const applicationsCache = cache.iterableCache<
     OktaApplicationCacheEntry,
     OktaCacheState
-  >("applications");
+  >('applications');
   const applicationsState = await applicationsCache.getState();
   if (!applicationsState || !applicationsState.fetchCompleted) {
     throw new IntegrationError({
@@ -62,7 +62,7 @@ export default async function synchronizeApplications(
   const applicationUsersCache = cache.iterableCache<
     OktaApplicationUserCacheEntry,
     OktaCacheState
-  >("application_users");
+  >('application_users');
   const applicationUsersState = await applicationUsersCache.getState();
   if (!applicationUsersState || !applicationUsersState.fetchCompleted) {
     throw new IntegrationError({
@@ -80,7 +80,7 @@ export default async function synchronizeApplications(
       new Error(
         "Applications synchronization depends on Applications and Applications' Users ingestion",
       ),
-      "applications",
+      'applications',
     );
   }
 
@@ -154,33 +154,36 @@ export default async function synchronizeApplications(
       oldApplicationUserRelationships: oldApplicationUserRelationships.length,
       oldUserIAMRoleRelationships: oldUserIAMRoleRelationships.length,
     },
-    "Synchronizing applications...",
+    'Synchronizing applications...',
   );
 
   return {
     operations: await persister.publishPersisterOperations([
       [
-        ...persister.processEntities(
-          oldApplications,
-          Object.values(newApplications),
-        ),
+        ...persister.processEntities({
+          oldEntities: oldApplications,
+          newEntities: Object.values(newApplications),
+        }),
       ],
       [
-        ...persister.processRelationships(
-          oldAccountApplicationRelationships,
-          newAccountApplicationRelationships,
-        ),
-        ...persister.processRelationships(
-          [
+        ...persister.processRelationships({
+          oldRelationships: oldAccountApplicationRelationships,
+          newRelationships: newAccountApplicationRelationships,
+        }),
+        ...persister.processRelationships({
+          oldRelationships: [
             ...oldApplicationGroupRelationships,
             ...oldGroupIAMRoleRelationships,
           ],
-          newApplicationGroupAndGroupRoleRelationships,
-        ),
-        ...persister.processRelationships(
-          [...oldApplicationUserRelationships, ...oldUserIAMRoleRelationships],
-          newApplicationUserAndUserRoleRelationships,
-        ),
+          newRelationships: newApplicationGroupAndGroupRoleRelationships,
+        }),
+        ...persister.processRelationships({
+          oldRelationships: [
+            ...oldApplicationUserRelationships,
+            ...oldUserIAMRoleRelationships,
+          ],
+          newRelationships: newApplicationUserAndUserRoleRelationships,
+        }),
       ],
     ]),
   };

@@ -1,18 +1,18 @@
-import { IntegrationExecutionResult } from "@jupiterone/jupiter-managed-integration-sdk";
+import { IntegrationExecutionResult } from '@jupiterone/jupiter-managed-integration-sdk';
 
-import { createHasRelationships } from "../converters";
+import { createHasRelationships } from '../converters';
 import {
   ACCOUNT_ENTITY_TYPE,
   createAccountEntity,
-} from "../converters/account";
+} from '../converters/account';
 import {
   ACCOUNT_SERVICE_RELATIONSHIP_TYPE,
   createMFAServiceEntity,
   createSSOServiceEntity,
   SERVICE_ENTITY_TYPE,
-} from "../converters/service";
-import { OktaExecutionContext } from "../types";
-import getOktaAccountInfo from "../util/getOktaAccountInfo";
+} from '../converters/service';
+import { OktaExecutionContext } from '../types';
+import getOktaAccountInfo from '../util/getOktaAccountInfo';
 
 export default async function synchronizeAccount(
   executionContext: OktaExecutionContext,
@@ -49,13 +49,19 @@ export default async function synchronizeAccount(
 
   const operationResults = await persister.publishPersisterOperations([
     [
-      ...persister.processEntities(oldAccounts, newAccounts),
-      ...persister.processEntities(oldServices, newServices),
+      ...persister.processEntities({
+        oldEntities: oldAccounts,
+        newEntities: newAccounts,
+      }),
+      ...persister.processEntities({
+        oldEntities: oldServices,
+        newEntities: newServices,
+      }),
     ],
-    persister.processRelationships(
-      oldAccountServiceRelationships,
-      newAccountServiceRelationships,
-    ),
+    persister.processRelationships({
+      oldRelationships: oldAccountServiceRelationships,
+      newRelationships: newAccountServiceRelationships,
+    }),
   ]);
 
   return {

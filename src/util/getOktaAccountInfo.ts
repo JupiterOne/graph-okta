@@ -1,13 +1,12 @@
-import { IntegrationInstance } from "@jupiterone/jupiter-managed-integration-sdk";
-
-import { OktaAccountInfo } from "../okta/types";
-import { OktaIntegrationConfig } from "../types";
+import { OktaAccountInfo } from '../okta/types';
+import { OktaIntegrationConfig } from '../types';
 
 const DOMAIN_REGEX = /\/\/([^.]*).okta(preview)?.com/;
 
-export default function getOktaAccountInfo(
-  integrationInstance: IntegrationInstance,
-): OktaAccountInfo {
+export default function getOktaAccountInfo(integrationInstance: {
+  name: string;
+  config: object;
+}): OktaAccountInfo {
   const config = integrationInstance.config as OktaIntegrationConfig;
   const match = DOMAIN_REGEX.exec(config.oktaOrgUrl);
   if (!match) {
@@ -17,7 +16,7 @@ export default function getOktaAccountInfo(
     };
   }
 
-  const preview = match[2] === "preview";
+  const preview = match[2] === 'preview';
   const name = match[1];
 
   return {
