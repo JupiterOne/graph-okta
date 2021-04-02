@@ -7,6 +7,25 @@ directly to Okta APIs to obtain account metadata and analyze resource
 relationships. Customers authorize access by creating an API token in your
 target Okta account and providing that credential to JupiterOne.
 
+## Okta + JupiterOne Integration Benefits
+
+- Visualize Okta users, groups, devices, applications, and services in the JupiterOne graph.
+- Map Okta users to employees in your JupiterOne account.
+- Monitor changes to Okta users and access management data using JupiterOne alerts.
+- Create an employee entity that is used to map users across your organization to an employee 
+via a matching email property.
+
+## How it Works
+
+- JupiterOne periodically fetches Okta users, groups, and access management data to update the graph.
+- Write JupiterOne queries to review and monitor updates to the graph.
+- Configure alerts to take action when the JupiterOne graph changes.
+
+## Requirements
+
+- JupiterOne requires the organization URL and an API key used to authenticate with Okta.
+- You must have permission in JupiterOne to install new integrations.
+
 ## Integration Instance Configuration
 
 The integration is triggered by an event containing the information for a
