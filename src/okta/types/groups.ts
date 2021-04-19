@@ -1,4 +1,4 @@
-import { OktaResource } from ".";
+import { OktaResource } from '.';
 
 export interface OktaUserGroupProfile {
   name: string;

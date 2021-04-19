@@ -1,51 +1,42 @@
 {
   "name": "@jupiterone/graph-okta",
-  "version": "1.8.2",
-  "description": "A JupiterOne managed integration for https://www.okta.com",
-  "main": "dist/index.js",
+  "version": "0.0.0",
+  "description": "A JupiterOne Integration for https://www.okta.com",
+  "license": "MPL-2.0",
   "repository": "https://github.com/jupiterone/graph-okta",
-  "license": "SEE LICENSE IN LICENSE",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "LICENSE",
     "dist"
   ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "start": "ts-node --require dotenv/config tools/execute.ts | bunyan",
-    "start:containers": "docker-compose up -d",
-    "stop:containers": "docker-compose down",
+    "start": "j1-integration collect",
+    "graph": "j1-integration visualize",
+    "graph:types": "j1-integration visualize-types",
     "lint": "eslint . --cache --fix --ext .ts,.tsx",
     "format": "prettier --write '**/*.{ts,js,json,css,md,yml}'",
     "type-check": "tsc",
     "test": "jest",
+    "test:env": "LOAD_ENV=1 yarn test",
     "test:ci": "yarn lint && yarn type-check && yarn test",
-    "prepush": "yarn test:ci",
     "build": "tsc -p tsconfig.dist.json --declaration",
+    "prepush": "yarn lint && yarn type-check && jest --changedSince master",
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@jupiterone/jupiter-managed-integration-sdk": "^36.0.1",
-    "@okta/okta-sdk-nodejs": "^3.0.0",
+    "@okta/okta-sdk-nodejs": "^4.5.1",
     "lodash.startcase": "^4.4.0",
     "promise-retry": "^1.1.1"
   },
+  "peerDependencies": {
+    "@jupiterone/integration-sdk-core": "^5.11.0"
+  },
   "devDependencies": {
-    "@jupiterone/integration-sdk-dev-tools": "^5.0.0",
-    "@jupiterone/integration-sdk-testing": "^5.0.0",
-    "@types/bunyan": "^1.8.5",
-    "@types/fs-extra": "^7.0.0",
-    "@types/gremlin": "^3.4.2",
-    "@types/lodash.startcase": "^4.4.6",
-    "@types/nock": "^10.0.3",
-    "@types/uuid": "^3.4.4",
-    "aws-sdk": "^2.828.0",
-    "bunyan": "^1.8.12",
-    "dotenv": "^8.2.0",
-    "fs-extra": "^8.0.1",
-    "nock": "^10.0.6",
-    "uuid": "^3.3.2",
-    "zlib": "^1.0.5"
+    "@jupiterone/integration-sdk-core": "^5.11.0",
+    "@jupiterone/integration-sdk-dev-tools": "^5.11.0",
+    "@jupiterone/integration-sdk-testing": "^5.11.0"
   }
 }

@@ -5,7 +5,7 @@ const DOMAIN_REGEX = /\/\/([^.]*).okta(preview)?.com/;
 
 export default function getOktaAccountInfo(integrationInstance: {
   name: string;
-  config: object;
+  config?: object;
 }): OktaAccountInfo {
   const config = integrationInstance.config as OktaIntegrationConfig;
   const match = DOMAIN_REGEX.exec(config.oktaOrgUrl);

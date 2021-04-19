@@ -1,4 +1,4 @@
-import { OktaResource } from ".";
+import { OktaResource } from '.';
 
 export interface OktaFactor extends OktaResource {
   factorType: string;
