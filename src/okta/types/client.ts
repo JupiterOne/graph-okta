@@ -6,6 +6,7 @@ import {
 import { OktaFactor } from './devices';
 import { OktaUserGroup } from './groups';
 import { OktaUser } from './users';
+import { OktaRule } from './rules';
 import { RequestExecutorWithEarlyRateLimiting } from '../createOktaClient';
 
 export interface OktaCollection<T> {
@@ -77,4 +78,9 @@ export interface OktaClient {
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/factors/#list-enrolled-factors
   listFactors: (userId: string) => OktaCollection<OktaFactor>;
+
+  // [API Endpoint]: https://developer.okta.com/docs/api/resources/groups/#list-group-rules
+  listGroupRules: (
+    queryParameters?: OktaQueryParams,
+  ) => OktaCollection<OktaRule>;
 }

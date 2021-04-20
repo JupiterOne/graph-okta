@@ -95,6 +95,7 @@ The following entities are created:
 | Okta App UserGroup | `okta_app_user_group` | `UserGroup`          |
 | Okta Application   | `okta_application`    | `Application`        |
 | Okta Factor Device | `mfa_device`          | `Key`                |
+| Okta Rule          | `okta_rule`           | `Configuration`      |
 | Okta Service       | `okta_service`        | `Service`, `Control` |
 | Okta User          | `okta_user`           | `User`               |
 | Okta UserGroup     | `okta_user_group`     | `UserGroup`          |
@@ -107,6 +108,7 @@ The following relationships are created/mapped:
 | --------------------- | --------------------- | --------------------- |
 | `okta_account`        | **HAS**               | `okta_app_user_group` |
 | `okta_account`        | **HAS**               | `okta_application`    |
+| `okta_account`        | **HAS**               | `okta_rule`           |
 | `okta_account`        | **HAS**               | `okta_service`        |
 | `okta_account`        | **HAS**               | `okta_user`           |
 | `okta_account`        | **HAS**               | `okta_user_group`     |

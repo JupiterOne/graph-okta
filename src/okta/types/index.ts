@@ -3,6 +3,7 @@ export * from './client';
 export * from './devices';
 export * from './groups';
 export * from './users';
+export * from './rules';
 
 /**
  * Account information derived from the domain/url.

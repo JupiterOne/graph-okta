@@ -14,6 +14,7 @@ import {
   OktaApplication,
   OktaApplicationGroup,
   OktaApplicationUser,
+  OktaRule,
 } from './okta/types';
 
 /**
@@ -136,6 +137,17 @@ export class APIClient {
     iteratee: ResourceIteratee<OktaApplicationUser>,
   ): Promise<void> {
     await this.oktaClient.listApplicationUsers(app.id).each(iteratee);
+  }
+
+  /**
+   * Iterates each rule resource in the provider.
+   *
+   * @param iteratee receives each resource to produce entities/relationships
+   */
+  public async iterateRules(
+    iteratee: ResourceIteratee<OktaRule>,
+  ): Promise<void> {
+    await this.oktaClient.listGroupRules().each(iteratee);
   }
 }
 
