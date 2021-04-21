@@ -33,10 +33,12 @@ export class APIClient {
 
   public async verifyAuthentication(): Promise<void> {
     // the most light-weight request possible to validate credentials
+
     try {
-      //there is always at least the Everyone group
       //note that if you don't hit the .each, it doesn't actually attempt it
-      await this.oktaClient.listGroups().each((e) => {});
+      await this.oktaClient.listUsers({ limit: '1' }).each((e) => {
+        return false;
+      });
     } catch (err) {
       throw new IntegrationProviderAuthenticationError({
         cause: err,

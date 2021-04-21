@@ -29,10 +29,7 @@ export async function fetchAccountDetails({
   const accountEntity = await jobState.addEntity(
     createIntegrationEntity({
       entityData: {
-        source: {
-          id: `okta-account:${instance.name}`,
-          name: 'Okta Account',
-        },
+        source: oktaAccountInfo,
         assign: {
           _key: `okta_account_${accountId}`,
           _type: 'okta_account',

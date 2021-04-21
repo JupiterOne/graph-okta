@@ -12,8 +12,8 @@ Object {
         Object {
           "name": "default",
           "rawData": Object {
-            "id": "okta-account:Local Integration",
-            "name": "Okta Account",
+            "name": "dev-857255",
+            "preview": false,
           },
         },
       ],
@@ -21,7 +21,6 @@ Object {
       "accountId": "dev-857255.okta.com/",
       "createdOn": undefined,
       "displayName": "dev-857255",
-      "id": "okta-account:Local Integration",
       "name": "dev-857255",
       "webLink": "https://dev-857255.okta.com/",
     },
