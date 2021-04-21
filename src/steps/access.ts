@@ -30,12 +30,12 @@ export async function fetchUsers({
   const accountEntity = (await jobState.getData(DATA_ACCOUNT_ENTITY)) as Entity;
 
   await apiClient.iterateUsers(async (user) => {
-    delete user.credentials; //no PII for you
     const webLink = url.resolve(
       getOktaAccountAdminUrl(instance.config),
       `/admin/user/profile/view/${user.id}`,
     );
     const emailProperties = convertCredentialEmails(user.credentials);
+    delete user.credentials; //no PII for you in raw objects
     const profile = user.profile;
     const userEntity = await jobState.addEntity(
       createIntegrationEntity({
