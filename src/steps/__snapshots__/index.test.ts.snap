@@ -235,9 +235,11 @@ Object {
       "status": "ACTIVE",
       "statusChanged": 1606929535000,
       "statusChangedOn": 1606929535000,
-      "unverifiedEmails": undefined,
+      "unverifiedEmails": Array [],
       "username": "nick.dowmon",
-      "verifiedEmails": undefined,
+      "verifiedEmails": Array [
+        "nick.dowmon@jupiterone.com",
+      ],
       "webLink": "https://dev-857255-admin.okta.com/admin/user/profile/view/00u1cagurdhtxqBdf4x7",
     },
     Object {
@@ -295,9 +297,11 @@ Object {
       "status": "ACTIVE",
       "statusChanged": 1616684414000,
       "statusChangedOn": 1616684414000,
-      "unverifiedEmails": undefined,
+      "unverifiedEmails": Array [],
       "username": "thomaskevincasey74",
-      "verifiedEmails": undefined,
+      "verifiedEmails": Array [
+        "thomaskevincasey74@gmail.com",
+      ],
       "webLink": "https://dev-857255-admin.okta.com/admin/user/profile/view/00u2ot2iur46vIUsV4x7",
     },
     Object {
@@ -355,9 +359,11 @@ Object {
       "status": "ACTIVE",
       "statusChanged": 1598490537000,
       "statusChangedOn": 1598490537000,
-      "unverifiedEmails": undefined,
+      "unverifiedEmails": Array [],
       "username": "erkang.zheng",
-      "verifiedEmails": undefined,
+      "verifiedEmails": Array [
+        "erkang.zheng@jupiterone.com",
+      ],
       "webLink": "https://dev-857255-admin.okta.com/admin/user/profile/view/00us5to77GW1mVs6w4x6",
     },
     Object {
@@ -415,9 +421,11 @@ Object {
       "status": "ACTIVE",
       "statusChanged": 1598527966000,
       "statusChangedOn": 1598527966000,
-      "unverifiedEmails": undefined,
+      "unverifiedEmails": Array [],
       "username": "austin.kelleher",
-      "verifiedEmails": undefined,
+      "verifiedEmails": Array [
+        "austin.kelleher@jupiterone.com",
+      ],
       "webLink": "https://dev-857255-admin.okta.com/admin/user/profile/view/00us5ty22kvu4NAxo4x6",
     },
     Object {
@@ -475,9 +483,11 @@ Object {
       "status": "ACTIVE",
       "statusChanged": 1598540368000,
       "statusChangedOn": 1598540368000,
-      "unverifiedEmails": undefined,
+      "unverifiedEmails": Array [],
       "username": "akash.ganapathi",
-      "verifiedEmails": undefined,
+      "verifiedEmails": Array [
+        "akash.ganapathi@jupiterone.com",
+      ],
       "webLink": "https://dev-857255-admin.okta.com/admin/user/profile/view/00us5z1aerBUBP41M4x6",
     },
     Object {
@@ -535,9 +545,11 @@ Object {
       "status": "ACTIVE",
       "statusChanged": 1598540963000,
       "statusChangedOn": 1598540963000,
-      "unverifiedEmails": undefined,
+      "unverifiedEmails": Array [],
       "username": "adam.williams",
-      "verifiedEmails": undefined,
+      "verifiedEmails": Array [
+        "adam.williams@jupiterone.com",
+      ],
       "webLink": "https://dev-857255-admin.okta.com/admin/user/profile/view/00us5zkpf7nGTeKXu4x6",
     },
     Object {
@@ -595,9 +607,11 @@ Object {
       "status": "DEPROVISIONED",
       "statusChanged": 1598491285000,
       "statusChangedOn": 1598491285000,
-      "unverifiedEmails": undefined,
+      "unverifiedEmails": Array [],
       "username": "test",
-      "verifiedEmails": undefined,
+      "verifiedEmails": Array [
+        "test@jupiterone.com",
+      ],
       "webLink": "https://dev-857255-admin.okta.com/admin/user/profile/view/00us60gayc3EIwpRc4x6",
     },
     Object {

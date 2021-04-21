@@ -64,13 +64,6 @@ export async function validateInvocation(
     );
   }
 
-  const response = await fetch(config.oktaOrgUrl);
-  if (response.status === 404) {
-    throw new IntegrationValidationError(
-      `Invalid Okta org URL provided (code=404, oktaOrgUrl=${config.oktaOrgUrl}, accountId=${config.accountId})`,
-    );
-  }
-
   const apiClient = createAPIClient(config, context.logger);
   await apiClient.verifyAuthentication();
 }
