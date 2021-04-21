@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/graph-okta",
-  "version": "0.0.0",
+  "version": "1.8.2",
   "description": "A JupiterOne Integration for https://www.okta.com",
   "license": "MPL-2.0",
   "repository": "https://github.com/jupiterone/graph-okta",
@@ -32,11 +32,11 @@
     "promise-retry": "^1.1.1"
   },
   "peerDependencies": {
-    "@jupiterone/integration-sdk-core": "^5.11.0"
+    "@jupiterone/integration-sdk-core": "^6.0.0"
   },
   "devDependencies": {
-    "@jupiterone/integration-sdk-core": "^5.11.0",
-    "@jupiterone/integration-sdk-dev-tools": "^5.11.0",
-    "@jupiterone/integration-sdk-testing": "^5.11.0"
+    "@jupiterone/integration-sdk-core": "^6.0.0",
+    "@jupiterone/integration-sdk-dev-tools": "^6.0.0",
+    "@jupiterone/integration-sdk-testing": "^6.0.0"
   }
 }

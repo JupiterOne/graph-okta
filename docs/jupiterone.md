@@ -2,10 +2,12 @@
 
 ## Okta + JupiterOne Integration Benefits
 
-- Visualize Okta applications, groups, users, and MFA devices in the JupiterOne
+- Visualize Okta users, groups, applications, and MFA devices in the JupiterOne
   graph.
 - Map Okta users to employees in your JupiterOne account.
 - Monitor changes to Okta users using JupiterOne alerts.
+- Create an employee entity that is used to map users across your organization
+  to an employee via a matching email property.
 
 ## How it Works
 
@@ -16,8 +18,8 @@
 
 ## Requirements
 
-- JupiterOne requires a REST API key. You need permission to create an Admin
-  user in Okta that will be used to
+- JupiterOne requires the organization URL and an API key to authenticate with
+  Okta. You need permission to create an Admin user in Okta that will be used to
   [create the API key](https://developer.okta.com/docs/api/getting_started/getting_a_token).
 - You must have permission in JupiterOne to install new integrations.
 
@@ -71,6 +73,33 @@ If you need help with this integration, please contact
 3. Identify and click the **integration to delete**.
 4. Click the **trash can** icon.
 5. Click the **Remove** button to delete the integration.
+
+# Tips
+
+All Okta users are automatically mapped to a `Person` entity as an employee. If
+you have service accounts or generic users in Okta, set their `userType`
+attribute to `generic` or `service` or `bot` in Okta user profile to skip this
+mapping.
+
+This allows you to find non-interactive users with a query like
+
+`Find User that !is Person`
+
+# Okta API Rate Limits
+
+Okta API rate limits are sophisticated, depending on a number of factors
+including the particular endpoint, organization-wide limits, and subscription
+level. Responses include a few headers to guide a system into conformance, and
+will deliver 429 responses that indicate a backoff delay when the rate limits
+are exceeded. The integration is implemented to respect these 429 response
+directives by leveraging the API client provided by Okta.
+
+The Okta integration currently ingests users, groups, applications, and MFA
+devices. The number of calls works out to be:
+
+((numUsers / 200) _ listUsers) + (numUsers _ (listFactors(user) +
+listGroups(user))) listApplications + (numApplications \*
+(listApplicationGroupAssignments(app) + listApplicationUsers(app)))
 
 <!-- {J1_DOCUMENTATION_MARKER_START} -->
 <!--
