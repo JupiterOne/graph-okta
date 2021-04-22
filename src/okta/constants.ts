@@ -1,3 +1,4 @@
+export const USER_ENTITY_TYPE = 'okta_user';
 export const USER_GROUP_ENTITY_TYPE = 'okta_user_group';
 export const APP_USER_GROUP_ENTITY_TYPE = 'okta_app_user_group';
 export const MFA_DEVICE_ENTITY_TYPE = 'mfa_device';
