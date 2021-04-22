@@ -13,8 +13,7 @@ import * as url from 'url';
 import * as lodash from 'lodash';
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import { DATA_ACCOUNT_ENTITY } from './account';
-import { USER_GROUP_ENTITY_TYPE } from './access';
+import { USER_GROUP_ENTITY_TYPE, DATA_ACCOUNT_ENTITY } from '../okta/constants';
 
 import buildAppShortName from '../util/buildAppShortName';
 import getOktaAccountInfo from '../util/getOktaAccountInfo';

@@ -60,128 +60,6 @@ Object {
     },
     Object {
       "_class": Array [
-        "UserGroup",
-      ],
-      "_key": "00gs5to49AhMBaJNU4x6",
-      "_rawData": Array [
-        Object {
-          "name": "default",
-          "rawData": Group {
-            "_links": Object {
-              "apps": Object {
-                "href": "https://dev-857255.okta.com/api/v1/groups/00gs5to49AhMBaJNU4x6/apps",
-              },
-              "logo": Array [
-                Object {
-                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-medium.1a5ebe44c4244fb796c235d86b47e3bb.png",
-                  "name": "medium",
-                  "type": "image/png",
-                },
-                Object {
-                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-large.d9cfbd8a00a4feac1aa5612ba02e99c0.png",
-                  "name": "large",
-                  "type": "image/png",
-                },
-              ],
-              "users": Object {
-                "href": "https://dev-857255.okta.com/api/v1/groups/00gs5to49AhMBaJNU4x6/users",
-              },
-            },
-            "created": "2020-08-27T01:06:34.000Z",
-            "id": "00gs5to49AhMBaJNU4x6",
-            "lastMembershipUpdated": "2021-03-25T13:00:33.000Z",
-            "lastUpdated": "2020-08-27T01:06:34.000Z",
-            "objectClass": Array [
-              "okta:user_group",
-            ],
-            "profile": GroupProfile {
-              "description": "All users in your organization",
-              "name": "Everyone",
-            },
-            "type": "BUILT_IN",
-          },
-        },
-      ],
-      "_type": "okta_user_group",
-      "created": 1598490394000,
-      "createdOn": 1598490394000,
-      "description": "All users in your organization",
-      "displayName": "Everyone",
-      "id": "00gs5to49AhMBaJNU4x6",
-      "lastMembershipUpdated": 1616677233000,
-      "lastMembershipUpdatedOn": 1616677233000,
-      "lastUpdated": 1598490394000,
-      "lastUpdatedOn": 1598490394000,
-      "name": "Everyone",
-      "objectClass": Array [
-        "okta:user_group",
-      ],
-      "type": "BUILT_IN",
-      "webLink": "https://dev-857255-admin.okta.com/admin/group/00gs5to49AhMBaJNU4x6",
-    },
-    Object {
-      "_class": Array [
-        "UserGroup",
-      ],
-      "_key": "00g2ovdjf9Ahbffgj4x7",
-      "_rawData": Array [
-        Object {
-          "name": "default",
-          "rawData": Group {
-            "_links": Object {
-              "apps": Object {
-                "href": "https://dev-857255.okta.com/api/v1/groups/00g2ovdjf9Ahbffgj4x7/apps",
-              },
-              "logo": Array [
-                Object {
-                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-medium.1a5ebe44c4244fb796c235d86b47e3bb.png",
-                  "name": "medium",
-                  "type": "image/png",
-                },
-                Object {
-                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-large.d9cfbd8a00a4feac1aa5612ba02e99c0.png",
-                  "name": "large",
-                  "type": "image/png",
-                },
-              ],
-              "users": Object {
-                "href": "https://dev-857255.okta.com/api/v1/groups/00g2ovdjf9Ahbffgj4x7/users",
-              },
-            },
-            "created": "2021-03-25T16:07:23.000Z",
-            "id": "00g2ovdjf9Ahbffgj4x7",
-            "lastMembershipUpdated": "2021-03-25T16:07:23.000Z",
-            "lastUpdated": "2021-03-25T16:07:23.000Z",
-            "objectClass": Array [
-              "okta:user_group",
-            ],
-            "profile": GroupProfile {
-              "description": "A group of testers testing groups of tests",
-              "name": "Test Group",
-            },
-            "type": "OKTA_GROUP",
-          },
-        },
-      ],
-      "_type": "okta_user_group",
-      "created": 1616688443000,
-      "createdOn": 1616688443000,
-      "description": "A group of testers testing groups of tests",
-      "displayName": "Test Group",
-      "id": "00g2ovdjf9Ahbffgj4x7",
-      "lastMembershipUpdated": 1616688443000,
-      "lastMembershipUpdatedOn": 1616688443000,
-      "lastUpdated": 1616688443000,
-      "lastUpdatedOn": 1616688443000,
-      "name": "Test Group",
-      "objectClass": Array [
-        "okta:user_group",
-      ],
-      "type": "OKTA_GROUP",
-      "webLink": "https://dev-857255-admin.okta.com/admin/group/00g2ovdjf9Ahbffgj4x7",
-    },
-    Object {
-      "_class": Array [
         "User",
       ],
       "_key": "00u1cagurdhtxqBdf4x7",
@@ -616,6 +494,128 @@ Object {
     },
     Object {
       "_class": Array [
+        "UserGroup",
+      ],
+      "_key": "00gs5to49AhMBaJNU4x6",
+      "_rawData": Array [
+        Object {
+          "name": "default",
+          "rawData": Group {
+            "_links": Object {
+              "apps": Object {
+                "href": "https://dev-857255.okta.com/api/v1/groups/00gs5to49AhMBaJNU4x6/apps",
+              },
+              "logo": Array [
+                Object {
+                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-medium.1a5ebe44c4244fb796c235d86b47e3bb.png",
+                  "name": "medium",
+                  "type": "image/png",
+                },
+                Object {
+                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-large.d9cfbd8a00a4feac1aa5612ba02e99c0.png",
+                  "name": "large",
+                  "type": "image/png",
+                },
+              ],
+              "users": Object {
+                "href": "https://dev-857255.okta.com/api/v1/groups/00gs5to49AhMBaJNU4x6/users",
+              },
+            },
+            "created": "2020-08-27T01:06:34.000Z",
+            "id": "00gs5to49AhMBaJNU4x6",
+            "lastMembershipUpdated": "2021-03-25T13:00:33.000Z",
+            "lastUpdated": "2020-08-27T01:06:34.000Z",
+            "objectClass": Array [
+              "okta:user_group",
+            ],
+            "profile": GroupProfile {
+              "description": "All users in your organization",
+              "name": "Everyone",
+            },
+            "type": "BUILT_IN",
+          },
+        },
+      ],
+      "_type": "okta_user_group",
+      "created": 1598490394000,
+      "createdOn": 1598490394000,
+      "description": "All users in your organization",
+      "displayName": "Everyone",
+      "id": "00gs5to49AhMBaJNU4x6",
+      "lastMembershipUpdated": 1616677233000,
+      "lastMembershipUpdatedOn": 1616677233000,
+      "lastUpdated": 1598490394000,
+      "lastUpdatedOn": 1598490394000,
+      "name": "Everyone",
+      "objectClass": Array [
+        "okta:user_group",
+      ],
+      "type": "BUILT_IN",
+      "webLink": "https://dev-857255-admin.okta.com/admin/group/00gs5to49AhMBaJNU4x6",
+    },
+    Object {
+      "_class": Array [
+        "UserGroup",
+      ],
+      "_key": "00g2ovdjf9Ahbffgj4x7",
+      "_rawData": Array [
+        Object {
+          "name": "default",
+          "rawData": Group {
+            "_links": Object {
+              "apps": Object {
+                "href": "https://dev-857255.okta.com/api/v1/groups/00g2ovdjf9Ahbffgj4x7/apps",
+              },
+              "logo": Array [
+                Object {
+                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-medium.1a5ebe44c4244fb796c235d86b47e3bb.png",
+                  "name": "medium",
+                  "type": "image/png",
+                },
+                Object {
+                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-large.d9cfbd8a00a4feac1aa5612ba02e99c0.png",
+                  "name": "large",
+                  "type": "image/png",
+                },
+              ],
+              "users": Object {
+                "href": "https://dev-857255.okta.com/api/v1/groups/00g2ovdjf9Ahbffgj4x7/users",
+              },
+            },
+            "created": "2021-03-25T16:07:23.000Z",
+            "id": "00g2ovdjf9Ahbffgj4x7",
+            "lastMembershipUpdated": "2021-03-25T16:07:23.000Z",
+            "lastUpdated": "2021-03-25T16:07:23.000Z",
+            "objectClass": Array [
+              "okta:user_group",
+            ],
+            "profile": GroupProfile {
+              "description": "A group of testers testing groups of tests",
+              "name": "Test Group",
+            },
+            "type": "OKTA_GROUP",
+          },
+        },
+      ],
+      "_type": "okta_user_group",
+      "created": 1616688443000,
+      "createdOn": 1616688443000,
+      "description": "A group of testers testing groups of tests",
+      "displayName": "Test Group",
+      "id": "00g2ovdjf9Ahbffgj4x7",
+      "lastMembershipUpdated": 1616688443000,
+      "lastMembershipUpdatedOn": 1616688443000,
+      "lastUpdated": 1616688443000,
+      "lastUpdatedOn": 1616688443000,
+      "name": "Test Group",
+      "objectClass": Array [
+        "okta:user_group",
+      ],
+      "type": "OKTA_GROUP",
+      "webLink": "https://dev-857255-admin.okta.com/admin/group/00g2ovdjf9Ahbffgj4x7",
+    },
+    Object {
+      "_class": Array [
         "Application",
       ],
       "_key": "0oa2s9fk7q82KPy9V4x7",
@@ -911,33 +911,9 @@ Object {
     Object {
       "_class": "HAS",
       "_fromEntityKey": "okta_account_dev-857255.okta.com/",
-      "_key": "okta_account_dev-857255.okta.com/|has|00gs5to49AhMBaJNU4x6",
-      "_toEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_type": "okta_account_has_user_group",
-      "displayName": "HAS",
-    },
-    Object {
-      "_class": "HAS",
-      "_fromEntityKey": "okta_account_dev-857255.okta.com/",
-      "_key": "okta_account_dev-857255.okta.com/|has|00g2ovdjf9Ahbffgj4x7",
-      "_toEntityKey": "00g2ovdjf9Ahbffgj4x7",
-      "_type": "okta_account_has_user_group",
-      "displayName": "HAS",
-    },
-    Object {
-      "_class": "HAS",
-      "_fromEntityKey": "okta_account_dev-857255.okta.com/",
       "_key": "okta_account_dev-857255.okta.com/|has|00u1cagurdhtxqBdf4x7",
       "_toEntityKey": "00u1cagurdhtxqBdf4x7",
       "_type": "okta_account_has_user",
-      "displayName": "HAS",
-    },
-    Object {
-      "_class": "HAS",
-      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00u1cagurdhtxqBdf4x7",
-      "_toEntityKey": "00u1cagurdhtxqBdf4x7",
-      "_type": "okta_user_group_has_user",
       "displayName": "HAS",
     },
     Object {
@@ -950,26 +926,10 @@ Object {
     },
     Object {
       "_class": "HAS",
-      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00u2ot2iur46vIUsV4x7",
-      "_toEntityKey": "00u2ot2iur46vIUsV4x7",
-      "_type": "okta_user_group_has_user",
-      "displayName": "HAS",
-    },
-    Object {
-      "_class": "HAS",
       "_fromEntityKey": "okta_account_dev-857255.okta.com/",
       "_key": "okta_account_dev-857255.okta.com/|has|00us5to77GW1mVs6w4x6",
       "_toEntityKey": "00us5to77GW1mVs6w4x6",
       "_type": "okta_account_has_user",
-      "displayName": "HAS",
-    },
-    Object {
-      "_class": "HAS",
-      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00us5to77GW1mVs6w4x6",
-      "_toEntityKey": "00us5to77GW1mVs6w4x6",
-      "_type": "okta_user_group_has_user",
       "displayName": "HAS",
     },
     Object {
@@ -982,26 +942,10 @@ Object {
     },
     Object {
       "_class": "HAS",
-      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00us5ty22kvu4NAxo4x6",
-      "_toEntityKey": "00us5ty22kvu4NAxo4x6",
-      "_type": "okta_user_group_has_user",
-      "displayName": "HAS",
-    },
-    Object {
-      "_class": "HAS",
       "_fromEntityKey": "okta_account_dev-857255.okta.com/",
       "_key": "okta_account_dev-857255.okta.com/|has|00us5z1aerBUBP41M4x6",
       "_toEntityKey": "00us5z1aerBUBP41M4x6",
       "_type": "okta_account_has_user",
-      "displayName": "HAS",
-    },
-    Object {
-      "_class": "HAS",
-      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00us5z1aerBUBP41M4x6",
-      "_toEntityKey": "00us5z1aerBUBP41M4x6",
-      "_type": "okta_user_group_has_user",
       "displayName": "HAS",
     },
     Object {
@@ -1014,14 +958,6 @@ Object {
     },
     Object {
       "_class": "HAS",
-      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00us5zkpf7nGTeKXu4x6",
-      "_toEntityKey": "00us5zkpf7nGTeKXu4x6",
-      "_type": "okta_user_group_has_user",
-      "displayName": "HAS",
-    },
-    Object {
-      "_class": "HAS",
       "_fromEntityKey": "okta_account_dev-857255.okta.com/",
       "_key": "okta_account_dev-857255.okta.com/|has|00us60gayc3EIwpRc4x6",
       "_toEntityKey": "00us60gayc3EIwpRc4x6",
@@ -1030,10 +966,74 @@ Object {
     },
     Object {
       "_class": "HAS",
+      "_fromEntityKey": "okta_account_dev-857255.okta.com/",
+      "_key": "okta_account_dev-857255.okta.com/|has|00gs5to49AhMBaJNU4x6",
+      "_toEntityKey": "00gs5to49AhMBaJNU4x6",
+      "_type": "okta_account_has_user_group",
+      "displayName": "HAS",
+    },
+    Object {
+      "_class": "HAS",
+      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
+      "_key": "00gs5to49AhMBaJNU4x6|has|00u1cagurdhtxqBdf4x7",
+      "_toEntityKey": "00u1cagurdhtxqBdf4x7",
+      "_type": "okta_user_group_has_user",
+      "displayName": "HAS",
+    },
+    Object {
+      "_class": "HAS",
+      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
+      "_key": "00gs5to49AhMBaJNU4x6|has|00u2ot2iur46vIUsV4x7",
+      "_toEntityKey": "00u2ot2iur46vIUsV4x7",
+      "_type": "okta_user_group_has_user",
+      "displayName": "HAS",
+    },
+    Object {
+      "_class": "HAS",
+      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
+      "_key": "00gs5to49AhMBaJNU4x6|has|00us5to77GW1mVs6w4x6",
+      "_toEntityKey": "00us5to77GW1mVs6w4x6",
+      "_type": "okta_user_group_has_user",
+      "displayName": "HAS",
+    },
+    Object {
+      "_class": "HAS",
+      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
+      "_key": "00gs5to49AhMBaJNU4x6|has|00us5ty22kvu4NAxo4x6",
+      "_toEntityKey": "00us5ty22kvu4NAxo4x6",
+      "_type": "okta_user_group_has_user",
+      "displayName": "HAS",
+    },
+    Object {
+      "_class": "HAS",
+      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
+      "_key": "00gs5to49AhMBaJNU4x6|has|00us5z1aerBUBP41M4x6",
+      "_toEntityKey": "00us5z1aerBUBP41M4x6",
+      "_type": "okta_user_group_has_user",
+      "displayName": "HAS",
+    },
+    Object {
+      "_class": "HAS",
+      "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
+      "_key": "00gs5to49AhMBaJNU4x6|has|00us5zkpf7nGTeKXu4x6",
+      "_toEntityKey": "00us5zkpf7nGTeKXu4x6",
+      "_type": "okta_user_group_has_user",
+      "displayName": "HAS",
+    },
+    Object {
+      "_class": "HAS",
       "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
       "_key": "00gs5to49AhMBaJNU4x6|has|00us60gayc3EIwpRc4x6",
       "_toEntityKey": "00us60gayc3EIwpRc4x6",
       "_type": "okta_user_group_has_user",
+      "displayName": "HAS",
+    },
+    Object {
+      "_class": "HAS",
+      "_fromEntityKey": "okta_account_dev-857255.okta.com/",
+      "_key": "okta_account_dev-857255.okta.com/|has|00g2ovdjf9Ahbffgj4x7",
+      "_toEntityKey": "00g2ovdjf9Ahbffgj4x7",
+      "_type": "okta_account_has_user_group",
       "displayName": "HAS",
     },
     Object {
@@ -1113,10 +1113,10 @@ Object {
     "okta_account",
     "okta_service",
     "okta_account_has_service",
-    "okta_user_group",
-    "okta_account_has_user_group",
     "okta_user",
     "okta_account_has_user",
+    "okta_user_group",
+    "okta_account_has_user_group",
     "okta_user_group_has_user",
     "okta_application",
     "okta_account_has_application",

@@ -9,9 +9,11 @@ import {
 import { IntegrationConfig } from '../config';
 import getOktaAccountInfo from '../util/getOktaAccountInfo';
 
-export const DATA_ACCOUNT_ENTITY = 'DATA_ACCOUNT_ENTITY';
-export const SERVICE_ENTITY_TYPE = 'okta_service';
-export const SERVICE_ENTITY_CLASS = ['Service', 'Control'];
+import {
+  DATA_ACCOUNT_ENTITY,
+  SERVICE_ENTITY_TYPE,
+  SERVICE_ENTITY_CLASS,
+} from '../okta/constants';
 
 export async function fetchAccountDetails({
   jobState,

@@ -77,15 +77,15 @@ export class APIClient {
   }
 
   /**
-   * Iterates each group resource assigned to a given user.
+   * Iterates each user resource assigned to a given group.
    *
    * @param iteratee receives each resource to produce relationships
    */
-  public async iterateGroupsForUser(
-    user: OktaUser,
-    iteratee: ResourceIteratee<OktaUserGroup>,
+  public async iterateUsersForGroup(
+    group: OktaUserGroup,
+    iteratee: ResourceIteratee<OktaUser>,
   ): Promise<void> {
-    await this.oktaClient.listUserGroups(user.id).each(iteratee);
+    await this.oktaClient.listGroupUsers(group.id).each(iteratee);
   }
 
   /**
@@ -94,13 +94,10 @@ export class APIClient {
    * @param iteratee receives each resource to produce relationships
    */
   public async iterateFactorsForUser(
-    user: OktaUser,
+    userId: string,
     iteratee: ResourceIteratee<OktaFactor>,
   ): Promise<void> {
-    if (user.status !== 'DEPROVISIONED') {
-      //asking for factors for DEPROV users throws error
-      await this.oktaClient.listFactors(user.id).each(iteratee);
-    }
+    await this.oktaClient.listFactors(userId).each(iteratee);
   }
 
   /**
