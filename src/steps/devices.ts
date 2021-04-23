@@ -9,11 +9,9 @@ import {
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
 import { MFA_DEVICE_ENTITY_TYPE } from '../okta/constants';
+import { createMFADeviceEntity } from '../converters/device';
 
-export const USER_GROUP_ENTITY_TYPE = 'okta_user_group';
-export const APP_USER_GROUP_ENTITY_TYPE = 'okta_app_user_group';
-
-export async function fetchFactors({
+export async function fetchDevices({
   instance,
   jobState,
   logger,
@@ -26,29 +24,14 @@ export async function fetchFactors({
     async (userEntity) => {
       if (userEntity.status !== 'DEPROVISIONED') {
         //asking for factors for DEPROV users throws error
-        await apiClient.iterateFactorsForUser(
+        await apiClient.iterateDevicesForUser(
           userEntity._key,
-          async (factor) => {
-            const factorEntity = await jobState.addEntity(
+          async (device) => {
+            const deviceEntity = await jobState.addEntity(
               createIntegrationEntity({
                 entityData: {
-                  source: factor,
-                  assign: {
-                    _key: factor.id,
-                    _type: MFA_DEVICE_ENTITY_TYPE,
-                    _class: ['Key', 'AccessKey'],
-                    displayName: `${factor.provider} ${factor.factorType}`,
-                    id: factor.id,
-                    factorType: factor.factorType,
-                    provider: factor.provider,
-                    vendorName: factor.vendorName,
-                    device: factor.device,
-                    deviceType: factor.deviceType,
-                    status: factor.status,
-                    created: factor.created,
-                    lastUpdated: factor.lastUpdated,
-                    active: factor.status === 'ACTIVE',
-                  },
+                  source: device,
+                  assign: createMFADeviceEntity(device),
                 },
               }),
             );
@@ -57,7 +40,7 @@ export async function fetchFactors({
               createDirectRelationship({
                 _class: RelationshipClass.ASSIGNED,
                 from: userEntity,
-                to: factorEntity,
+                to: deviceEntity,
               }),
             );
           },
@@ -67,10 +50,10 @@ export async function fetchFactors({
   );
 }
 
-export const factorSteps: IntegrationStep<IntegrationConfig>[] = [
+export const deviceSteps: IntegrationStep<IntegrationConfig>[] = [
   {
-    id: 'fetch-factors',
-    name: 'Fetch Factors',
+    id: 'fetch-devices',
+    name: 'Fetch Devices',
     entities: [
       {
         resourceName: 'Okta Factor Device',
@@ -87,6 +70,6 @@ export const factorSteps: IntegrationStep<IntegrationConfig>[] = [
       },
     ],
     dependsOn: ['fetch-users'],
-    executionHandler: fetchFactors,
+    executionHandler: fetchDevices,
   },
 ];

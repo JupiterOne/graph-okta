@@ -1,23 +1,12 @@
-import {
-  convertProperties,
-  parseTimePropertyValue,
-} from '@jupiterone/integration-sdk-core';
+import { convertProperties } from '@jupiterone/integration-sdk-core';
 
 import * as url from 'url';
 
 import { OktaUser, OktaUserCredentials } from '../okta/types';
-import {
-  OktaIntegrationConfig,
-  StandardizedOktaFactor,
-  StandardizedOktaUser,
-} from '../types';
+import { OktaIntegrationConfig, StandardizedOktaUser } from '../types';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
 import { USER_ENTITY_TYPE } from '../okta/constants';
-
-function getTime(input) {
-  //just so we don't have to code below
-  return parseTimePropertyValue(input);
-}
+import getTime from '../util/getTime';
 
 export function createUserEntity(
   config: OktaIntegrationConfig,
@@ -48,7 +37,7 @@ export function createUserEntity(
     _key: id,
     _type: USER_ENTITY_TYPE,
     _class: 'User',
-    _rawData: [{ name: 'default', rawData: data }],
+    _rawData: [{ name: profile.login, rawData: data }],
     id,
     webLink,
     displayName: profile.login,
@@ -70,7 +59,6 @@ export function createUserEntity(
     passwordChanged: getTime(passwordChanged),
     passwordChangedOn: getTime(passwordChanged),
   };
-
   return entity;
 }
 

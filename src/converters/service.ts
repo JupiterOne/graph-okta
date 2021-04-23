@@ -1,9 +1,6 @@
 import { StandardizedOktaAccount, StandardizedOktaService } from '../types';
 
-export const SERVICE_ENTITY_TYPE = 'okta_service';
-export const SERVICE_ENTITY_CLASS = ['Service', 'Control'];
-
-export const ACCOUNT_SERVICE_RELATIONSHIP_TYPE = 'okta_account_has_service';
+import { SERVICE_ENTITY_TYPE, SERVICE_ENTITY_CLASS } from '../okta/constants';
 
 export function createSSOServiceEntity(
   account: StandardizedOktaAccount,
@@ -14,7 +11,7 @@ export function createSSOServiceEntity(
     _class: SERVICE_ENTITY_CLASS,
     name: 'SSO',
     displayName: 'Okta SSO',
-    category: 'security',
+    category: ['security'],
     function: 'SSO',
     controlDomain: 'identity-access',
   };
@@ -29,7 +26,7 @@ export function createMFAServiceEntity(
     _class: SERVICE_ENTITY_CLASS,
     name: 'MFA',
     displayName: 'Okta MFA',
-    category: 'security',
+    category: ['security'],
     function: 'MFA',
     controlDomain: 'identity-access',
   };

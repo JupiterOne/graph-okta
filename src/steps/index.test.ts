@@ -7,7 +7,7 @@ import { setupOktaRecording } from '../../test/setup/recording';
 import { IntegrationConfig } from '../config';
 import { fetchUsers } from './users';
 import { fetchGroups } from './groups';
-import { fetchFactors } from './factors';
+import { fetchDevices } from './devices';
 import { fetchApplications } from './applications';
 import { fetchAccountDetails } from './account';
 
@@ -34,7 +34,7 @@ test('should collect data', async () => {
   await fetchAccountDetails(context);
   await fetchUsers(context);
   await fetchGroups(context);
-  await fetchFactors(context);
+  await fetchDevices(context);
   await fetchApplications(context);
 
   // Review snapshot, failure is a regression

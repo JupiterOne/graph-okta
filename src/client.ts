@@ -93,7 +93,7 @@ export class APIClient {
    *
    * @param iteratee receives each resource to produce relationships
    */
-  public async iterateFactorsForUser(
+  public async iterateDevicesForUser(
     userId: string,
     iteratee: ResourceIteratee<OktaFactor>,
   ): Promise<void> {

@@ -1,7 +1,7 @@
 import { OktaFactor } from '../okta/types';
 import { StandardizedOktaFactor } from '../types';
 
-export const MFA_DEVICE_ENTITY_TYPE = 'mfa_device';
+import { MFA_DEVICE_ENTITY_TYPE } from '../okta/constants';
 
 export function createMFADeviceEntity(
   data: OktaFactor,

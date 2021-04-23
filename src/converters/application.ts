@@ -1,20 +1,11 @@
 import {
-  IntegrationRelationship,
-  MappedRelationshipFromIntegration,
+  MappedRelationship,
   RelationshipDirection,
-} from '@jupiterone/jupiter-managed-integration-sdk';
+} from '@jupiterone/integration-sdk-core';
+import * as lodash from 'lodash';
 import * as url from 'url';
-import {
-  OktaApplication,
-  OktaApplicationGroup,
-  OktaApplicationUser,
-} from '../okta/types';
-import {
-  StandardizedOktaApplication,
-  StandardizedOktaApplicationGroupRelationship,
-  StandardizedOktaApplicationUserRelationship,
-  OktaIntegrationConfig,
-} from '../types';
+import { OktaApplication } from '../okta/types';
+import { StandardizedOktaApplication, OktaIntegrationConfig } from '../types';
 import buildAppShortName from '../util/buildAppShortName';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
 import getOktaAccountInfo from '../util/getOktaAccountInfo';
@@ -24,16 +15,7 @@ import {
   isMultiInstanceApp,
 } from '../util/knownVendors';
 
-export const APPLICATION_ENTITY_TYPE = 'okta_application';
-export const APPLICATION_USER_RELATIONSHIP_TYPE =
-  'okta_user_assigned_application';
-export const GROUP_IAM_ROLE_RELATIONSHIP_TYPE =
-  'okta_user_group_assigned_aws_iam_role';
-export const USER_IAM_ROLE_RELATIONSHIP_TYPE =
-  'okta_user_assigned_aws_iam_role';
-
-export const APPLICATION_GROUP_RELATIONSHIP_TYPE =
-  'okta_group_assigned_application';
+import { APPLICATION_ENTITY_TYPE } from '../okta/constants';
 
 interface IntegrationInstance {
   id: string;
@@ -54,11 +36,11 @@ export function createApplicationEntity(
   let loginUrl;
 
   if (data._links?.logo) {
-    imageUrl = [data._links.logo].flat()[0].href;
+    imageUrl = lodash.flatten([data._links.logo])[0].href;
   }
 
   if (data._links?.appLinks) {
-    const links = [data._links.appLinks].flat();
+    const links = lodash.flatten([data._links.appLinks]);
     const link = links.find((l) => l.name === 'login') || links[0];
     loginUrl = link && link.href;
   }
@@ -70,7 +52,6 @@ export function createApplicationEntity(
     _key: data.id,
     _type: APPLICATION_ENTITY_TYPE,
     _class: 'Application',
-    _rawData: [{ name: 'default', rawData: data }],
     displayName: data.label || data.name || data.id,
     id: data.id,
     name: data.name || data.label,
@@ -123,105 +104,6 @@ export function createApplicationEntity(
   return entity;
 }
 
-export function createApplicationGroupRelationships(
-  application: StandardizedOktaApplication,
-  group: OktaApplicationGroup,
-): IntegrationRelationship[] {
-  const relationships: IntegrationRelationship[] = [];
-
-  const relationship: StandardizedOktaApplicationGroupRelationship = {
-    _key: `${group.id}|assigned|${application._key}`,
-    _type: APPLICATION_GROUP_RELATIONSHIP_TYPE,
-    _class: 'ASSIGNED',
-    _fromEntityKey: group.id,
-    _toEntityKey: application._key,
-    displayName: 'ASSIGNED',
-    applicationId: application.id,
-    groupId: group.id,
-    // Array property not supported on the edge in Neptune
-    roles:
-      group.profile && group.profile.samlRoles
-        ? JSON.stringify(group.profile.samlRoles)
-        : undefined,
-    role: group.profile ? group.profile.role : undefined,
-  };
-
-  if (application.awsAccountId) {
-    relationships.push(
-      ...convertAWSRolesToRelationships(
-        application,
-        group,
-        GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
-      ),
-    );
-  }
-
-  relationships.push(relationship);
-
-  return relationships;
-}
-
-export function createApplicationUserRelationships(
-  application: StandardizedOktaApplication,
-  user: OktaApplicationUser,
-): IntegrationRelationship[] {
-  const relationships: IntegrationRelationship[] = [];
-
-  const relationship: StandardizedOktaApplicationUserRelationship = {
-    _key: `${user.id}|assigned|${application._key}`,
-    _type: APPLICATION_USER_RELATIONSHIP_TYPE,
-    _class: 'ASSIGNED',
-    _fromEntityKey: user.id,
-    _toEntityKey: application._key,
-    displayName: 'ASSIGNED',
-    applicationId: application.id,
-    userId: user.id,
-    userEmail: user.profile.email,
-    // Array property not supported on the edge in Neptune
-    roles: user.profile.samlRoles
-      ? JSON.stringify(user.profile.samlRoles)
-      : undefined,
-    role: user.profile.role,
-  };
-
-  if (application.awsAccountId) {
-    relationships.push(
-      ...convertAWSRolesToRelationships(
-        application,
-        user,
-        USER_IAM_ROLE_RELATIONSHIP_TYPE,
-      ),
-    );
-  }
-
-  relationships.push(relationship);
-
-  return relationships;
-}
-
-function convertAWSRolesToRelationships(
-  application: StandardizedOktaApplication,
-  oktaPrincipal: OktaApplicationUser | OktaApplicationGroup,
-  relationshipType: string,
-): MappedRelationshipFromIntegration[] {
-  const relationships: MappedRelationshipFromIntegration[] = [];
-  if (application.awsAccountId && oktaPrincipal.profile) {
-    const profile = oktaPrincipal.profile;
-    for (const role of profile.samlRoles || [profile.role]) {
-      const relationship = mapAWSRoleAssignment({
-        sourceKey: oktaPrincipal.id,
-        role,
-        relationshipType,
-        awsAccountId: application.awsAccountId,
-      });
-      if (relationship) {
-        relationships.push(relationship);
-      }
-    }
-  }
-  return relationships;
-}
-
 /**
  * When an Okta application represents access to an AWS Account (the application
  * has an `awsAccountId`), the application user or group profile may define a
@@ -243,7 +125,7 @@ function convertAWSRolesToRelationships(
  * @param role the AWS IAM role identifier provided by Okta
  * @param awsAccountId the application `awsAccountId`
  */
-function mapAWSRoleAssignment({
+export function mapAWSRoleAssignment({
   sourceKey,
   role,
   relationshipType,
@@ -253,7 +135,7 @@ function mapAWSRoleAssignment({
   role: string;
   relationshipType: string;
   awsAccountId: string;
-}): MappedRelationshipFromIntegration | undefined {
+}): MappedRelationship | undefined {
   const regex = /\[?([a-zA-Z0-9_-]+)\]? -- ([a-zA-Z0-9_-]+)/;
   const match = role && regex.exec(role);
   if (match) {

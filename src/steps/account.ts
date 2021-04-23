@@ -8,6 +8,11 @@ import {
 
 import { IntegrationConfig } from '../config';
 import getOktaAccountInfo from '../util/getOktaAccountInfo';
+import { createAccountEntity } from '../converters/account';
+import {
+  createSSOServiceEntity,
+  createMFAServiceEntity,
+} from '../converters/service';
 
 import {
   DATA_ACCOUNT_ENTITY,
@@ -23,24 +28,17 @@ export async function fetchAccountDetails({
     name: instance.name,
     config: instance.config,
   });
-  let displayName = oktaAccountInfo.name;
-  if (oktaAccountInfo.preview) {
-    displayName += ' (preview)';
-  }
-  const accountId = instance.config.oktaOrgUrl.replace(/^https?:\/\//, '');
+
+  const accountProperties = createAccountEntity(
+    instance.config,
+    oktaAccountInfo,
+  );
+
   const accountEntity = await jobState.addEntity(
     createIntegrationEntity({
       entityData: {
         source: oktaAccountInfo,
-        assign: {
-          _key: `okta_account_${accountId}`,
-          _type: 'okta_account',
-          _class: 'Account',
-          name: oktaAccountInfo.name,
-          displayName: displayName,
-          webLink: instance.config.oktaOrgUrl,
-          accountId,
-        },
+        assign: accountProperties,
       },
     }),
   );
@@ -51,16 +49,7 @@ export async function fetchAccountDetails({
     createIntegrationEntity({
       entityData: {
         source: {},
-        assign: {
-          _type: SERVICE_ENTITY_TYPE,
-          _key: `okta:sso:${oktaAccountInfo.name}`,
-          _class: SERVICE_ENTITY_CLASS,
-          name: 'SSO',
-          displayName: 'Okta SSO',
-          category: ['security'],
-          function: 'SSO',
-          controlDomain: 'identity-access',
-        },
+        assign: createSSOServiceEntity(accountProperties),
       },
     }),
   );
@@ -77,16 +66,7 @@ export async function fetchAccountDetails({
     createIntegrationEntity({
       entityData: {
         source: {},
-        assign: {
-          _type: SERVICE_ENTITY_TYPE,
-          _key: `okta:mfa:${oktaAccountInfo.name}`,
-          _class: SERVICE_ENTITY_CLASS,
-          name: 'MFA',
-          displayName: 'Okta MFA',
-          category: ['security'],
-          function: 'MFA',
-          controlDomain: 'identity-access',
-        },
+        assign: createMFAServiceEntity(accountProperties),
       },
     }),
   );

@@ -1,5 +1,3 @@
-import * as url from 'url';
-
 import {
   createDirectRelationship,
   createIntegrationEntity,
@@ -7,7 +5,6 @@ import {
   IntegrationStep,
   IntegrationStepExecutionContext,
   RelationshipClass,
-  parseTimePropertyValue,
   IntegrationMissingKeyError,
 } from '@jupiterone/integration-sdk-core';
 
@@ -18,7 +15,7 @@ import {
   USER_GROUP_ENTITY_TYPE,
   APP_USER_GROUP_ENTITY_TYPE,
 } from '../okta/constants';
-import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
+import { createUserGroupEntity } from '../converters/group';
 
 export async function fetchGroups({
   instance,
@@ -30,41 +27,11 @@ export async function fetchGroups({
   const accountEntity = (await jobState.getData(DATA_ACCOUNT_ENTITY)) as Entity;
 
   await apiClient.iterateGroups(async (group) => {
-    const webLink = url.resolve(
-      getOktaAccountAdminUrl(instance.config),
-      `/admin/group/${group.id}`,
-    );
-    const entityType =
-      group.type === 'APP_GROUP'
-        ? APP_USER_GROUP_ENTITY_TYPE
-        : USER_GROUP_ENTITY_TYPE;
-
     const groupEntity = await jobState.addEntity(
       createIntegrationEntity({
         entityData: {
           source: group,
-          assign: {
-            _key: group.id,
-            _type: entityType,
-            _class: 'UserGroup',
-            id: group.id,
-            webLink: webLink,
-            name: group.profile.name,
-            displayName: group.profile.name,
-            created: parseTimePropertyValue(group.created)!,
-            createdOn: parseTimePropertyValue(group.created)!,
-            lastUpdated: parseTimePropertyValue(group.lastUpdated)!,
-            lastUpdatedOn: parseTimePropertyValue(group.lastUpdated)!,
-            lastMembershipUpdated: parseTimePropertyValue(
-              group.lastMembershipUpdated,
-            )!,
-            lastMembershipUpdatedOn: parseTimePropertyValue(
-              group.lastMembershipUpdated,
-            )!,
-            objectClass: group.objectClass,
-            type: group.type,
-            description: group.profile.description,
-          },
+          assign: createUserGroupEntity(instance.config, group),
         },
       }),
     );
