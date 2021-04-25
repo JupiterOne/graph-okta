@@ -8,6 +8,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+## 1.9.0 - 2021-04-25
+
+### Changed
+
+- Set `mfaEnabled` flag to `true` on `okta_user` entities when at least one MFA
+  device/factor assigned to the user is active.
+
 ## 1.8.0 - 2020-12-03
 
 ### Added

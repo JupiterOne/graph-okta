@@ -74,6 +74,10 @@ export default async function synchronizeUsers(
       newUserMFADeviceRelationships.push(
         createUserMfaDeviceRelationship(userEntity, mfaDeviceEntity),
       );
+
+      if (mfaDeviceEntity.active === true) {
+        userEntity.mfaEnabled = true;
+      }
     }
 
     for (const group of entry.data!.userGroups) {
