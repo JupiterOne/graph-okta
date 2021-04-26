@@ -26,7 +26,6 @@ import {
  */
 export class APIClient {
   oktaClient: OktaClient;
-  usersList: OktaUser[];
   constructor(readonly config: IntegrationConfig, logger: IntegrationLogger) {
     this.oktaClient = createOktaClient(logger, config);
   }

@@ -36,6 +36,10 @@ export async function fetchDevices({
               }),
             );
 
+            if (device.status === 'ACTIVE') {
+              userEntity.mfaEnabled = true;
+            }
+
             await jobState.addRelationship(
               createDirectRelationship({
                 _class: RelationshipClass.ASSIGNED,
