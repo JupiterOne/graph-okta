@@ -65,7 +65,7 @@ export interface StandardizedOktaUserGroup extends Entity {
   objectClass?: string[];
   type: string;
   name: string;
-  description: string;
+  description?: string;
 }
 
 export interface StandardizedOktaApplication extends Entity {

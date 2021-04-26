@@ -158,6 +158,18 @@ export const applicationSteps: IntegrationStep<IntegrationConfig>[] = [
         sourceType: 'okta_user',
         targetType: APPLICATION_ENTITY_TYPE,
       },
+      {
+        _type: USER_IAM_ROLE_RELATIONSHIP_TYPE,
+        _class: RelationshipClass.ASSIGNED,
+        sourceType: 'okta_user',
+        targetType: 'aws_iam_role',
+      },
+      {
+        _type: GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
+        _class: RelationshipClass.ASSIGNED,
+        sourceType: 'okta_user_group',
+        targetType: 'aws_iam_role',
+      },
     ],
     dependsOn: ['fetch-groups'],
     executionHandler: fetchApplications,

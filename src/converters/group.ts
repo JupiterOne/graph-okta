@@ -55,7 +55,7 @@ export function createUserGroupEntity(
     objectClass,
     type,
     name: profileName,
-    description: profileDescription,
+    description: profileDescription ? profileDescription : undefined,
   };
 
   return entity;
