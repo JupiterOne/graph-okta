@@ -28,8 +28,7 @@
   },
   "dependencies": {
     "@okta/okta-sdk-nodejs": "^4.5.1",
-    "lodash.startcase": "^4.4.0",
-    "promise-retry": "^1.1.1"
+    "lodash.startcase": "^4.4.0"
   },
   "peerDependencies": {
     "@jupiterone/integration-sdk-core": "^6.0.0"

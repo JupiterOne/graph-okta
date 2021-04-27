@@ -24,23 +24,6 @@ describe('creating group entity', () => {
     expect(createUserGroupEntity(config, group)).toEqual({
       _class: 'UserGroup',
       _key: 'id',
-      _rawData: [
-        {
-          name: 'name',
-          rawData: {
-            _links: '_links',
-            created: '2019-04-22T21:43:53.000Z',
-            id: 'id',
-            lastMembershipUpdated: '2019-04-22T21:43:53.000Z',
-            lastUpdated: '2019-04-22T21:43:53.000Z',
-            profile: {
-              description: 'description',
-              name: 'name',
-            },
-            type: 'APP_GROUP',
-          },
-        },
-      ],
       _type: 'okta_app_user_group',
       created: 1555969433000,
       createdOn: 1555969433000,
@@ -73,23 +56,6 @@ describe('creating group entity', () => {
     expect(createUserGroupEntity(config, group)).toEqual({
       _class: 'UserGroup',
       _key: 'id',
-      _rawData: [
-        {
-          name: 'name',
-          rawData: {
-            _links: '_links',
-            created: '2019-04-22T21:43:53.000Z',
-            id: 'id',
-            lastMembershipUpdated: '2019-04-22T21:43:53.000Z',
-            lastUpdated: '2019-04-22T21:43:53.000Z',
-            profile: {
-              description: 'description',
-              name: 'name',
-            },
-            type: 'just_type',
-          },
-        },
-      ],
       _type: 'okta_user_group',
       created: 1555969433000,
       createdOn: 1555969433000,
