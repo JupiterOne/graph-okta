@@ -37,7 +37,6 @@ export function createUserEntity(
     _key: id,
     _type: USER_ENTITY_TYPE,
     _class: 'User',
-    _rawData: [{ name: profile.login, rawData: data }],
     id,
     webLink,
     displayName: profile.login,
