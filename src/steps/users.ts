@@ -1,15 +1,14 @@
 import {
   createDirectRelationship,
-  createIntegrationEntity,
   Entity,
   IntegrationStep,
   IntegrationStepExecutionContext,
   RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
 
-import { createUserEntity } from '../converters/user';
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
+import { createUserEntity } from '../converters/user';
 import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
 
 export async function fetchUsers({
@@ -21,15 +20,8 @@ export async function fetchUsers({
   const accountEntity = (await jobState.getData(DATA_ACCOUNT_ENTITY)) as Entity;
 
   await apiClient.iterateUsers(async (user) => {
-    const userProperties = createUserEntity(instance.config, user);
-    delete user.credentials; //no PII in raw objects
     const userEntity = await jobState.addEntity(
-      createIntegrationEntity({
-        entityData: {
-          source: user,
-          assign: userProperties,
-        },
-      }),
+      createUserEntity(instance.config, user),
     );
 
     await jobState.addRelationship(

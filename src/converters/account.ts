@@ -1,7 +1,20 @@
-import { OktaAccountInfo } from '../okta/types';
-import { OktaIntegrationConfig, StandardizedOktaAccount } from '../types';
+import {
+  createDirectRelationship,
+  Relationship,
+  RelationshipClass,
+} from '@jupiterone/integration-sdk-core';
 
-import { ACCOUNT_ENTITY_TYPE } from '../okta/constants';
+import {
+  ACCOUNT_ENTITY_TYPE,
+  ACCOUNT_GROUP_RELATIONSHIP_TYPE,
+} from '../okta/constants';
+import { OktaAccountInfo } from '../okta/types';
+import {
+  OktaIntegrationConfig,
+  StandardizedOktaAccount,
+  StandardizedOktaApplication,
+  StandardizedOktaUserGroup,
+} from '../types';
 
 export function createAccountEntity(
   config: OktaIntegrationConfig,
@@ -23,4 +36,36 @@ export function createAccountEntity(
     accountId,
     webLink: config.oktaOrgUrl,
   };
+}
+
+export function createAccountApplicationRelationship(
+  account: StandardizedOktaAccount,
+  application: StandardizedOktaApplication,
+): Relationship {
+  return createDirectRelationship({
+    _class: RelationshipClass.HAS,
+    from: account,
+    to: application,
+    properties: {
+      accountUrl: account.webLink,
+      applicationId: application.id,
+      applicationName: application.name,
+    },
+  });
+}
+
+export function createAccountGroupRelationship(
+  account: StandardizedOktaAccount,
+  group: StandardizedOktaUserGroup,
+): Relationship {
+  return createDirectRelationship({
+    _class: RelationshipClass.HAS,
+    from: account,
+    to: group,
+    properties: {
+      _type: ACCOUNT_GROUP_RELATIONSHIP_TYPE,
+      accountUrl: account.webLink,
+      groupId: group.id,
+    },
+  });
 }

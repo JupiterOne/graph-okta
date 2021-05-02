@@ -61,37 +61,15 @@ describe('creating user entity', () => {
       },
     };
     expect(createUserEntity(config, user)).toEqual({
-      _class: 'User',
+      _class: ['User'],
       _key: 'id',
       _rawData: [
         {
-          name: 'login',
+          name: 'default',
           rawData: {
             _links: {},
             activated: '2019-04-22T21:43:53.000Z',
             created: '2019-04-22T21:43:53.000Z',
-            credentials: {
-              emails: [
-                {
-                  status: 'VERIFIED',
-                  type: 'type',
-                  value: 'value',
-                },
-                {
-                  status: 'UNVERIFIED',
-                  type: 'type',
-                  value: 'value',
-                },
-              ],
-              integration: {
-                name: 'name',
-                type: 'type',
-              },
-              password: 'password',
-              recovery_question: {
-                question: 'question',
-              },
-            },
             id: 'id',
             lastLogin: '2019-04-22T21:43:53.000Z',
             lastUpdated: '2019-04-22T21:43:53.000Z',
@@ -186,11 +164,11 @@ describe('creating user entity', () => {
       },
     };
     expect(createUserEntity(config, user)).toEqual({
-      _class: 'User',
+      _class: ['User'],
       _key: 'id',
       _rawData: [
         {
-          name: 'login',
+          name: 'default',
           rawData: {
             activated: '2019-04-22T21:43:53.000Z',
             created: '2019-04-22T21:43:53.000Z',

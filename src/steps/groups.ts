@@ -1,21 +1,26 @@
 import {
-  createDirectRelationship,
-  createIntegrationEntity,
-  Entity,
+  IntegrationMissingKeyError,
   IntegrationStep,
   IntegrationStepExecutionContext,
   RelationshipClass,
-  IntegrationMissingKeyError,
 } from '@jupiterone/integration-sdk-core';
-
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
+import { createAccountGroupRelationship } from '../converters';
 import {
-  DATA_ACCOUNT_ENTITY,
-  USER_GROUP_ENTITY_TYPE,
+  createGroupUserRelationship,
+  createUserGroupEntity,
+} from '../converters/group';
+import {
+  ACCOUNT_ENTITY_TYPE,
+  ACCOUNT_GROUP_RELATIONSHIP_TYPE,
   APP_USER_GROUP_ENTITY_TYPE,
+  DATA_ACCOUNT_ENTITY,
+  GROUP_USER_RELATIONSHIP_TYPE,
+  USER_ENTITY_TYPE,
+  USER_GROUP_ENTITY_TYPE,
 } from '../okta/constants';
-import { createUserGroupEntity } from '../converters/group';
+import { StandardizedOktaAccount, StandardizedOktaUserGroup } from '../types';
 
 export async function fetchGroups({
   instance,
@@ -24,27 +29,19 @@ export async function fetchGroups({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   const apiClient = createAPIClient(instance.config, logger);
 
-  const accountEntity = (await jobState.getData(DATA_ACCOUNT_ENTITY)) as Entity;
+  const accountEntity = (await jobState.getData(
+    DATA_ACCOUNT_ENTITY,
+  )) as StandardizedOktaAccount;
 
   await apiClient.iterateGroups(async (group) => {
-    const groupEntity = await jobState.addEntity(
-      createIntegrationEntity({
-        entityData: {
-          source: group,
-          assign: createUserGroupEntity(instance.config, group),
-        },
-      }),
-    );
+    const groupEntity = (await jobState.addEntity(
+      createUserGroupEntity(instance.config, group),
+    )) as StandardizedOktaUserGroup;
 
     await jobState.addRelationship(
-      createDirectRelationship({
-        _class: RelationshipClass.HAS,
-        from: accountEntity,
-        to: groupEntity,
-      }),
+      createAccountGroupRelationship(accountEntity, groupEntity),
     );
 
-    //add relationships for all users in this group
     await apiClient.iterateUsersForGroup(group, async (user) => {
       const userEntity = await jobState.findEntity(user.id);
 
@@ -55,11 +52,7 @@ export async function fetchGroups({
       }
 
       await jobState.addRelationship(
-        createDirectRelationship({
-          _class: RelationshipClass.HAS,
-          from: groupEntity,
-          to: userEntity,
-        }),
+        createGroupUserRelationship(groupEntity, userEntity),
       );
     });
   });
@@ -83,28 +76,28 @@ export const groupSteps: IntegrationStep<IntegrationConfig>[] = [
     ],
     relationships: [
       {
-        _type: 'okta_account_has_user_group',
+        _type: ACCOUNT_GROUP_RELATIONSHIP_TYPE,
         _class: RelationshipClass.HAS,
-        sourceType: 'okta_account',
+        sourceType: ACCOUNT_ENTITY_TYPE,
         targetType: USER_GROUP_ENTITY_TYPE,
       },
       {
-        _type: 'okta_account_has_app_user_group',
+        _type: ACCOUNT_GROUP_RELATIONSHIP_TYPE,
         _class: RelationshipClass.HAS,
-        sourceType: 'okta_account',
+        sourceType: ACCOUNT_ENTITY_TYPE,
         targetType: APP_USER_GROUP_ENTITY_TYPE,
       },
       {
-        _type: 'okta_user_group_has_user',
+        _type: GROUP_USER_RELATIONSHIP_TYPE,
         _class: RelationshipClass.HAS,
         sourceType: USER_GROUP_ENTITY_TYPE,
-        targetType: 'okta_user',
+        targetType: USER_ENTITY_TYPE,
       },
       {
-        _type: 'okta_app_user_group_has_user',
+        _type: GROUP_USER_RELATIONSHIP_TYPE,
         _class: RelationshipClass.HAS,
         sourceType: APP_USER_GROUP_ENTITY_TYPE,
-        targetType: 'okta_user',
+        targetType: USER_ENTITY_TYPE,
       },
     ],
     dependsOn: ['fetch-users'],

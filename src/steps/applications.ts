@@ -1,25 +1,30 @@
 import {
-  createDirectRelationship,
-  createIntegrationEntity,
-  Entity,
+  IntegrationMissingKeyError,
   IntegrationStep,
   IntegrationStepExecutionContext,
   RelationshipClass,
-  IntegrationMissingKeyError,
 } from '@jupiterone/integration-sdk-core';
+
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import { USER_GROUP_ENTITY_TYPE, DATA_ACCOUNT_ENTITY } from '../okta/constants';
-
 import {
+  createAccountApplicationRelationship,
+  createApplicationEntity,
+  createApplicationGroupRelationships,
+  createApplicationUserRelationships,
+} from '../converters';
+import {
+  ACCOUNT_APPLICATION_RELATIONSHIP_TYPE,
+  ACCOUNT_ENTITY_TYPE,
   APPLICATION_ENTITY_TYPE,
+  APPLICATION_GROUP_RELATIONSHIP_TYPE,
+  APPLICATION_USER_RELATIONSHIP_TYPE,
+  DATA_ACCOUNT_ENTITY,
   GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
+  USER_ENTITY_TYPE,
   USER_IAM_ROLE_RELATIONSHIP_TYPE,
 } from '../okta/constants';
-import {
-  createApplicationEntity,
-  mapAWSRoleAssignment,
-} from '../converters/application';
+import { StandardizedOktaAccount, StandardizedOktaApplication } from '../types';
 
 export async function fetchApplications({
   instance,
@@ -28,26 +33,17 @@ export async function fetchApplications({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   const apiClient = createAPIClient(instance.config, logger);
 
-  const accountEntity = (await jobState.getData(DATA_ACCOUNT_ENTITY)) as Entity;
+  const accountEntity = (await jobState.getData(
+    DATA_ACCOUNT_ENTITY,
+  )) as StandardizedOktaAccount;
 
   await apiClient.iterateApplications(async (app) => {
-    const appProperties = createApplicationEntity(instance, app);
-    delete app.credentials; //some OAuth config options stored here
-    const appEntity = await jobState.addEntity(
-      createIntegrationEntity({
-        entityData: {
-          source: app,
-          assign: appProperties,
-        },
-      }),
-    );
+    const appEntity = (await jobState.addEntity(
+      createApplicationEntity(instance, app),
+    )) as StandardizedOktaApplication;
 
     await jobState.addRelationship(
-      createDirectRelationship({
-        _class: RelationshipClass.HAS,
-        from: accountEntity,
-        to: appEntity,
-      }),
+      createAccountApplicationRelationship(accountEntity, appEntity),
     );
 
     //get the groups that are assigned to this app
@@ -60,32 +56,9 @@ export async function fetchApplications({
         );
       }
 
-      await jobState.addRelationship(
-        createDirectRelationship({
-          _class: RelationshipClass.ASSIGNED,
-          from: groupEntity,
-          to: appEntity,
-        }),
+      await jobState.addRelationships(
+        createApplicationGroupRelationships(appEntity, group),
       );
-
-      //if this appEntity points to an AWS IAM resource,
-      //also add global mappings for this group to that resource
-      if (appProperties['awsAccountId']) {
-        if (group.profile) {
-          const profile = group.profile;
-          for (const role of profile.samlRoles || [profile.role]) {
-            const relationship = mapAWSRoleAssignment({
-              sourceKey: group.id,
-              role,
-              relationshipType: GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
-              awsAccountId: appProperties['awsAccountId'],
-            });
-            if (relationship) {
-              await jobState.addRelationship(relationship);
-            }
-          }
-        }
-      }
     });
 
     //get the individual users that are assigned to this app (ie. not assigned as part of group)
@@ -98,32 +71,9 @@ export async function fetchApplications({
         );
       }
 
-      await jobState.addRelationship(
-        createDirectRelationship({
-          _class: RelationshipClass.ASSIGNED,
-          from: userEntity,
-          to: appEntity,
-        }),
+      await jobState.addRelationships(
+        createApplicationUserRelationships(appEntity, user),
       );
-
-      //if this appEntity points to an AWS IAM resource,
-      //also add global mappings for this user to that resource
-      if (appProperties['awsAccountId']) {
-        if (user.profile) {
-          const profile = user.profile;
-          for (const role of profile.samlRoles || [profile.role]) {
-            const relationship = mapAWSRoleAssignment({
-              sourceKey: user.id,
-              role: role || '',
-              relationshipType: USER_IAM_ROLE_RELATIONSHIP_TYPE,
-              awsAccountId: appProperties['awsAccountId'],
-            });
-            if (relationship) {
-              await jobState.addRelationship(relationship);
-            }
-          }
-        }
-      }
     });
   });
 }
@@ -141,27 +91,27 @@ export const applicationSteps: IntegrationStep<IntegrationConfig>[] = [
     ],
     relationships: [
       {
-        _type: 'okta_account_has_application',
+        _type: ACCOUNT_APPLICATION_RELATIONSHIP_TYPE,
         _class: RelationshipClass.HAS,
-        sourceType: 'okta_account',
+        sourceType: ACCOUNT_ENTITY_TYPE,
         targetType: APPLICATION_ENTITY_TYPE,
       },
       {
-        _type: 'okta_user_group_assigned_application',
+        _type: APPLICATION_GROUP_RELATIONSHIP_TYPE,
         _class: RelationshipClass.ASSIGNED,
-        sourceType: USER_GROUP_ENTITY_TYPE,
+        sourceType: 'okta_group',
         targetType: APPLICATION_ENTITY_TYPE,
       },
       {
-        _type: 'okta_user_assigned_application',
+        _type: APPLICATION_USER_RELATIONSHIP_TYPE,
         _class: RelationshipClass.ASSIGNED,
-        sourceType: 'okta_user',
+        sourceType: USER_ENTITY_TYPE,
         targetType: APPLICATION_ENTITY_TYPE,
       },
       {
         _type: USER_IAM_ROLE_RELATIONSHIP_TYPE,
         _class: RelationshipClass.ASSIGNED,
-        sourceType: 'okta_user',
+        sourceType: USER_ENTITY_TYPE,
         targetType: 'aws_iam_role',
       },
       {

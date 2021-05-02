@@ -66,36 +66,7 @@ Object {
       "_rawData": Array [
         Object {
           "name": "default",
-          "rawData": User {
-            "_links": Object {
-              "self": Object {
-                "href": "https://dev-857255.okta.com/api/v1/users/00u1cagurdhtxqBdf4x7",
-              },
-            },
-            "activated": "2020-12-02T17:07:38.000Z",
-            "created": "2020-11-06T15:47:18.000Z",
-            "id": "00u1cagurdhtxqBdf4x7",
-            "lastLogin": "2020-12-03T16:39:33.000Z",
-            "lastUpdated": "2020-12-02T17:18:55.000Z",
-            "passwordChanged": "2020-12-02T17:18:55.000Z",
-            "profile": UserProfile {
-              "email": "nick.dowmon@jupiterone.com",
-              "firstName": "Nick",
-              "lastName": "Dowmon",
-              "login": "nick.dowmon@jupiterone.com",
-              "mobilePhone": null,
-              "secondEmail": null,
-            },
-            "status": "ACTIVE",
-            "statusChanged": "2020-12-02T17:18:55.000Z",
-            "type": UserType {
-              "id": "otys5to4jqDf0Ws0W4x6",
-            },
-          },
-        },
-        Object {
-          "name": "nick.dowmon@jupiterone.com",
-          "rawData": User {
+          "rawData": Object {
             "_links": Object {
               "self": Object {
                 "href": "https://dev-857255.okta.com/api/v1/users/00u1cagurdhtxqBdf4x7",
@@ -160,36 +131,7 @@ Object {
       "_rawData": Array [
         Object {
           "name": "default",
-          "rawData": User {
-            "_links": Object {
-              "self": Object {
-                "href": "https://dev-857255.okta.com/api/v1/users/00u2ot2iur46vIUsV4x7",
-              },
-            },
-            "activated": "2021-03-25T13:00:33.000Z",
-            "created": "2021-03-25T13:00:33.000Z",
-            "id": "00u2ot2iur46vIUsV4x7",
-            "lastLogin": "2021-04-13T15:20:22.000Z",
-            "lastUpdated": "2021-03-25T15:00:14.000Z",
-            "passwordChanged": "2021-03-25T15:00:14.000Z",
-            "profile": UserProfile {
-              "email": "thomaskevincasey74@gmail.com",
-              "firstName": "Kevin",
-              "lastName": "Casey",
-              "login": "thomaskevincasey74@gmail.com",
-              "mobilePhone": null,
-              "secondEmail": null,
-            },
-            "status": "ACTIVE",
-            "statusChanged": "2021-03-25T15:00:14.000Z",
-            "type": UserType {
-              "id": "otys5to4jqDf0Ws0W4x6",
-            },
-          },
-        },
-        Object {
-          "name": "thomaskevincasey74@gmail.com",
-          "rawData": User {
+          "rawData": Object {
             "_links": Object {
               "self": Object {
                 "href": "https://dev-857255.okta.com/api/v1/users/00u2ot2iur46vIUsV4x7",
@@ -254,36 +196,7 @@ Object {
       "_rawData": Array [
         Object {
           "name": "default",
-          "rawData": User {
-            "_links": Object {
-              "self": Object {
-                "href": "https://dev-857255.okta.com/api/v1/users/00us5to77GW1mVs6w4x6",
-              },
-            },
-            "activated": null,
-            "created": "2020-08-27T01:06:39.000Z",
-            "id": "00us5to77GW1mVs6w4x6",
-            "lastLogin": "2020-11-06T15:46:17.000Z",
-            "lastUpdated": "2020-08-27T01:08:57.000Z",
-            "passwordChanged": "2020-08-27T01:08:57.000Z",
-            "profile": UserProfile {
-              "email": "erkang.zheng@jupiterone.com",
-              "firstName": "Erkang",
-              "lastName": "Zheng",
-              "login": "erkang.zheng@jupiterone.com",
-              "mobilePhone": null,
-              "secondEmail": null,
-            },
-            "status": "ACTIVE",
-            "statusChanged": "2020-08-27T01:08:57.000Z",
-            "type": UserType {
-              "id": "otys5to4jqDf0Ws0W4x6",
-            },
-          },
-        },
-        Object {
-          "name": "erkang.zheng@jupiterone.com",
-          "rawData": User {
+          "rawData": Object {
             "_links": Object {
               "self": Object {
                 "href": "https://dev-857255.okta.com/api/v1/users/00us5to77GW1mVs6w4x6",
@@ -348,36 +261,7 @@ Object {
       "_rawData": Array [
         Object {
           "name": "default",
-          "rawData": User {
-            "_links": Object {
-              "self": Object {
-                "href": "https://dev-857255.okta.com/api/v1/users/00us5ty22kvu4NAxo4x6",
-              },
-            },
-            "activated": "2020-08-27T01:10:47.000Z",
-            "created": "2020-08-27T01:10:40.000Z",
-            "id": "00us5ty22kvu4NAxo4x6",
-            "lastLogin": "2020-11-09T22:21:23.000Z",
-            "lastUpdated": "2020-11-09T22:21:23.000Z",
-            "passwordChanged": "2020-11-09T22:21:23.000Z",
-            "profile": UserProfile {
-              "email": "austin.kelleher@jupiterone.com",
-              "firstName": "Austin",
-              "lastName": "Kelleher",
-              "login": "austin.kelleher@jupiterone.com",
-              "mobilePhone": null,
-              "secondEmail": null,
-            },
-            "status": "ACTIVE",
-            "statusChanged": "2020-08-27T11:32:46.000Z",
-            "type": UserType {
-              "id": "otys5to4jqDf0Ws0W4x6",
-            },
-          },
-        },
-        Object {
-          "name": "austin.kelleher@jupiterone.com",
-          "rawData": User {
+          "rawData": Object {
             "_links": Object {
               "self": Object {
                 "href": "https://dev-857255.okta.com/api/v1/users/00us5ty22kvu4NAxo4x6",
@@ -442,36 +326,7 @@ Object {
       "_rawData": Array [
         Object {
           "name": "default",
-          "rawData": User {
-            "_links": Object {
-              "self": Object {
-                "href": "https://dev-857255.okta.com/api/v1/users/00us5z1aerBUBP41M4x6",
-              },
-            },
-            "activated": "2020-08-27T01:10:15.000Z",
-            "created": "2020-08-27T01:10:14.000Z",
-            "id": "00us5z1aerBUBP41M4x6",
-            "lastLogin": "2020-08-27T14:59:28.000Z",
-            "lastUpdated": "2020-08-27T14:59:28.000Z",
-            "passwordChanged": "2020-08-27T14:59:28.000Z",
-            "profile": UserProfile {
-              "email": "akash.ganapathi@jupiterone.com",
-              "firstName": "Akash",
-              "lastName": "Ganapathi",
-              "login": "akash.ganapathi@jupiterone.com",
-              "mobilePhone": null,
-              "secondEmail": null,
-            },
-            "status": "ACTIVE",
-            "statusChanged": "2020-08-27T14:59:28.000Z",
-            "type": UserType {
-              "id": "otys5to4jqDf0Ws0W4x6",
-            },
-          },
-        },
-        Object {
-          "name": "akash.ganapathi@jupiterone.com",
-          "rawData": User {
+          "rawData": Object {
             "_links": Object {
               "self": Object {
                 "href": "https://dev-857255.okta.com/api/v1/users/00us5z1aerBUBP41M4x6",
@@ -536,36 +391,7 @@ Object {
       "_rawData": Array [
         Object {
           "name": "default",
-          "rawData": User {
-            "_links": Object {
-              "self": Object {
-                "href": "https://dev-857255.okta.com/api/v1/users/00us5zkpf7nGTeKXu4x6",
-              },
-            },
-            "activated": "2020-08-27T01:09:43.000Z",
-            "created": "2020-08-27T01:09:43.000Z",
-            "id": "00us5zkpf7nGTeKXu4x6",
-            "lastLogin": "2021-03-29T17:25:51.000Z",
-            "lastUpdated": "2020-08-27T15:09:23.000Z",
-            "passwordChanged": "2020-08-27T15:09:23.000Z",
-            "profile": UserProfile {
-              "email": "adam.williams@jupiterone.com",
-              "firstName": "Adam",
-              "lastName": "Williams",
-              "login": "adam.williams@jupiterone.com",
-              "mobilePhone": null,
-              "secondEmail": null,
-            },
-            "status": "ACTIVE",
-            "statusChanged": "2020-08-27T15:09:23.000Z",
-            "type": UserType {
-              "id": "otys5to4jqDf0Ws0W4x6",
-            },
-          },
-        },
-        Object {
-          "name": "adam.williams@jupiterone.com",
-          "rawData": User {
+          "rawData": Object {
             "_links": Object {
               "self": Object {
                 "href": "https://dev-857255.okta.com/api/v1/users/00us5zkpf7nGTeKXu4x6",
@@ -630,36 +456,7 @@ Object {
       "_rawData": Array [
         Object {
           "name": "default",
-          "rawData": User {
-            "_links": Object {
-              "self": Object {
-                "href": "https://dev-857255.okta.com/api/v1/users/00us60gayc3EIwpRc4x6",
-              },
-            },
-            "activated": "2020-08-27T01:21:05.000Z",
-            "created": "2020-08-27T01:17:24.000Z",
-            "id": "00us60gayc3EIwpRc4x6",
-            "lastLogin": null,
-            "lastUpdated": "2020-08-27T01:21:25.000Z",
-            "passwordChanged": null,
-            "profile": UserProfile {
-              "email": "test@jupiterone.com",
-              "firstName": "Test",
-              "lastName": "Test",
-              "login": "test@jupiterone.com",
-              "mobilePhone": null,
-              "secondEmail": null,
-            },
-            "status": "DEPROVISIONED",
-            "statusChanged": "2020-08-27T01:21:25.000Z",
-            "type": UserType {
-              "id": "otys5to4jqDf0Ws0W4x6",
-            },
-          },
-        },
-        Object {
-          "name": "test@jupiterone.com",
-          "rawData": User {
+          "rawData": Object {
             "_links": Object {
               "self": Object {
                 "href": "https://dev-857255.okta.com/api/v1/users/00us60gayc3EIwpRc4x6",
@@ -759,43 +556,6 @@ Object {
             "type": "BUILT_IN",
           },
         },
-        Object {
-          "name": "Everyone",
-          "rawData": Group {
-            "_links": Object {
-              "apps": Object {
-                "href": "https://dev-857255.okta.com/api/v1/groups/00gs5to49AhMBaJNU4x6/apps",
-              },
-              "logo": Array [
-                Object {
-                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-medium.1a5ebe44c4244fb796c235d86b47e3bb.png",
-                  "name": "medium",
-                  "type": "image/png",
-                },
-                Object {
-                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-large.d9cfbd8a00a4feac1aa5612ba02e99c0.png",
-                  "name": "large",
-                  "type": "image/png",
-                },
-              ],
-              "users": Object {
-                "href": "https://dev-857255.okta.com/api/v1/groups/00gs5to49AhMBaJNU4x6/users",
-              },
-            },
-            "created": "2020-08-27T01:06:34.000Z",
-            "id": "00gs5to49AhMBaJNU4x6",
-            "lastMembershipUpdated": "2021-03-25T13:00:33.000Z",
-            "lastUpdated": "2020-08-27T01:06:34.000Z",
-            "objectClass": Array [
-              "okta:user_group",
-            ],
-            "profile": GroupProfile {
-              "description": "All users in your organization",
-              "name": "Everyone",
-            },
-            "type": "BUILT_IN",
-          },
-        },
       ],
       "_type": "okta_user_group",
       "created": 1598490394000,
@@ -857,43 +617,6 @@ Object {
             "type": "OKTA_GROUP",
           },
         },
-        Object {
-          "name": "Test Group",
-          "rawData": Group {
-            "_links": Object {
-              "apps": Object {
-                "href": "https://dev-857255.okta.com/api/v1/groups/00g2ovdjf9Ahbffgj4x7/apps",
-              },
-              "logo": Array [
-                Object {
-                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-medium.1a5ebe44c4244fb796c235d86b47e3bb.png",
-                  "name": "medium",
-                  "type": "image/png",
-                },
-                Object {
-                  "href": "https://ok11static.oktacdn.com/assets/img/logos/groups/odyssey/okta-large.d9cfbd8a00a4feac1aa5612ba02e99c0.png",
-                  "name": "large",
-                  "type": "image/png",
-                },
-              ],
-              "users": Object {
-                "href": "https://dev-857255.okta.com/api/v1/groups/00g2ovdjf9Ahbffgj4x7/users",
-              },
-            },
-            "created": "2021-03-25T16:07:23.000Z",
-            "id": "00g2ovdjf9Ahbffgj4x7",
-            "lastMembershipUpdated": "2021-03-25T16:07:23.000Z",
-            "lastUpdated": "2021-03-25T16:07:23.000Z",
-            "objectClass": Array [
-              "okta:user_group",
-            ],
-            "profile": GroupProfile {
-              "description": "A group of testers testing groups of tests",
-              "name": "Test Group",
-            },
-            "type": "OKTA_GROUP",
-          },
-        },
       ],
       "_type": "okta_user_group",
       "created": 1616688443000,
@@ -920,7 +643,7 @@ Object {
       "_rawData": Array [
         Object {
           "name": "default",
-          "rawData": OpenIdConnectApplication {
+          "rawData": Object {
             "_links": Object {
               "appLinks": Array [],
               "deactivate": Object {
@@ -1005,7 +728,7 @@ Object {
       "_rawData": Array [
         Object {
           "name": "default",
-          "rawData": AutoLoginApplication {
+          "rawData": Object {
             "_links": Object {
               "appLinks": Array [
                 Object {
@@ -1103,7 +826,7 @@ Object {
       "_rawData": Array [
         Object {
           "name": "default",
-          "rawData": OpenIdConnectApplication {
+          "rawData": Object {
             "_links": Object {
               "appLinks": Array [
                 Object {
@@ -1267,72 +990,90 @@ Object {
       "_fromEntityKey": "okta_account_dev-857255.okta.com/",
       "_key": "okta_account_dev-857255.okta.com/|has|00gs5to49AhMBaJNU4x6",
       "_toEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_type": "okta_account_has_user_group",
+      "_type": "okta_account_has_group",
+      "accountUrl": "https://dev-857255.okta.com/",
       "displayName": "HAS",
+      "groupId": "00gs5to49AhMBaJNU4x6",
     },
     Object {
       "_class": "HAS",
       "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00u1cagurdhtxqBdf4x7",
+      "_key": "00gs5to49AhMBaJNU4x6|has_user|00u1cagurdhtxqBdf4x7",
       "_toEntityKey": "00u1cagurdhtxqBdf4x7",
-      "_type": "okta_user_group_has_user",
+      "_type": "okta_group_has_user",
       "displayName": "HAS",
+      "groupId": "00gs5to49AhMBaJNU4x6",
+      "userId": "00u1cagurdhtxqBdf4x7",
     },
     Object {
       "_class": "HAS",
       "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00u2ot2iur46vIUsV4x7",
+      "_key": "00gs5to49AhMBaJNU4x6|has_user|00u2ot2iur46vIUsV4x7",
       "_toEntityKey": "00u2ot2iur46vIUsV4x7",
-      "_type": "okta_user_group_has_user",
+      "_type": "okta_group_has_user",
       "displayName": "HAS",
+      "groupId": "00gs5to49AhMBaJNU4x6",
+      "userId": "00u2ot2iur46vIUsV4x7",
     },
     Object {
       "_class": "HAS",
       "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00us5to77GW1mVs6w4x6",
+      "_key": "00gs5to49AhMBaJNU4x6|has_user|00us5to77GW1mVs6w4x6",
       "_toEntityKey": "00us5to77GW1mVs6w4x6",
-      "_type": "okta_user_group_has_user",
+      "_type": "okta_group_has_user",
       "displayName": "HAS",
+      "groupId": "00gs5to49AhMBaJNU4x6",
+      "userId": "00us5to77GW1mVs6w4x6",
     },
     Object {
       "_class": "HAS",
       "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00us5ty22kvu4NAxo4x6",
+      "_key": "00gs5to49AhMBaJNU4x6|has_user|00us5ty22kvu4NAxo4x6",
       "_toEntityKey": "00us5ty22kvu4NAxo4x6",
-      "_type": "okta_user_group_has_user",
+      "_type": "okta_group_has_user",
       "displayName": "HAS",
+      "groupId": "00gs5to49AhMBaJNU4x6",
+      "userId": "00us5ty22kvu4NAxo4x6",
     },
     Object {
       "_class": "HAS",
       "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00us5z1aerBUBP41M4x6",
+      "_key": "00gs5to49AhMBaJNU4x6|has_user|00us5z1aerBUBP41M4x6",
       "_toEntityKey": "00us5z1aerBUBP41M4x6",
-      "_type": "okta_user_group_has_user",
+      "_type": "okta_group_has_user",
       "displayName": "HAS",
+      "groupId": "00gs5to49AhMBaJNU4x6",
+      "userId": "00us5z1aerBUBP41M4x6",
     },
     Object {
       "_class": "HAS",
       "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00us5zkpf7nGTeKXu4x6",
+      "_key": "00gs5to49AhMBaJNU4x6|has_user|00us5zkpf7nGTeKXu4x6",
       "_toEntityKey": "00us5zkpf7nGTeKXu4x6",
-      "_type": "okta_user_group_has_user",
+      "_type": "okta_group_has_user",
       "displayName": "HAS",
+      "groupId": "00gs5to49AhMBaJNU4x6",
+      "userId": "00us5zkpf7nGTeKXu4x6",
     },
     Object {
       "_class": "HAS",
       "_fromEntityKey": "00gs5to49AhMBaJNU4x6",
-      "_key": "00gs5to49AhMBaJNU4x6|has|00us60gayc3EIwpRc4x6",
+      "_key": "00gs5to49AhMBaJNU4x6|has_user|00us60gayc3EIwpRc4x6",
       "_toEntityKey": "00us60gayc3EIwpRc4x6",
-      "_type": "okta_user_group_has_user",
+      "_type": "okta_group_has_user",
       "displayName": "HAS",
+      "groupId": "00gs5to49AhMBaJNU4x6",
+      "userId": "00us60gayc3EIwpRc4x6",
     },
     Object {
       "_class": "HAS",
       "_fromEntityKey": "okta_account_dev-857255.okta.com/",
       "_key": "okta_account_dev-857255.okta.com/|has|00g2ovdjf9Ahbffgj4x7",
       "_toEntityKey": "00g2ovdjf9Ahbffgj4x7",
-      "_type": "okta_account_has_user_group",
+      "_type": "okta_account_has_group",
+      "accountUrl": "https://dev-857255.okta.com/",
       "displayName": "HAS",
+      "groupId": "00g2ovdjf9Ahbffgj4x7",
     },
     Object {
       "_class": "HAS",
@@ -1340,6 +1081,9 @@ Object {
       "_key": "okta_account_dev-857255.okta.com/|has|0oa2s9fk7q82KPy9V4x7",
       "_toEntityKey": "0oa2s9fk7q82KPy9V4x7",
       "_type": "okta_account_has_application",
+      "accountUrl": "https://dev-857255.okta.com/",
+      "applicationId": "0oa2s9fk7q82KPy9V4x7",
+      "applicationName": "okta_browser_plugin",
       "displayName": "HAS",
     },
     Object {
@@ -1348,6 +1092,9 @@ Object {
       "_key": "okta_account_dev-857255.okta.com/|has|0oa2vpmqxp82pl9sk4x7",
       "_toEntityKey": "0oa2vpmqxp82pl9sk4x7",
       "_type": "okta_account_has_application",
+      "accountUrl": "https://dev-857255.okta.com/",
+      "applicationId": "0oa2vpmqxp82pl9sk4x7",
+      "applicationName": "slack",
       "displayName": "HAS",
     },
     Object {
@@ -1355,8 +1102,12 @@ Object {
       "_fromEntityKey": "00g2ovdjf9Ahbffgj4x7",
       "_key": "00g2ovdjf9Ahbffgj4x7|assigned|0oa2vpmqxp82pl9sk4x7",
       "_toEntityKey": "0oa2vpmqxp82pl9sk4x7",
-      "_type": "okta_user_group_assigned_application",
+      "_type": "okta_group_assigned_application",
+      "applicationId": "0oa2vpmqxp82pl9sk4x7",
       "displayName": "ASSIGNED",
+      "groupId": "00g2ovdjf9Ahbffgj4x7",
+      "role": undefined,
+      "roles": undefined,
     },
     Object {
       "_class": "ASSIGNED",
@@ -1364,7 +1115,12 @@ Object {
       "_key": "00u2ot2iur46vIUsV4x7|assigned|0oa2vpmqxp82pl9sk4x7",
       "_toEntityKey": "0oa2vpmqxp82pl9sk4x7",
       "_type": "okta_user_assigned_application",
+      "applicationId": "0oa2vpmqxp82pl9sk4x7",
       "displayName": "ASSIGNED",
+      "role": undefined,
+      "roles": undefined,
+      "userEmail": undefined,
+      "userId": "00u2ot2iur46vIUsV4x7",
     },
     Object {
       "_class": "HAS",
@@ -1372,6 +1128,9 @@ Object {
       "_key": "okta_account_dev-857255.okta.com/|has|0oas5to408GEd54s04x6",
       "_toEntityKey": "0oas5to408GEd54s04x6",
       "_type": "okta_account_has_application",
+      "accountUrl": "https://dev-857255.okta.com/",
+      "applicationId": "0oas5to408GEd54s04x6",
+      "applicationName": "saasure",
       "displayName": "HAS",
     },
     Object {
@@ -1380,7 +1139,12 @@ Object {
       "_key": "00us5zkpf7nGTeKXu4x6|assigned|0oas5to408GEd54s04x6",
       "_toEntityKey": "0oas5to408GEd54s04x6",
       "_type": "okta_user_assigned_application",
+      "applicationId": "0oas5to408GEd54s04x6",
       "displayName": "ASSIGNED",
+      "role": undefined,
+      "roles": undefined,
+      "userEmail": undefined,
+      "userId": "00us5zkpf7nGTeKXu4x6",
     },
     Object {
       "_class": "ASSIGNED",
@@ -1388,7 +1152,12 @@ Object {
       "_key": "00u1cagurdhtxqBdf4x7|assigned|0oas5to408GEd54s04x6",
       "_toEntityKey": "0oas5to408GEd54s04x6",
       "_type": "okta_user_assigned_application",
+      "applicationId": "0oas5to408GEd54s04x6",
       "displayName": "ASSIGNED",
+      "role": undefined,
+      "roles": undefined,
+      "userEmail": undefined,
+      "userId": "00u1cagurdhtxqBdf4x7",
     },
     Object {
       "_class": "ASSIGNED",
@@ -1396,7 +1165,12 @@ Object {
       "_key": "00u2ot2iur46vIUsV4x7|assigned|0oas5to408GEd54s04x6",
       "_toEntityKey": "0oas5to408GEd54s04x6",
       "_type": "okta_user_assigned_application",
+      "applicationId": "0oas5to408GEd54s04x6",
       "displayName": "ASSIGNED",
+      "role": undefined,
+      "roles": undefined,
+      "userEmail": undefined,
+      "userId": "00u2ot2iur46vIUsV4x7",
     },
     Object {
       "_class": "ASSIGNED",
@@ -1404,7 +1178,12 @@ Object {
       "_key": "00us5to77GW1mVs6w4x6|assigned|0oas5to408GEd54s04x6",
       "_toEntityKey": "0oas5to408GEd54s04x6",
       "_type": "okta_user_assigned_application",
+      "applicationId": "0oas5to408GEd54s04x6",
       "displayName": "ASSIGNED",
+      "role": undefined,
+      "roles": undefined,
+      "userEmail": undefined,
+      "userId": "00us5to77GW1mVs6w4x6",
     },
   ],
   "encounteredTypes": Array [
@@ -1414,11 +1193,11 @@ Object {
     "okta_user",
     "okta_account_has_user",
     "okta_user_group",
-    "okta_account_has_user_group",
-    "okta_user_group_has_user",
+    "okta_account_has_group",
+    "okta_group_has_user",
     "okta_application",
     "okta_account_has_application",
-    "okta_user_group_assigned_application",
+    "okta_group_assigned_application",
     "okta_user_assigned_application",
   ],
   "numCollectedEntities": 15,
