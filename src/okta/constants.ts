@@ -23,3 +23,4 @@ export const GROUP_IAM_ROLE_RELATIONSHIP_TYPE =
   'okta_user_group_assigned_aws_iam_role';
 export const USER_IAM_ROLE_RELATIONSHIP_TYPE =
   'okta_user_assigned_aws_iam_role';
+export const USER_MFA_DEVICE_RELATIONSHIP_TYPE = 'okta_user_assigned_factor';

@@ -3,11 +3,19 @@ import * as url from 'url';
 import {
   convertProperties,
   createIntegrationEntity,
+  Relationship,
 } from '@jupiterone/integration-sdk-core';
 
-import { USER_ENTITY_TYPE } from '../okta/constants';
+import {
+  USER_ENTITY_TYPE,
+  USER_MFA_DEVICE_RELATIONSHIP_TYPE,
+} from '../okta/constants';
 import { OktaUser, OktaUserCredentials } from '../okta/types';
-import { OktaIntegrationConfig, StandardizedOktaUser } from '../types';
+import {
+  OktaIntegrationConfig,
+  StandardizedOktaFactor,
+  StandardizedOktaUser,
+} from '../types';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
 import getTime from '../util/getTime';
 
@@ -70,6 +78,22 @@ export function createUserEntity(
       },
     },
   }) as StandardizedOktaUser;
+}
+
+export function createUserMfaDeviceRelationship(
+  user: StandardizedOktaUser,
+  device: StandardizedOktaFactor,
+): Relationship {
+  return {
+    _key: `${user._key}|assigned|${device._key}`,
+    _type: USER_MFA_DEVICE_RELATIONSHIP_TYPE,
+    _class: 'ASSIGNED',
+    _fromEntityKey: user._key,
+    _toEntityKey: device._key,
+    displayName: 'ASSIGNED',
+    userId: user.id,
+    factorId: device.id,
+  };
 }
 
 function convertCredentialEmails(credentials?: OktaUserCredentials) {

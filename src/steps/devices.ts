@@ -1,6 +1,4 @@
 import {
-  createDirectRelationship,
-  createIntegrationEntity,
   IntegrationStep,
   IntegrationStepExecutionContext,
   RelationshipClass,
@@ -8,8 +6,10 @@ import {
 
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import { MFA_DEVICE_ENTITY_TYPE } from '../okta/constants';
+import { createUserMfaDeviceRelationship } from '../converters';
 import { createMFADeviceEntity } from '../converters/device';
+import { MFA_DEVICE_ENTITY_TYPE } from '../okta/constants';
+import { StandardizedOktaUser } from '../types';
 
 export async function fetchDevices({
   instance,
@@ -21,31 +21,21 @@ export async function fetchDevices({
     {
       _type: 'okta_user',
     },
-    async (userEntity) => {
+    async (userEntity: StandardizedOktaUser) => {
       if (userEntity.status !== 'DEPROVISIONED') {
         //asking for factors for DEPROV users throws error
         await apiClient.iterateDevicesForUser(
           userEntity._key,
           async (device) => {
-            const deviceEntity = await jobState.addEntity(
-              createIntegrationEntity({
-                entityData: {
-                  source: device,
-                  assign: createMFADeviceEntity(device),
-                },
-              }),
-            );
+            const deviceEntity = createMFADeviceEntity(device);
+            await jobState.addEntity(createMFADeviceEntity(device));
 
             if (device.status === 'ACTIVE') {
               userEntity.mfaEnabled = true;
             }
 
             await jobState.addRelationship(
-              createDirectRelationship({
-                _class: RelationshipClass.ASSIGNED,
-                from: userEntity,
-                to: deviceEntity,
-              }),
+              createUserMfaDeviceRelationship(userEntity, deviceEntity),
             );
           },
         );
