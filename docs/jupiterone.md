@@ -2,17 +2,18 @@
 
 ## Okta + JupiterOne Integration Benefits
 
-- Visualize Okta users, groups, applications, and MFA devices in the JupiterOne
-  graph.
+- Visualize Okta users, groups, devices, applications, and services in the
+  JupiterOne graph.
 - Map Okta users to employees in your JupiterOne account.
-- Monitor changes to Okta users using JupiterOne alerts.
+- Monitor changes to Okta users and access management data using JupiterOne
+  alerts.
 - Create an employee entity that is used to map users across your organization
   to an employee via a matching email property.
 
 ## How it Works
 
-- JupiterOne periodically fetches the current applications, groups, users, and
-  MFA devices from Okta to update the graph.
+- JupiterOne periodically fetches Okta users, groups, and access management data
+  to update the graph.
 - Write JupiterOne queries to review and monitor updates to the graph.
 - Configure alerts to take action when the JupiterOne graph changes.
 
@@ -51,22 +52,21 @@ If you need help with this integration, please contact
 
 1. From the configuration **Gear Icon**, select **Integrations**.
 2. Scroll to the **Okta** integration tile and click it.
-3. Click the **Add Configuration** button.
-4. Enter the **Account Name** by which you'd like to identify this Okta account
-   in JupiterOne. Ingested entities will have this value stored in
-   `tag.AccountName` when **Tag with Account Name** is checked.
-5. Enter a **Description** that will further assist your team when identifying
-   the integration instance.
-6. Select a **Polling Interval** that you feel is sufficient for your monitoring
-   needs. You may leave this as `DISABLED` and manually execute the integration.
-   Remember that an Okta API token that is not used for 30 days will expire.
-7. Enter the **Okta Org Url** for your organization. Note this should be in the
-   format https://yoursubdomain.okta.com, not
-   https://yoursubdomain-admin.okta.com.
-8. Enter the **Okta API Key** generated for use by JupiterOne.
-9. Click **Create Configuration** once all values are provided.
+3. Click the **Add Configuration** button and configure the following settings:
 
-# How to Uninstall
+- Enter the **Account Name** by which you'd like to identify this Okta account
+  in JupiterOne. Ingested entities will have this value stored in
+  `tag.AccountName` when **Tag with Account Name** is checked.
+- Enter a **Description** that will further assist your team when identifying
+  the integration instance.
+- Select a **Polling Interval** that you feel is sufficient for your monitoring
+  needs. You may leave this as `DISABLED` and manually execute the integration.
+- Enter the **Organization URL** unique to your Okta organization.
+- Enter the **API Key** used to authenticate with Okta.
+
+4. Click **Create Configuration** once all values are provided.
+
+## How to Uninstall
 
 1. From the configuration **Gear Icon**, select **Integrations**.
 2. Scroll to the **Okta** integration tile and click it.
@@ -83,15 +83,17 @@ mapping.
 
 This allows you to find non-interactive users with a query like
 
-`Find User that !is Person`
+```j1ql
+Find User that !is Person
+```
 
-# Okta API Rate Limits
+## Okta API Rate Limits
 
-Okta API rate limits are sophisticated, depending on a number of factors
+[Okta API rate limits][2] are sophisticated, depending on a number of factors
 including the particular endpoint, organization-wide limits, and subscription
 level. Responses include a few headers to guide a system into conformance, and
-will deliver 429 responses that indicate a backoff delay when the rate limits
-are exceeded. The integration is implemented to respect these 429 response
+will deliver `429` responses that indicate a backoff delay when the rate limits
+are exceeded. The integration is implemented to respect these `429` response
 directives by leveraging the API client provided by Okta.
 
 The Okta integration currently ingests users, groups, applications, and MFA
@@ -151,3 +153,11 @@ END OF GENERATED DOCUMENTATION AFTER BELOW MARKER
 ********************************************************************************
 -->
 <!-- {J1_DOCUMENTATION_MARKER_END} -->
+
+_Note: the `Service` entities can later be connected to security policy
+procedures as control providers. This mapping establishes evidence that your
+organization security policies, procedures and controls are fully implemented,
+monitored, and managed._
+
+[1]: https://developer.okta.com/docs/api/getting_started/getting_a_token
+[2]: https://developer.okta.com/docs/reference/rate-limits/
