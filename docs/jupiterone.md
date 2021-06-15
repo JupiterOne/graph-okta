@@ -99,9 +99,8 @@ directives by leveraging the API client provided by Okta.
 The Okta integration currently ingests users, groups, applications, and MFA
 devices. The number of calls works out to be:
 
-((numUsers / 200) _ listUsers) + (numUsers _ (listFactors(user) +
-listGroups(user))) listApplications + (numApplications \*
-(listApplicationGroupAssignments(app) + listApplicationUsers(app)))
+- `((numUsers / 200) * listUsers) + (numUsers * (listFactors(user) + listGroups(user)))`
+- `listApplications + (numApplications * (listApplicationGroupAssignments(app) + listApplicationUsers(app)))`
 
 <!-- {J1_DOCUMENTATION_MARKER_START} -->
 <!--
@@ -154,10 +153,12 @@ END OF GENERATED DOCUMENTATION AFTER BELOW MARKER
 -->
 <!-- {J1_DOCUMENTATION_MARKER_END} -->
 
-_Note: the `Service` entities can later be connected to security policy
-procedures as control providers. This mapping establishes evidence that your
-organization security policies, procedures and controls are fully implemented,
-monitored, and managed._
+!!! note
+
+    The `Service` entities can later be connected to security policy
+    procedures as control providers. This mapping establishes evidence that your
+    organization security policies, procedures and controls are fully implemented,
+    monitored, and managed._
 
 [1]: https://developer.okta.com/docs/api/getting_started/getting_a_token
 [2]: https://developer.okta.com/docs/reference/rate-limits/
