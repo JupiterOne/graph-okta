@@ -1,20 +1,27 @@
-import {
-  IntegrationRelationship,
-  MappedRelationshipFromIntegration,
-  RelationshipDirection,
-} from '@jupiterone/jupiter-managed-integration-sdk';
+import * as lodash from 'lodash';
 import * as url from 'url';
+
+import {
+  createDirectRelationship,
+  createIntegrationEntity,
+  MappedRelationship,
+  Relationship,
+  RelationshipClass,
+  RelationshipDirection,
+} from '@jupiterone/integration-sdk-core';
+
+import {
+  APPLICATION_ENTITY_TYPE,
+  GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
+  USER_ENTITY_TYPE,
+  USER_IAM_ROLE_RELATIONSHIP_TYPE,
+} from '../okta/constants';
 import {
   OktaApplication,
   OktaApplicationGroup,
   OktaApplicationUser,
 } from '../okta/types';
-import {
-  StandardizedOktaApplication,
-  StandardizedOktaApplicationGroupRelationship,
-  StandardizedOktaApplicationUserRelationship,
-  OktaIntegrationConfig,
-} from '../types';
+import { OktaIntegrationConfig, StandardizedOktaApplication } from '../types';
 import buildAppShortName from '../util/buildAppShortName';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
 import getOktaAccountInfo from '../util/getOktaAccountInfo';
@@ -23,17 +30,6 @@ import {
   getVendorName,
   isMultiInstanceApp,
 } from '../util/knownVendors';
-
-export const APPLICATION_ENTITY_TYPE = 'okta_application';
-export const APPLICATION_USER_RELATIONSHIP_TYPE =
-  'okta_user_assigned_application';
-export const GROUP_IAM_ROLE_RELATIONSHIP_TYPE =
-  'okta_user_group_assigned_aws_iam_role';
-export const USER_IAM_ROLE_RELATIONSHIP_TYPE =
-  'okta_user_assigned_aws_iam_role';
-
-export const APPLICATION_GROUP_RELATIONSHIP_TYPE =
-  'okta_group_assigned_application';
 
 interface IntegrationInstance {
   id: string;
@@ -54,11 +50,11 @@ export function createApplicationEntity(
   let loginUrl;
 
   if (data._links?.logo) {
-    imageUrl = [data._links.logo].flat()[0].href;
+    imageUrl = lodash.flatten([data._links.logo])[0].href;
   }
 
   if (data._links?.appLinks) {
-    const links = [data._links.appLinks].flat();
+    const links = lodash.flatten([data._links.appLinks]);
     const link = links.find((l) => l.name === 'login') || links[0];
     loginUrl = link && link.href;
   }
@@ -66,30 +62,37 @@ export function createApplicationEntity(
   const oktaAccountInfo = getOktaAccountInfo(instance);
   const appShortName = buildAppShortName(oktaAccountInfo, data.name);
 
-  const entity: StandardizedOktaApplication = {
-    _key: data.id,
-    _type: APPLICATION_ENTITY_TYPE,
-    _class: 'Application',
-    _rawData: [{ name: 'default', rawData: data }],
-    displayName: data.label || data.name || data.id,
-    id: data.id,
-    name: data.name || data.label,
-    shortName: appShortName,
-    label: data.label,
-    status: data.status,
-    active: data.status === 'ACTIVE',
-    lastUpdated: data.lastUpdated,
-    created: data.created,
-    features: data.features,
-    signOnMode: data.signOnMode,
-    appVendorName: getVendorName(appShortName),
-    appAccountType: getAccountName(appShortName),
-    isMultiInstanceApp: isMultiInstanceApp(appShortName),
-    isSAMLApp: !!data.signOnMode && data.signOnMode.startsWith('SAML'),
-    webLink,
-    imageUrl,
-    loginUrl,
-  };
+  const source = { ...data };
+  delete source.credentials; //some OAuth config options stored here
+
+  const entity = createIntegrationEntity({
+    entityData: {
+      source,
+      assign: {
+        _key: data.id,
+        _type: APPLICATION_ENTITY_TYPE,
+        _class: 'Application',
+        displayName: data.label || data.name || data.id,
+        id: data.id,
+        name: data.name || data.label,
+        shortName: appShortName,
+        label: data.label,
+        status: data.status,
+        active: data.status === 'ACTIVE',
+        lastUpdated: data.lastUpdated,
+        created: data.created,
+        features: data.features,
+        signOnMode: data.signOnMode,
+        appVendorName: getVendorName(appShortName),
+        appAccountType: getAccountName(appShortName),
+        isMultiInstanceApp: isMultiInstanceApp(appShortName),
+        isSAMLApp: !!data.signOnMode && data.signOnMode.startsWith('SAML'),
+        webLink,
+        imageUrl,
+        loginUrl,
+      },
+    },
+  }) as StandardizedOktaApplication;
 
   const appSettings = data.settings && data.settings.app;
   if (appSettings) {
@@ -126,25 +129,26 @@ export function createApplicationEntity(
 export function createApplicationGroupRelationships(
   application: StandardizedOktaApplication,
   group: OktaApplicationGroup,
-): IntegrationRelationship[] {
-  const relationships: IntegrationRelationship[] = [];
+): Relationship[] {
+  const relationships: Relationship[] = [];
 
-  const relationship: StandardizedOktaApplicationGroupRelationship = {
-    _key: `${group.id}|assigned|${application._key}`,
-    _type: APPLICATION_GROUP_RELATIONSHIP_TYPE,
-    _class: 'ASSIGNED',
-    _fromEntityKey: group.id,
-    _toEntityKey: application._key,
-    displayName: 'ASSIGNED',
-    applicationId: application.id,
-    groupId: group.id,
-    // Array property not supported on the edge in Neptune
-    roles:
-      group.profile && group.profile.samlRoles
-        ? JSON.stringify(group.profile.samlRoles)
-        : undefined,
-    role: group.profile ? group.profile.role : undefined,
-  };
+  const relationship: Relationship = createDirectRelationship({
+    _class: RelationshipClass.ASSIGNED,
+    fromKey: group.id,
+    fromType: 'okta_group',
+    toKey: application._key,
+    toType: application._type,
+    properties: {
+      applicationId: application.id,
+      groupId: group.id,
+      // Array property not supported on the edge in Neptune
+      roles:
+        group.profile && group.profile.samlRoles
+          ? JSON.stringify(group.profile.samlRoles)
+          : undefined,
+      role: group.profile ? group.profile.role : undefined,
+    },
+  });
 
   if (application.awsAccountId) {
     relationships.push(
@@ -164,25 +168,26 @@ export function createApplicationGroupRelationships(
 export function createApplicationUserRelationships(
   application: StandardizedOktaApplication,
   user: OktaApplicationUser,
-): IntegrationRelationship[] {
-  const relationships: IntegrationRelationship[] = [];
+): Relationship[] {
+  const relationships: Relationship[] = [];
 
-  const relationship: StandardizedOktaApplicationUserRelationship = {
-    _key: `${user.id}|assigned|${application._key}`,
-    _type: APPLICATION_USER_RELATIONSHIP_TYPE,
-    _class: 'ASSIGNED',
-    _fromEntityKey: user.id,
-    _toEntityKey: application._key,
-    displayName: 'ASSIGNED',
-    applicationId: application.id,
-    userId: user.id,
-    userEmail: user.profile.email,
-    // Array property not supported on the edge in Neptune
-    roles: user.profile.samlRoles
-      ? JSON.stringify(user.profile.samlRoles)
-      : undefined,
-    role: user.profile.role,
-  };
+  const relationship: Relationship = createDirectRelationship({
+    _class: RelationshipClass.ASSIGNED,
+    fromKey: user.id,
+    fromType: USER_ENTITY_TYPE,
+    toKey: application._key,
+    toType: APPLICATION_ENTITY_TYPE,
+    properties: {
+      applicationId: application.id,
+      userId: user.id,
+      userEmail: user.profile.email,
+      // Array property not supported on the edge in Neptune
+      roles: user.profile.samlRoles
+        ? JSON.stringify(user.profile.samlRoles)
+        : undefined,
+      role: user.profile.role,
+    },
+  });
 
   if (application.awsAccountId) {
     relationships.push(
@@ -203,8 +208,8 @@ function convertAWSRolesToRelationships(
   application: StandardizedOktaApplication,
   oktaPrincipal: OktaApplicationUser | OktaApplicationGroup,
   relationshipType: string,
-): MappedRelationshipFromIntegration[] {
-  const relationships: MappedRelationshipFromIntegration[] = [];
+): MappedRelationship[] {
+  const relationships: MappedRelationship[] = [];
   if (application.awsAccountId && oktaPrincipal.profile) {
     const profile = oktaPrincipal.profile;
     for (const role of profile.samlRoles || [profile.role]) {
@@ -253,7 +258,7 @@ function mapAWSRoleAssignment({
   role: string;
   relationshipType: string;
   awsAccountId: string;
-}): MappedRelationshipFromIntegration | undefined {
+}): MappedRelationship | undefined {
   const regex = /\[?([a-zA-Z0-9_-]+)\]? -- ([a-zA-Z0-9_-]+)/;
   const match = role && regex.exec(role);
   if (match) {

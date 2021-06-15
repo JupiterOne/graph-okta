@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { IntegrationLogger } from '@jupiterone/jupiter-managed-integration-sdk';
+import { IntegrationLogger } from '@jupiterone/integration-sdk-core';
 import { OktaClient } from './types';
 import { OktaIntegrationConfig } from '../types';
 
 const okta = require('@okta/okta-sdk-nodejs');
-const MemoryStore = require('@okta/okta-sdk-nodejs/src/memory-store');
 
 const DEFAULT_MINIMUM_RATE_LIMIT_REMAINING = 5;
 
@@ -34,8 +33,8 @@ export class RequestExecutorWithEarlyRateLimiting extends okta.RequestExecutor {
   }
 
   async fetch(request: any) {
-    const now = Date.now();
-    if (this.requestAfter && this.requestAfter > now) {
+    if (this.getThrottleActivated() && this.requestAfter) {
+      const now = Date.now();
       const delayMs = this.requestAfter - now;
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
@@ -71,6 +70,17 @@ export class RequestExecutorWithEarlyRateLimiting extends okta.RequestExecutor {
       return requestAfter;
     }
     return undefined;
+  }
+
+  delayRequests(delayMs: number) {
+    //used to force delays even without header feedback, mainly in testing
+    const now = Date.now();
+    this.requestAfter = now + delayMs;
+  }
+
+  getThrottleActivated() {
+    const now = Date.now();
+    return this.requestAfter && this.requestAfter > now;
   }
 }
 
@@ -125,10 +135,5 @@ export default function createOktaClient(
     orgUrl: config.oktaOrgUrl,
     token: config.oktaApiKey,
     requestExecutor: defaultRequestExecutor,
-    // is this necessary? We're not re-calling the same APIs.
-    cacheStore: new MemoryStore({
-      keyLimit: 100000,
-      expirationPoll: null,
-    }),
   }) as OktaClient;
 }

@@ -26,7 +26,7 @@ describe('creating group entity', () => {
       _links: '_links',
     };
     expect(createUserGroupEntity(config, group)).toEqual({
-      _class: 'UserGroup',
+      _class: ['UserGroup'],
       _key: 'id',
       _rawData: [
         {
@@ -75,7 +75,7 @@ describe('creating group entity', () => {
       _links: '_links',
     };
     expect(createUserGroupEntity(config, group)).toEqual({
-      _class: 'UserGroup',
+      _class: ['UserGroup'],
       _key: 'id',
       _rawData: [
         {
@@ -114,7 +114,7 @@ describe('creating group entity', () => {
 describe('creating group entity differently', () => {
   test('with APP_GROUP type', () => {
     const group: StandardizedOktaUserGroup = {
-      _class: 'UserGroup',
+      _class: ['UserGroup'],
       _key: 'id',
       _rawData: [
         {

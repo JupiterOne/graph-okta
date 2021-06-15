@@ -53,11 +53,20 @@ export interface OktaClient {
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/groups/#list-groups
   listGroups: () => OktaCollection<OktaUserGroup>;
 
+  // [API Endpoint]: https://developer.okta.com/docs/api/resources/groups/#list-group-members
+  listGroupUsers: (
+    groupId: string,
+    queryParameters?: OktaQueryParams,
+  ) => OktaCollection<OktaUser>;
+
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/users.html#list-users
   listUsers: (queryParameters?: OktaQueryParams) => OktaCollection<OktaUser>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/users/#get-member-groups
-  listUserGroups: (userId: string) => OktaCollection<OktaUserGroup>;
+  listUserGroups: (
+    userId: string,
+    queryParameters?: OktaQueryParams,
+  ) => OktaCollection<OktaUserGroup>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/apps/#list-applications
   listApplications: (
@@ -76,5 +85,8 @@ export interface OktaClient {
   ) => OktaCollection<OktaApplicationGroup>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/factors/#list-enrolled-factors
-  listFactors: (userId: string) => OktaCollection<OktaFactor>;
+  listFactors: (
+    userId: string,
+    queryParameters?: OktaQueryParams,
+  ) => OktaCollection<OktaFactor>;
 }

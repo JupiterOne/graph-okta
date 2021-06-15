@@ -1,13 +1,13 @@
-import { OktaAccountInfo } from "../okta/types";
+import { OktaAccountInfo } from '../okta/types';
 
 export default function buildAppShortName(
   oktaAccountInfo: OktaAccountInfo,
   appName: string,
 ): string {
-  if (appName === "amazon_aws") {
-    return "aws";
-  } else if (appName === "cloudconsole") {
-    return "gcp";
+  if (appName === 'amazon_aws') {
+    return 'aws';
+  } else if (appName === 'cloudconsole') {
+    return 'gcp';
   }
 
   /**
@@ -19,12 +19,12 @@ export default function buildAppShortName(
   const samlAppMatch = samlAppRegex.exec(appName);
 
   if (samlAppMatch) {
-    return samlAppMatch[1].replace(/_$/, "");
+    return samlAppMatch[1].replace(/_$/, '');
   }
 
-  const startPos = appName.indexOf("_");
+  const startPos = appName.indexOf('_');
   if (startPos !== -1) {
-    const endPos = appName.lastIndexOf("_");
+    const endPos = appName.lastIndexOf('_');
     if (startPos < endPos) {
       const suffix = appName.substring(endPos + 1);
       if (/[0-9]+/.test(suffix)) {

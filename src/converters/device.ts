@@ -1,16 +1,16 @@
-import { OktaFactor } from "../okta/types";
-import { StandardizedOktaFactor } from "../types";
+import { createIntegrationEntity } from '@jupiterone/integration-sdk-core';
 
-export const MFA_DEVICE_ENTITY_TYPE = "mfa_device";
+import { MFA_DEVICE_ENTITY_TYPE } from '../okta/constants';
+import { OktaFactor } from '../okta/types';
+import { StandardizedOktaFactor } from '../types';
 
 export function createMFADeviceEntity(
   data: OktaFactor,
 ): StandardizedOktaFactor {
-  const entity: StandardizedOktaFactor = {
+  const entityProperties: StandardizedOktaFactor = {
     _key: data.id,
     _type: MFA_DEVICE_ENTITY_TYPE,
-    _class: ["Key", "AccessKey"],
-    _rawData: [{ name: "default", rawData: data }],
+    _class: ['Key', 'AccessKey'],
     displayName: `${data.provider} ${data.factorType}`,
     id: data.id,
     factorType: data.factorType,
@@ -21,8 +21,12 @@ export function createMFADeviceEntity(
     status: data.status,
     created: data.created,
     lastUpdated: data.lastUpdated,
-    active: data.status === "ACTIVE",
+    active: data.status === 'ACTIVE',
   };
-
-  return entity;
+  return createIntegrationEntity({
+    entityData: {
+      source: data,
+      assign: entityProperties,
+    },
+  }) as StandardizedOktaFactor;
 }

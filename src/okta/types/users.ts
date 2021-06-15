@@ -1,4 +1,4 @@
-import { OktaResource } from ".";
+import { OktaResource } from '.';
 
 export type OktaPasswordCredential = string;
 

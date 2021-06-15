@@ -1,19 +1,19 @@
-import { EntityFromIntegration } from "@jupiterone/jupiter-managed-integration-sdk";
+import { Entity } from '@jupiterone/integration-sdk-core';
 
-export interface StandardizedOktaAccount extends EntityFromIntegration {
+export interface StandardizedOktaAccount extends Entity {
   name: string;
   accountId: string;
   webLink: string;
 }
 
-export interface StandardizedOktaService extends EntityFromIntegration {
+export interface StandardizedOktaService extends Entity {
   name: string;
-  category: string;
+  category: string[];
   function: string;
   controlDomain: string;
 }
 
-export interface StandardizedOktaUser extends EntityFromIntegration {
+export interface StandardizedOktaUser extends Entity {
   id: string;
   name: string;
   displayName?: string;
@@ -53,7 +53,7 @@ export interface StandardizedOktaUser extends EntityFromIntegration {
   unverifiedEmails?: string[];
 }
 
-export interface StandardizedOktaUserGroup extends EntityFromIntegration {
+export interface StandardizedOktaUserGroup extends Entity {
   id: string;
   displayName?: string;
   created: number;
@@ -65,10 +65,10 @@ export interface StandardizedOktaUserGroup extends EntityFromIntegration {
   objectClass?: string[];
   type: string;
   name: string;
-  description: string;
+  description?: string;
 }
 
-export interface StandardizedOktaApplication extends EntityFromIntegration {
+export interface StandardizedOktaApplication extends Entity {
   isMultiInstanceApp: boolean;
   isSAMLApp: boolean;
   appVendorName?: string;
@@ -97,7 +97,7 @@ export interface StandardizedOktaApplication extends EntityFromIntegration {
   loginUrl?: string;
 }
 
-export interface StandardizedOktaFactor extends EntityFromIntegration {
+export interface StandardizedOktaFactor extends Entity {
   active: boolean;
   id: string;
   type?: string | null;

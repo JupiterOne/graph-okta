@@ -1,4 +1,4 @@
-import { OktaResource } from ".";
+import { OktaResource } from '.';
 
 export interface AppSettings {
   [key: string]: any;
@@ -33,6 +33,7 @@ export interface OktaApplication extends OktaResource {
   lastUpdated: string;
   created: string;
   signOnMode: string;
+  credentials?: any;
   accessibility?: any;
   visibility?: any;
   features?: string[];

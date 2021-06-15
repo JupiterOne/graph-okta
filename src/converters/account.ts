@@ -1,19 +1,20 @@
-import { OktaAccountInfo } from "../okta/types";
+import {
+  createDirectRelationship,
+  Relationship,
+  RelationshipClass,
+} from '@jupiterone/integration-sdk-core';
+
+import {
+  ACCOUNT_ENTITY_TYPE,
+  ACCOUNT_GROUP_RELATIONSHIP_TYPE,
+} from '../okta/constants';
+import { OktaAccountInfo } from '../okta/types';
 import {
   OktaIntegrationConfig,
   StandardizedOktaAccount,
-  StandardizedOktaAccountApplicationRelationship,
-  StandardizedOktaAccountGroupRelationship,
   StandardizedOktaApplication,
   StandardizedOktaUserGroup,
-} from "../types";
-
-export const ACCOUNT_ENTITY_TYPE = "okta_account";
-export const ACCOUNT_ENTITY_CLASS = "Account";
-
-export const ACCOUNT_APPLICATION_RELATIONSHIP_TYPE =
-  "okta_account_has_application";
-export const ACCOUNT_GROUP_RELATIONSHIP_TYPE = "okta_account_has_group";
+} from '../types';
 
 export function createAccountEntity(
   config: OktaIntegrationConfig,
@@ -21,15 +22,15 @@ export function createAccountEntity(
 ): StandardizedOktaAccount {
   let displayName = data.name;
   if (data.preview) {
-    displayName += " (preview)";
+    displayName += ' (preview)';
   }
 
-  const accountId = config.oktaOrgUrl.replace(/^https?:\/\//, "");
+  const accountId = config.oktaOrgUrl.replace(/^https?:\/\//, '');
 
   return {
     _type: ACCOUNT_ENTITY_TYPE,
     _key: `okta_account_${accountId}`,
-    _class: "Account",
+    _class: 'Account',
     name: data.name,
     displayName,
     accountId,
@@ -40,32 +41,31 @@ export function createAccountEntity(
 export function createAccountApplicationRelationship(
   account: StandardizedOktaAccount,
   application: StandardizedOktaApplication,
-): StandardizedOktaAccountApplicationRelationship {
-  return {
-    _key: `${account._key}|has|${application._key}`,
-    _type: ACCOUNT_APPLICATION_RELATIONSHIP_TYPE,
-    _class: "HAS",
-    _fromEntityKey: account._key,
-    _toEntityKey: application._key,
-    displayName: "HAS",
-    accountUrl: account.webLink,
-    applicationId: application.id,
-    applicationName: application.name,
-  };
+): Relationship {
+  return createDirectRelationship({
+    _class: RelationshipClass.HAS,
+    from: account,
+    to: application,
+    properties: {
+      accountUrl: account.webLink,
+      applicationId: application.id,
+      applicationName: application.name,
+    },
+  });
 }
 
 export function createAccountGroupRelationship(
   account: StandardizedOktaAccount,
   group: StandardizedOktaUserGroup,
-): StandardizedOktaAccountGroupRelationship {
-  return {
-    _key: `${account._key}|has|${group._key}`,
-    _type: ACCOUNT_GROUP_RELATIONSHIP_TYPE,
-    _class: "HAS",
-    _fromEntityKey: account._key,
-    _toEntityKey: group._key,
-    displayName: "HAS",
-    accountUrl: account.webLink,
-    groupId: group.id,
-  };
+): Relationship {
+  return createDirectRelationship({
+    _class: RelationshipClass.HAS,
+    from: account,
+    to: group,
+    properties: {
+      _type: ACCOUNT_GROUP_RELATIONSHIP_TYPE,
+      accountUrl: account.webLink,
+      groupId: group.id,
+    },
+  });
 }

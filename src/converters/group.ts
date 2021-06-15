@@ -1,14 +1,12 @@
-import * as url from "url";
+import * as url from 'url';
 
-import { OktaUserGroup } from "../okta/types";
 import {
-  OktaIntegrationConfig,
-  StandardizedOktaUser,
-  StandardizedOktaUserGroup,
-  StandardizedOktaUserGroupRelationship,
-} from "../types";
-import getOktaAccountAdminUrl from "../util/getOktaAccountAdminUrl";
-import getTime from "../util/getTime";
+  createDirectRelationship,
+  createIntegrationEntity,
+  Entity,
+  Relationship,
+  RelationshipClass,
+} from '@jupiterone/integration-sdk-core';
 
 /**
  * The entity type for Okta user groups having `type: 'OKTA_GROUP'` or
@@ -16,10 +14,15 @@ import getTime from "../util/getTime";
  *
  * See https://developer.okta.com/docs/api/resources/groups#group-type
  */
-export const USER_GROUP_ENTITY_TYPE = "okta_user_group";
-export const APP_USER_GROUP_ENTITY_TYPE = "okta_app_user_group";
-
-export const GROUP_USER_RELATIONSHIP_TYPE = "okta_group_has_user";
+import {
+  APP_USER_GROUP_ENTITY_TYPE,
+  GROUP_USER_RELATIONSHIP_TYPE,
+  USER_GROUP_ENTITY_TYPE,
+} from '../okta/constants';
+import { OktaUserGroup } from '../okta/types';
+import { OktaIntegrationConfig, StandardizedOktaUserGroup } from '../types';
+import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
+import getTime from '../util/getTime';
 
 export function createUserGroupEntity(
   config: OktaIntegrationConfig,
@@ -41,43 +44,46 @@ export function createUserGroupEntity(
   );
 
   const entityType =
-    type === "APP_GROUP" ? APP_USER_GROUP_ENTITY_TYPE : USER_GROUP_ENTITY_TYPE;
+    type === 'APP_GROUP' ? APP_USER_GROUP_ENTITY_TYPE : USER_GROUP_ENTITY_TYPE;
 
-  const entity: StandardizedOktaUserGroup = {
-    _key: data.id,
-    _type: entityType,
-    _class: "UserGroup",
-    _rawData: [{ name: "default", rawData: data }],
-    id,
-    webLink,
-    displayName: profileName,
-    created: getTime(created)!,
-    createdOn: getTime(created)!,
-    lastUpdated: getTime(lastUpdated)!,
-    lastUpdatedOn: getTime(lastUpdated)!,
-    lastMembershipUpdated: getTime(lastMembershipUpdated)!,
-    lastMembershipUpdatedOn: getTime(lastMembershipUpdated)!,
-    objectClass,
-    type,
-    name: profileName,
-    description: profileDescription,
-  };
-
-  return entity;
+  return createIntegrationEntity({
+    entityData: {
+      source: data,
+      assign: {
+        _key: data.id,
+        _type: entityType,
+        _class: 'UserGroup',
+        id,
+        webLink,
+        displayName: profileName,
+        created: getTime(created)!,
+        createdOn: getTime(created)!,
+        lastUpdated: getTime(lastUpdated)!,
+        lastUpdatedOn: getTime(lastUpdated)!,
+        lastMembershipUpdated: getTime(lastMembershipUpdated)!,
+        lastMembershipUpdatedOn: getTime(lastMembershipUpdated)!,
+        objectClass,
+        type,
+        name: profileName,
+        description: profileDescription ? profileDescription : undefined,
+      },
+    },
+  }) as StandardizedOktaUserGroup;
 }
 
 export function createGroupUserRelationship(
-  group: StandardizedOktaUserGroup,
-  user: StandardizedOktaUser,
-): StandardizedOktaUserGroupRelationship {
-  return {
-    _key: `${group._key}|has_user|${user._key}`,
-    _type: GROUP_USER_RELATIONSHIP_TYPE,
-    _class: "HAS",
-    _fromEntityKey: group._key,
-    _toEntityKey: user._key,
-    displayName: "HAS",
-    userId: user.id,
-    groupId: group.id,
-  };
+  group: Entity,
+  user: Entity,
+): Relationship {
+  return createDirectRelationship({
+    _class: RelationshipClass.HAS,
+    from: group,
+    to: user,
+    properties: {
+      _key: `${group._key}|has_user|${user._key}`,
+      _type: GROUP_USER_RELATIONSHIP_TYPE,
+      userId: user.id as string,
+      groupId: group.id as string,
+    },
+  });
 }
