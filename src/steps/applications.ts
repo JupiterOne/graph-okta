@@ -2,7 +2,6 @@ import {
   IntegrationMissingKeyError,
   IntegrationStep,
   IntegrationStepExecutionContext,
-  RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
 
 import { createAPIClient } from '../client';
@@ -13,18 +12,9 @@ import {
   createApplicationGroupRelationships,
   createApplicationUserRelationships,
 } from '../converters';
-import {
-  ACCOUNT_APPLICATION_RELATIONSHIP_TYPE,
-  ACCOUNT_ENTITY_TYPE,
-  APPLICATION_ENTITY_TYPE,
-  APPLICATION_GROUP_RELATIONSHIP_TYPE,
-  APPLICATION_USER_RELATIONSHIP_TYPE,
-  DATA_ACCOUNT_ENTITY,
-  GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
-  USER_ENTITY_TYPE,
-  USER_IAM_ROLE_RELATIONSHIP_TYPE,
-} from '../okta/constants';
+import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
 import { StandardizedOktaAccount, StandardizedOktaApplication } from '../types';
+import { Entities, Relationships, Steps } from './constants';
 
 export async function fetchApplications({
   instance,
@@ -80,48 +70,17 @@ export async function fetchApplications({
 
 export const applicationSteps: IntegrationStep<IntegrationConfig>[] = [
   {
-    id: 'fetch-applications',
+    id: Steps.APPLICATIONS,
     name: 'Fetch Applications',
-    entities: [
-      {
-        resourceName: 'Okta Application',
-        _type: APPLICATION_ENTITY_TYPE,
-        _class: 'Application',
-      },
-    ],
+    entities: [Entities.APPLICATION],
     relationships: [
-      {
-        _type: ACCOUNT_APPLICATION_RELATIONSHIP_TYPE,
-        _class: RelationshipClass.HAS,
-        sourceType: ACCOUNT_ENTITY_TYPE,
-        targetType: APPLICATION_ENTITY_TYPE,
-      },
-      {
-        _type: APPLICATION_GROUP_RELATIONSHIP_TYPE,
-        _class: RelationshipClass.ASSIGNED,
-        sourceType: 'okta_group',
-        targetType: APPLICATION_ENTITY_TYPE,
-      },
-      {
-        _type: APPLICATION_USER_RELATIONSHIP_TYPE,
-        _class: RelationshipClass.ASSIGNED,
-        sourceType: USER_ENTITY_TYPE,
-        targetType: APPLICATION_ENTITY_TYPE,
-      },
-      {
-        _type: USER_IAM_ROLE_RELATIONSHIP_TYPE,
-        _class: RelationshipClass.ASSIGNED,
-        sourceType: USER_ENTITY_TYPE,
-        targetType: 'aws_iam_role',
-      },
-      {
-        _type: GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
-        _class: RelationshipClass.ASSIGNED,
-        sourceType: 'okta_user_group',
-        targetType: 'aws_iam_role',
-      },
+      Relationships.ACCOUNT_HAS_APPLICATION,
+      Relationships.GROUP_ASSIGNED_APPLICATION,
+      Relationships.USER_ASSIGNED_APPLICATION,
+      Relationships.USER_ASSIGNED_AWS_IAM_ROLE,
+      Relationships.USER_GROUP_ASSIGNED_AWS_IAM_ROLE,
     ],
-    dependsOn: ['fetch-groups'],
+    dependsOn: [Steps.GROUPS],
     executionHandler: fetchApplications,
   },
 ];

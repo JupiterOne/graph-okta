@@ -1,24 +1,20 @@
 import {
+  createDirectRelationship,
   createIntegrationEntity,
   IntegrationStep,
   IntegrationStepExecutionContext,
   RelationshipClass,
-  createDirectRelationship,
 } from '@jupiterone/integration-sdk-core';
 
 import { IntegrationConfig } from '../config';
-import getOktaAccountInfo from '../util/getOktaAccountInfo';
 import { createAccountEntity } from '../converters/account';
 import {
-  createSSOServiceEntity,
   createMFAServiceEntity,
+  createSSOServiceEntity,
 } from '../converters/service';
-
-import {
-  DATA_ACCOUNT_ENTITY,
-  SERVICE_ENTITY_TYPE,
-  SERVICE_ENTITY_CLASS,
-} from '../okta/constants';
+import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
+import getOktaAccountInfo from '../util/getOktaAccountInfo';
+import { Entities, Relationships, Steps } from './constants';
 
 export async function fetchAccountDetails({
   jobState,
@@ -82,28 +78,10 @@ export async function fetchAccountDetails({
 
 export const accountSteps: IntegrationStep<IntegrationConfig>[] = [
   {
-    id: 'fetch-account',
+    id: Steps.ACCOUNT,
     name: 'Fetch Account Details',
-    entities: [
-      {
-        resourceName: 'Okta Account',
-        _type: 'okta_account',
-        _class: 'Account',
-      },
-      {
-        resourceName: 'Okta Service',
-        _type: SERVICE_ENTITY_TYPE,
-        _class: SERVICE_ENTITY_CLASS,
-      },
-    ],
-    relationships: [
-      {
-        _type: 'okta_account_has_service',
-        _class: RelationshipClass.HAS,
-        sourceType: 'okta_account',
-        targetType: SERVICE_ENTITY_TYPE,
-      },
-    ],
+    entities: [Entities.ACCOUNT, Entities.SERVICE],
+    relationships: [Relationships.ACCOUNT_HAS_SERVICE],
     dependsOn: [],
     executionHandler: fetchAccountDetails,
   },

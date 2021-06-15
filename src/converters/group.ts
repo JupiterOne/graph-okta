@@ -15,12 +15,8 @@ import {
  *
  * See https://developer.okta.com/docs/api/resources/groups#group-type
  */
-import {
-  APP_USER_GROUP_ENTITY_TYPE,
-  GROUP_USER_RELATIONSHIP_TYPE,
-  USER_GROUP_ENTITY_TYPE,
-} from '../okta/constants';
 import { OktaUserGroup } from '../okta/types';
+import { Entities, Relationships } from '../steps/constants';
 import { OktaIntegrationConfig, StandardizedOktaUserGroup } from '../types';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
 
@@ -44,7 +40,9 @@ export function createUserGroupEntity(
   );
 
   const entityType =
-    type === 'APP_GROUP' ? APP_USER_GROUP_ENTITY_TYPE : USER_GROUP_ENTITY_TYPE;
+    type === 'APP_GROUP'
+      ? Entities.APP_USER_GROUP._type
+      : Entities.USER_GROUP._type;
 
   return createIntegrationEntity({
     entityData: {
@@ -81,7 +79,7 @@ export function createGroupUserRelationship(
     to: user,
     properties: {
       _key: `${group._key}|has_user|${user._key}`,
-      _type: GROUP_USER_RELATIONSHIP_TYPE,
+      _type: Relationships.USER_GROUP_HAS_USER._type,
       userId: user.id as string,
       groupId: group.id as string,
     },

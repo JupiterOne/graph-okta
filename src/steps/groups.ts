@@ -2,8 +2,8 @@ import {
   IntegrationMissingKeyError,
   IntegrationStep,
   IntegrationStepExecutionContext,
-  RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
+
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
 import { createAccountGroupRelationship } from '../converters';
@@ -11,16 +11,9 @@ import {
   createGroupUserRelationship,
   createUserGroupEntity,
 } from '../converters/group';
-import {
-  ACCOUNT_ENTITY_TYPE,
-  ACCOUNT_GROUP_RELATIONSHIP_TYPE,
-  APP_USER_GROUP_ENTITY_TYPE,
-  DATA_ACCOUNT_ENTITY,
-  GROUP_USER_RELATIONSHIP_TYPE,
-  USER_ENTITY_TYPE,
-  USER_GROUP_ENTITY_TYPE,
-} from '../okta/constants';
+import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
 import { StandardizedOktaAccount, StandardizedOktaUserGroup } from '../types';
+import { Entities, Relationships, Steps } from './constants';
 
 export async function fetchGroups({
   instance,
@@ -60,47 +53,16 @@ export async function fetchGroups({
 
 export const groupSteps: IntegrationStep<IntegrationConfig>[] = [
   {
-    id: 'fetch-groups',
+    id: Steps.GROUPS,
     name: 'Fetch Groups',
-    entities: [
-      {
-        resourceName: 'Okta UserGroup',
-        _type: USER_GROUP_ENTITY_TYPE,
-        _class: 'UserGroup',
-      },
-      {
-        resourceName: 'Okta App UserGroup',
-        _type: APP_USER_GROUP_ENTITY_TYPE,
-        _class: 'UserGroup',
-      },
-    ],
+    entities: [Entities.USER_GROUP, Entities.APP_USER_GROUP],
     relationships: [
-      {
-        _type: ACCOUNT_GROUP_RELATIONSHIP_TYPE,
-        _class: RelationshipClass.HAS,
-        sourceType: ACCOUNT_ENTITY_TYPE,
-        targetType: USER_GROUP_ENTITY_TYPE,
-      },
-      {
-        _type: ACCOUNT_GROUP_RELATIONSHIP_TYPE,
-        _class: RelationshipClass.HAS,
-        sourceType: ACCOUNT_ENTITY_TYPE,
-        targetType: APP_USER_GROUP_ENTITY_TYPE,
-      },
-      {
-        _type: GROUP_USER_RELATIONSHIP_TYPE,
-        _class: RelationshipClass.HAS,
-        sourceType: USER_GROUP_ENTITY_TYPE,
-        targetType: USER_ENTITY_TYPE,
-      },
-      {
-        _type: GROUP_USER_RELATIONSHIP_TYPE,
-        _class: RelationshipClass.HAS,
-        sourceType: APP_USER_GROUP_ENTITY_TYPE,
-        targetType: USER_ENTITY_TYPE,
-      },
+      Relationships.ACCOUNT_HAS_USER_GROUP,
+      Relationships.ACCOUNT_HAS_APP_USER_GROUP,
+      Relationships.USER_GROUP_HAS_USER,
+      Relationships.APP_USER_GROUP_HAS_USER,
     ],
-    dependsOn: ['fetch-users'],
+    dependsOn: [Steps.USERS],
     executionHandler: fetchGroups,
   },
 ];

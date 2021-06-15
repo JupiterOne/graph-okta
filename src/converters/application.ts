@@ -11,16 +11,11 @@ import {
 } from '@jupiterone/integration-sdk-core';
 
 import {
-  APPLICATION_ENTITY_TYPE,
-  GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
-  USER_ENTITY_TYPE,
-  USER_IAM_ROLE_RELATIONSHIP_TYPE,
-} from '../okta/constants';
-import {
   OktaApplication,
   OktaApplicationGroup,
   OktaApplicationUser,
 } from '../okta/types';
+import { Entities, Relationships } from '../steps/constants';
 import { OktaIntegrationConfig, StandardizedOktaApplication } from '../types';
 import buildAppShortName from '../util/buildAppShortName';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
@@ -70,8 +65,8 @@ export function createApplicationEntity(
       source,
       assign: {
         _key: data.id,
-        _type: APPLICATION_ENTITY_TYPE,
-        _class: 'Application',
+        _type: Entities.APPLICATION._type,
+        _class: Entities.APPLICATION._class,
         displayName: data.label || data.name || data.id,
         id: data.id,
         name: data.name || data.label,
@@ -155,7 +150,7 @@ export function createApplicationGroupRelationships(
       ...convertAWSRolesToRelationships(
         application,
         group,
-        GROUP_IAM_ROLE_RELATIONSHIP_TYPE,
+        Relationships.USER_GROUP_ASSIGNED_AWS_IAM_ROLE._type,
       ),
     );
   }
@@ -174,9 +169,9 @@ export function createApplicationUserRelationships(
   const relationship: Relationship = createDirectRelationship({
     _class: RelationshipClass.ASSIGNED,
     fromKey: user.id,
-    fromType: USER_ENTITY_TYPE,
+    fromType: Entities.USER._type,
     toKey: application._key,
-    toType: APPLICATION_ENTITY_TYPE,
+    toType: Entities.APPLICATION._type,
     properties: {
       applicationId: application.id,
       userId: user.id,
@@ -194,7 +189,7 @@ export function createApplicationUserRelationships(
       ...convertAWSRolesToRelationships(
         application,
         user,
-        USER_IAM_ROLE_RELATIONSHIP_TYPE,
+        Relationships.USER_ASSIGNED_AWS_IAM_ROLE._type,
       ),
     );
   }

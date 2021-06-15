@@ -1,14 +1,13 @@
+import { Entities } from '../steps/constants';
 import { StandardizedOktaAccount, StandardizedOktaService } from '../types';
-
-import { SERVICE_ENTITY_TYPE, SERVICE_ENTITY_CLASS } from '../okta/constants';
 
 export function createSSOServiceEntity(
   account: StandardizedOktaAccount,
 ): StandardizedOktaService {
   return {
-    _type: SERVICE_ENTITY_TYPE,
+    _type: Entities.SERVICE._type,
     _key: `okta:sso:${account.name}`,
-    _class: SERVICE_ENTITY_CLASS,
+    _class: Entities.SERVICE._class,
     name: 'SSO',
     displayName: 'Okta SSO',
     category: ['security'],
@@ -21,9 +20,9 @@ export function createMFAServiceEntity(
   account: StandardizedOktaAccount,
 ): StandardizedOktaService {
   return {
-    _type: SERVICE_ENTITY_TYPE,
+    _type: Entities.SERVICE._type,
     _key: `okta:mfa:${account.name}`,
-    _class: SERVICE_ENTITY_CLASS,
+    _class: Entities.SERVICE._class,
     name: 'MFA',
     displayName: 'Okta MFA',
     category: ['security'],

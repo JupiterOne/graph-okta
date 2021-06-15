@@ -10,6 +10,7 @@ import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
 import { createUserEntity } from '../converters/user';
 import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
+import { Entities, Relationships, Steps } from './constants';
 
 export async function fetchUsers({
   instance,
@@ -36,24 +37,11 @@ export async function fetchUsers({
 
 export const userSteps: IntegrationStep<IntegrationConfig>[] = [
   {
-    id: 'fetch-users',
+    id: Steps.USERS,
     name: 'Fetch Users',
-    entities: [
-      {
-        resourceName: 'Okta User',
-        _type: 'okta_user',
-        _class: 'User',
-      },
-    ],
-    relationships: [
-      {
-        _type: 'okta_account_has_user',
-        _class: RelationshipClass.HAS,
-        sourceType: 'okta_account',
-        targetType: 'okta_user',
-      },
-    ],
-    dependsOn: ['fetch-account'],
+    entities: [Entities.USER],
+    relationships: [Relationships.ACCOUNT_HAS_USER],
+    dependsOn: [Steps.ACCOUNT],
     executionHandler: fetchUsers,
   },
 ];

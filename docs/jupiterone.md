@@ -124,7 +124,7 @@ The following entities are created:
 | Okta Account       | `okta_account`        | `Account`            |
 | Okta App UserGroup | `okta_app_user_group` | `UserGroup`          |
 | Okta Application   | `okta_application`    | `Application`        |
-| Okta Factor Device | `mfa_device`          | `Key`                |
+| Okta Factor Device | `mfa_device`          | `Key`, `AccessKey`   |
 | Okta Service       | `okta_service`        | `Service`, `Control` |
 | Okta User          | `okta_user`           | `User`               |
 | Okta UserGroup     | `okta_user_group`     | `UserGroup`          |

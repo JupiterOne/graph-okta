@@ -1,15 +1,14 @@
 import {
   IntegrationStep,
   IntegrationStepExecutionContext,
-  RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
 
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
 import { createUserMfaDeviceRelationship } from '../converters';
 import { createMFADeviceEntity } from '../converters/device';
-import { MFA_DEVICE_ENTITY_TYPE } from '../okta/constants';
 import { StandardizedOktaUser } from '../types';
+import { Entities, Relationships, Steps } from './constants';
 
 export async function fetchDevices({
   instance,
@@ -46,24 +45,11 @@ export async function fetchDevices({
 
 export const deviceSteps: IntegrationStep<IntegrationConfig>[] = [
   {
-    id: 'fetch-devices',
+    id: Steps.MFA_DEVICES,
     name: 'Fetch Devices',
-    entities: [
-      {
-        resourceName: 'Okta Factor Device',
-        _type: MFA_DEVICE_ENTITY_TYPE,
-        _class: 'Key',
-      },
-    ],
-    relationships: [
-      {
-        _type: 'okta_user_assigned_mfa_device',
-        _class: RelationshipClass.ASSIGNED,
-        sourceType: 'okta_user',
-        targetType: MFA_DEVICE_ENTITY_TYPE,
-      },
-    ],
-    dependsOn: ['fetch-users'],
+    entities: [Entities.MFA_DEVICE],
+    relationships: [Relationships.USER_ASSIGNED_MFA_DEVICE],
+    dependsOn: [Steps.USERS],
     executionHandler: fetchDevices,
   },
 ];

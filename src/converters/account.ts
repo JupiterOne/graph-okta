@@ -4,11 +4,8 @@ import {
   RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
 
-import {
-  ACCOUNT_ENTITY_TYPE,
-  ACCOUNT_GROUP_RELATIONSHIP_TYPE,
-} from '../okta/constants';
 import { OktaAccountInfo } from '../okta/types';
+import { Entities, Relationships } from '../steps/constants';
 import {
   OktaIntegrationConfig,
   StandardizedOktaAccount,
@@ -28,9 +25,9 @@ export function createAccountEntity(
   const accountId = config.oktaOrgUrl.replace(/^https?:\/\//, '');
 
   return {
-    _type: ACCOUNT_ENTITY_TYPE,
+    _type: Entities.ACCOUNT._type,
     _key: `okta_account_${accountId}`,
-    _class: 'Account',
+    _class: Entities.ACCOUNT._class,
     name: data.name,
     displayName,
     accountId,
@@ -63,7 +60,7 @@ export function createAccountGroupRelationship(
     from: account,
     to: group,
     properties: {
-      _type: ACCOUNT_GROUP_RELATIONSHIP_TYPE,
+      _type: Relationships.ACCOUNT_HAS_USER_GROUP._type,
       accountUrl: account.webLink,
       groupId: group.id,
     },
