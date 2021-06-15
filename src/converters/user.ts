@@ -7,11 +7,8 @@ import {
   Relationship,
 } from '@jupiterone/integration-sdk-core';
 
-import {
-  USER_ENTITY_TYPE,
-  USER_MFA_DEVICE_RELATIONSHIP_TYPE,
-} from '../okta/constants';
 import { OktaUser, OktaUserCredentials } from '../okta/types';
+import { Entities, Relationships } from '../steps/constants';
 import {
   OktaIntegrationConfig,
   StandardizedOktaFactor,
@@ -53,8 +50,8 @@ export function createUserEntity(
         ...convertProperties(profile),
         ...convertCredentialEmails(credentials),
         _key: id,
-        _class: 'User',
-        _type: USER_ENTITY_TYPE,
+        _class: Entities.USER._class,
+        _type: Entities.USER._type,
         id,
         webLink,
         displayName: profile.login,
@@ -86,11 +83,11 @@ export function createUserMfaDeviceRelationship(
 ): Relationship {
   return {
     _key: `${user._key}|assigned|${device._key}`,
-    _type: USER_MFA_DEVICE_RELATIONSHIP_TYPE,
-    _class: 'ASSIGNED',
+    _type: Relationships.USER_ASSIGNED_MFA_DEVICE._type,
+    _class: Relationships.USER_ASSIGNED_MFA_DEVICE._class,
     _fromEntityKey: user._key,
     _toEntityKey: device._key,
-    displayName: 'ASSIGNED',
+    displayName: Relationships.USER_ASSIGNED_MFA_DEVICE._class,
     userId: user.id,
     factorId: device.id,
   };
