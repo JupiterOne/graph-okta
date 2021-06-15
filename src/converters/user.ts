@@ -3,6 +3,7 @@ import * as url from 'url';
 import {
   convertProperties,
   createIntegrationEntity,
+  parseTimePropertyValue,
   Relationship,
 } from '@jupiterone/integration-sdk-core';
 
@@ -17,7 +18,6 @@ import {
   StandardizedOktaUser,
 } from '../types';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
-import getTime from '../util/getTime';
 
 export function createUserEntity(
   config: OktaIntegrationConfig,
@@ -63,18 +63,18 @@ export function createUserEntity(
         email: profile.email.toLowerCase(),
         status,
         active: status === 'ACTIVE',
-        created: getTime(created)!,
-        createdOn: getTime(created)!,
-        activated: getTime(activated)!,
-        activatedOn: getTime(activated)!,
-        statusChanged: getTime(statusChanged),
-        statusChangedOn: getTime(statusChanged),
-        lastLogin: getTime(lastLogin),
-        lastLoginOn: getTime(lastLogin),
-        lastUpdated: getTime(lastUpdated)!,
-        lastUpdatedOn: getTime(lastUpdated)!,
-        passwordChanged: getTime(passwordChanged),
-        passwordChangedOn: getTime(passwordChanged),
+        created: parseTimePropertyValue(created)!,
+        createdOn: parseTimePropertyValue(created)!,
+        activated: parseTimePropertyValue(activated)!,
+        activatedOn: parseTimePropertyValue(activated)!,
+        statusChanged: parseTimePropertyValue(statusChanged),
+        statusChangedOn: parseTimePropertyValue(statusChanged),
+        lastLogin: parseTimePropertyValue(lastLogin),
+        lastLoginOn: parseTimePropertyValue(lastLogin),
+        lastUpdated: parseTimePropertyValue(lastUpdated)!,
+        lastUpdatedOn: parseTimePropertyValue(lastUpdated)!,
+        passwordChanged: parseTimePropertyValue(passwordChanged),
+        passwordChangedOn: parseTimePropertyValue(passwordChanged),
       },
     },
   }) as StandardizedOktaUser;

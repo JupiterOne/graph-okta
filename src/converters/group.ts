@@ -4,6 +4,7 @@ import {
   createDirectRelationship,
   createIntegrationEntity,
   Entity,
+  parseTimePropertyValue,
   Relationship,
   RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
@@ -22,7 +23,6 @@ import {
 import { OktaUserGroup } from '../okta/types';
 import { OktaIntegrationConfig, StandardizedOktaUserGroup } from '../types';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
-import getTime from '../util/getTime';
 
 export function createUserGroupEntity(
   config: OktaIntegrationConfig,
@@ -56,12 +56,12 @@ export function createUserGroupEntity(
         id,
         webLink,
         displayName: profileName,
-        created: getTime(created)!,
-        createdOn: getTime(created)!,
-        lastUpdated: getTime(lastUpdated)!,
-        lastUpdatedOn: getTime(lastUpdated)!,
-        lastMembershipUpdated: getTime(lastMembershipUpdated)!,
-        lastMembershipUpdatedOn: getTime(lastMembershipUpdated)!,
+        created: parseTimePropertyValue(created)!,
+        createdOn: parseTimePropertyValue(created)!,
+        lastUpdated: parseTimePropertyValue(lastUpdated)!,
+        lastUpdatedOn: parseTimePropertyValue(lastUpdated)!,
+        lastMembershipUpdated: parseTimePropertyValue(lastMembershipUpdated)!,
+        lastMembershipUpdatedOn: parseTimePropertyValue(lastMembershipUpdated)!,
         objectClass,
         type,
         name: profileName,
