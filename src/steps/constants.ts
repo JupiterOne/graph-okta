@@ -119,7 +119,7 @@ export const Relationships: Record<
   GROUP_ASSIGNED_APPLICATION: {
     _type: 'okta_group_assigned_application',
     _class: RelationshipClass.ASSIGNED,
-    sourceType: 'okta_group', // TODO what up with this?
+    sourceType: 'okta_user_group, okta_app_user_group',
     targetType: Entities.APPLICATION._type,
   },
   USER_ASSIGNED_APPLICATION: {
