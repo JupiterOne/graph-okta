@@ -8,6 +8,16 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.0.0 - 2021-06-22
+
+### Added
+
+- New properties added to resources:
+
+  | Entity      | Properties   |
+  | ----------- | ------------ |
+  | `okta_user` | `mfaEnabled` |
+
 ### Changed
 
 - Migrated the integration to the new SDK and latest Okta APIs.

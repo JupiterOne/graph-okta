@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/graph-okta",
-  "version": "1.8.2",
+  "version": "2.0.0",
   "description": "A JupiterOne Integration for https://www.okta.com",
   "license": "MPL-2.0",
   "repository": "https://github.com/jupiterone/graph-okta",
