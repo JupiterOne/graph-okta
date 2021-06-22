@@ -128,12 +128,19 @@ export function createApplicationGroupRelationships(
   const relationships: Relationship[] = [];
 
   const relationship: Relationship = createDirectRelationship({
-    _class: RelationshipClass.ASSIGNED,
+    _class: Relationships.GROUP_ASSIGNED_APPLICATION._class,
     fromKey: group.id,
+    // Actually okta_user_group or okta_app_user_group.
+    // See `createUserGroupEntity`.
     fromType: 'okta_group',
     toKey: application._key,
     toType: application._type,
     properties: {
+      // Override generated values for _key, _type to maintain
+      // values before migration to new SDK
+      _key: `${group.id}|assigned|${application._key}`,
+      _type: Relationships.GROUP_ASSIGNED_APPLICATION._type,
+
       applicationId: application.id,
       groupId: group.id,
       // Array property not supported on the edge in Neptune
