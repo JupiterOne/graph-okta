@@ -38,7 +38,9 @@ Object {
       "controlDomain": "identity-access",
       "createdOn": undefined,
       "displayName": "Okta SSO",
-      "function": "SSO",
+      "function": Array [
+        "SSO",
+      ],
       "name": "SSO",
     },
     Object {
@@ -55,7 +57,9 @@ Object {
       "controlDomain": "identity-access",
       "createdOn": undefined,
       "displayName": "Okta MFA",
-      "function": "MFA",
+      "function": Array [
+        "MFA",
+      ],
       "name": "MFA",
     },
     Object {
