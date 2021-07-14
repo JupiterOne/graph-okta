@@ -9,7 +9,7 @@ import {
 } from '@jupiterone/integration-sdk-core';
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import { DATA_ACCOUNT_ENTITY } from './account';
+import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
 
 export const RULE_ENTITY_TYPE = 'okta_rule';
 

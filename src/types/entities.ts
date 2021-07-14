@@ -9,7 +9,7 @@ export interface StandardizedOktaAccount extends Entity {
 export interface StandardizedOktaService extends Entity {
   name: string;
   category: string[];
-  function: string;
+  function: string[];
   controlDomain: string;
 }
 
