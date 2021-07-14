@@ -1,11 +1,15 @@
 import { accountSteps } from './account';
-import { accessSteps } from './access';
+import { userSteps } from './users';
+import { groupSteps } from './groups';
+import { deviceSteps } from './devices';
 import { applicationSteps } from './applications';
 import { ruleSteps } from './rules';
 
 const integrationSteps = [
   ...accountSteps,
-  ...accessSteps,
+  ...userSteps,
+  ...groupSteps,
+  ...deviceSteps,
   ...applicationSteps,
   ...ruleSteps,
 ];

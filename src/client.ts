@@ -27,17 +27,18 @@ import {
  */
 export class APIClient {
   oktaClient: OktaClient;
-  usersList: OktaUser[];
   constructor(readonly config: IntegrationConfig, logger: IntegrationLogger) {
     this.oktaClient = createOktaClient(logger, config);
   }
 
   public async verifyAuthentication(): Promise<void> {
     // the most light-weight request possible to validate credentials
+
     try {
-      //there is always at least the Everyone group
       //note that if you don't hit the .each, it doesn't actually attempt it
-      await this.oktaClient.listGroups().each((e) => {});
+      await this.oktaClient.listUsers({ limit: '1' }).each((e) => {
+        return false;
+      });
     } catch (err) {
       throw new IntegrationProviderAuthenticationError({
         cause: err,
@@ -76,15 +77,15 @@ export class APIClient {
   }
 
   /**
-   * Iterates each group resource assigned to a given user.
+   * Iterates each user resource assigned to a given group.
    *
    * @param iteratee receives each resource to produce relationships
    */
-  public async iterateGroupsForUser(
-    user: OktaUser,
-    iteratee: ResourceIteratee<OktaUserGroup>,
+  public async iterateUsersForGroup(
+    group: OktaUserGroup,
+    iteratee: ResourceIteratee<OktaUser>,
   ): Promise<void> {
-    await this.oktaClient.listUserGroups(user.id).each(iteratee);
+    await this.oktaClient.listGroupUsers(group.id).each(iteratee);
   }
 
   /**
@@ -92,14 +93,11 @@ export class APIClient {
    *
    * @param iteratee receives each resource to produce relationships
    */
-  public async iterateFactorsForUser(
-    user: OktaUser,
+  public async iterateDevicesForUser(
+    userId: string,
     iteratee: ResourceIteratee<OktaFactor>,
   ): Promise<void> {
-    if (user.status !== 'DEPROVISIONED') {
-      //asking for factors for DEPROV users throws error
-      await this.oktaClient.listFactors(user.id).each(iteratee);
-    }
+    await this.oktaClient.listFactors(userId).each(iteratee);
   }
 
   /**

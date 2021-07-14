@@ -5,9 +5,11 @@ import {
 
 import { setupOktaRecording } from '../../test/setup/recording';
 import { IntegrationConfig } from '../config';
-import { fetchGroups, fetchUsers } from './access';
-import { fetchAccountDetails } from './account';
+import { fetchUsers } from './users';
+import { fetchGroups } from './groups';
+import { fetchDevices } from './devices';
 import { fetchApplications } from './applications';
+import { fetchAccountDetails } from './account';
 
 import { integrationConfig } from '../../test/config';
 
@@ -30,8 +32,9 @@ test('should collect data', async () => {
   // Simulates dependency graph execution.
   // See https://github.com/JupiterOne/sdk/issues/262.
   await fetchAccountDetails(context);
-  await fetchGroups(context); //groups come before Users in this integration
   await fetchUsers(context);
+  await fetchGroups(context);
+  await fetchDevices(context);
   await fetchApplications(context);
 
   // Review snapshot, failure is a regression

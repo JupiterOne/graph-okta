@@ -5,6 +5,7 @@ import {
   IntegrationInstanceConfig,
 } from '@jupiterone/integration-sdk-core';
 import { createAPIClient } from './client';
+import isValidOktaOrgUrl from './util/isValidOktaOrgUrl';
 
 /**
  * A type describing the configuration fields required to execute the
@@ -54,6 +55,12 @@ export async function validateInvocation(
   if (!config.oktaOrgUrl || !config.oktaApiKey) {
     throw new IntegrationValidationError(
       'Config requires all of {oktaOrgUrl, oktaApiKey}',
+    );
+  }
+
+  if (!config.oktaOrgUrl || !isValidOktaOrgUrl(config.oktaOrgUrl)) {
+    throw new IntegrationValidationError(
+      `Invalid Okta org URL provided (oktaOrgUrl=${config.oktaOrgUrl}, accountId=${config.accountId})`,
     );
   }
 

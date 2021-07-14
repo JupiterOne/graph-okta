@@ -1,17 +1,20 @@
 import {
+  createDirectRelationship,
   createIntegrationEntity,
   IntegrationStep,
   IntegrationStepExecutionContext,
   RelationshipClass,
-  createDirectRelationship,
 } from '@jupiterone/integration-sdk-core';
 
 import { IntegrationConfig } from '../config';
+import { createAccountEntity } from '../converters/account';
+import {
+  createMFAServiceEntity,
+  createSSOServiceEntity,
+} from '../converters/service';
+import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
 import getOktaAccountInfo from '../util/getOktaAccountInfo';
-
-export const DATA_ACCOUNT_ENTITY = 'DATA_ACCOUNT_ENTITY';
-export const SERVICE_ENTITY_TYPE = 'okta_service';
-export const SERVICE_ENTITY_CLASS = ['Service', 'Control'];
+import { Entities, Relationships, Steps } from './constants';
 
 export async function fetchAccountDetails({
   jobState,
@@ -21,27 +24,17 @@ export async function fetchAccountDetails({
     name: instance.name,
     config: instance.config,
   });
-  let displayName = oktaAccountInfo.name;
-  if (oktaAccountInfo.preview) {
-    displayName += ' (preview)';
-  }
-  const accountId = instance.config.oktaOrgUrl.replace(/^https?:\/\//, '');
+
+  const accountProperties = createAccountEntity(
+    instance.config,
+    oktaAccountInfo,
+  );
+
   const accountEntity = await jobState.addEntity(
     createIntegrationEntity({
       entityData: {
-        source: {
-          id: `okta-account:${instance.name}`,
-          name: 'Okta Account',
-        },
-        assign: {
-          _key: `okta_account_${accountId}`,
-          _type: 'okta_account',
-          _class: 'Account',
-          name: oktaAccountInfo.name,
-          displayName: displayName,
-          webLink: instance.config.oktaOrgUrl,
-          accountId,
-        },
+        source: oktaAccountInfo,
+        assign: accountProperties,
       },
     }),
   );
@@ -52,16 +45,7 @@ export async function fetchAccountDetails({
     createIntegrationEntity({
       entityData: {
         source: {},
-        assign: {
-          _type: SERVICE_ENTITY_TYPE,
-          _key: `okta:sso:${oktaAccountInfo.name}`,
-          _class: SERVICE_ENTITY_CLASS,
-          name: 'SSO',
-          displayName: 'Okta SSO',
-          category: ['security'],
-          function: 'SSO',
-          controlDomain: 'identity-access',
-        },
+        assign: createSSOServiceEntity(accountProperties),
       },
     }),
   );
@@ -78,16 +62,7 @@ export async function fetchAccountDetails({
     createIntegrationEntity({
       entityData: {
         source: {},
-        assign: {
-          _type: SERVICE_ENTITY_TYPE,
-          _key: `okta:mfa:${oktaAccountInfo.name}`,
-          _class: SERVICE_ENTITY_CLASS,
-          name: 'MFA',
-          displayName: 'Okta MFA',
-          category: ['security'],
-          function: 'MFA',
-          controlDomain: 'identity-access',
-        },
+        assign: createMFAServiceEntity(accountProperties),
       },
     }),
   );
@@ -103,28 +78,10 @@ export async function fetchAccountDetails({
 
 export const accountSteps: IntegrationStep<IntegrationConfig>[] = [
   {
-    id: 'fetch-account',
+    id: Steps.ACCOUNT,
     name: 'Fetch Account Details',
-    entities: [
-      {
-        resourceName: 'Okta Account',
-        _type: 'okta_account',
-        _class: 'Account',
-      },
-      {
-        resourceName: 'Okta Service',
-        _type: SERVICE_ENTITY_TYPE,
-        _class: SERVICE_ENTITY_CLASS,
-      },
-    ],
-    relationships: [
-      {
-        _type: 'okta_account_has_service',
-        _class: RelationshipClass.HAS,
-        sourceType: 'okta_account',
-        targetType: SERVICE_ENTITY_TYPE,
-      },
-    ],
+    entities: [Entities.ACCOUNT, Entities.SERVICE],
+    relationships: [Relationships.ACCOUNT_HAS_SERVICE],
     dependsOn: [],
     executionHandler: fetchAccountDetails,
   },
