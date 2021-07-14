@@ -5,6 +5,8 @@
 - Visualize Okta users, groups, devices, applications, and services in the
   JupiterOne graph.
 - Map Okta users to employees in your JupiterOne account.
+- See Okta rules which are automatically adding users to groups. Write queries
+  to determine which users were added via rules.
 - Monitor changes to Okta users and access management data using JupiterOne
   alerts.
 - Create an employee entity that is used to map users across your organization
@@ -12,8 +14,8 @@
 
 ## How it Works
 
-- JupiterOne periodically fetches Okta users, groups, and access management data
-  to update the graph.
+- JupiterOne periodically fetches Okta users, groups, user rules, and access
+  management data to update the graph.
 - Write JupiterOne queries to review and monitor updates to the graph.
 - Configure alerts to take action when the JupiterOne graph changes.
 

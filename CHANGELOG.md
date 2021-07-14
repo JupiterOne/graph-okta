@@ -8,6 +8,32 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.1.0 - 2021-07-14
+
+### Added
+
+- New entity added:
+
+| Resources | Entity `_type` | Entity `_class` |
+| --------- | -------------- | --------------- |
+| Okta Rule | `okta_rule`    | `Configuration` |
+
+- New relationship added:
+
+| Source Entity `_type` | Relationship `_class` | Target Entity `_type` |
+| --------------------- | --------------------- | --------------------- |
+| `okta_account`        | **HAS**               | `okta_rule`           |
+
+## 2.0.0 - 2021-06-22
+
+### Added
+
+- New properties added to resources:
+
+  | Entity      | Properties   |
+  | ----------- | ------------ |
+  | `okta_user` | `mfaEnabled` |
+
 ### Changed
 
 - Migrated the integration to the new SDK and latest Okta APIs.
