@@ -10,8 +10,7 @@ import {
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
 import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
-
-export const RULE_ENTITY_TYPE = 'okta_rule';
+import { Entities, Relationships, Steps } from './constants';
 
 export async function fetchRules({
   instance,
@@ -29,8 +28,8 @@ export async function fetchRules({
           source: rule,
           assign: {
             _key: rule.id,
-            _type: RULE_ENTITY_TYPE,
-            _class: 'Configuration',
+            _type: Entities.RULE._type,
+            _class: Entities.RULE._class,
             id: rule.id,
             name: rule.name,
             ruleType: rule.type, //example: 'group_rule', 'policy_rule'
@@ -58,24 +57,11 @@ export async function fetchRules({
 
 export const ruleSteps: IntegrationStep<IntegrationConfig>[] = [
   {
-    id: 'fetch-rules',
+    id: Steps.RULES,
     name: 'Fetch Rules',
-    entities: [
-      {
-        resourceName: 'Okta Rule',
-        _type: RULE_ENTITY_TYPE,
-        _class: 'Configuration',
-      },
-    ],
-    relationships: [
-      {
-        _type: 'okta_account_has_rule',
-        _class: RelationshipClass.HAS,
-        sourceType: 'okta_account',
-        targetType: RULE_ENTITY_TYPE,
-      },
-    ],
-    dependsOn: ['fetch-users'],
+    entities: [Entities.RULE],
+    relationships: [Relationships.ACCOUNT_HAS_RULE],
+    dependsOn: [Steps.USERS],
     executionHandler: fetchRules,
   },
 ];

@@ -10,6 +10,7 @@ export const Steps = {
   USERS: 'fetch-users',
   APPLICATIONS: 'fetch-applications',
   MFA_DEVICES: 'fetch-devices',
+  RULES: 'fetch-rules',
 };
 
 export const Entities: Record<
@@ -19,7 +20,8 @@ export const Entities: Record<
   | 'USER_GROUP'
   | 'APP_USER_GROUP'
   | 'APPLICATION'
-  | 'MFA_DEVICE',
+  | 'MFA_DEVICE'
+  | 'RULE',
   StepEntityMetadata
 > = {
   ACCOUNT: {
@@ -57,6 +59,11 @@ export const Entities: Record<
     _type: 'mfa_device',
     _class: ['Key', 'AccessKey'],
   },
+  RULE: {
+    resourceName: 'Okta Rule',
+    _type: 'okta_rule',
+    _class: ['Configuration'],
+  },
 };
 
 export const Relationships: Record<
@@ -64,6 +71,7 @@ export const Relationships: Record<
   | 'ACCOUNT_HAS_USER'
   | 'ACCOUNT_HAS_USER_GROUP'
   | 'ACCOUNT_HAS_APP_USER_GROUP'
+  | 'ACCOUNT_HAS_RULE'
   | 'USER_GROUP_HAS_USER'
   | 'APP_USER_GROUP_HAS_USER'
   | 'ACCOUNT_HAS_APPLICATION'
@@ -97,6 +105,12 @@ export const Relationships: Record<
     _class: RelationshipClass.HAS,
     sourceType: Entities.ACCOUNT._type,
     targetType: Entities.APP_USER_GROUP._type,
+  },
+  ACCOUNT_HAS_RULE: {
+    _type: 'okta_account_has_rule',
+    _class: RelationshipClass.HAS,
+    sourceType: Entities.ACCOUNT._type,
+    targetType: Entities.RULE._type,
   },
   USER_GROUP_HAS_USER: {
     _type: 'okta_group_has_user',
