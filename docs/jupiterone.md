@@ -145,6 +145,7 @@ The following relationships are created/mapped:
 | `okta_account`                         | **HAS**               | `okta_user`           |
 | `okta_user_group, okta_app_user_group` | **ASSIGNED**          | `okta_application`    |
 | `okta_user_group`                      | **HAS**               | `okta_user`           |
+| `okta_rule`                            | **ALLOWS**            | `okta_user_group`     |
 | `okta_user`                            | **ASSIGNED**          | `okta_application`    |
 | `okta_user`                            | **ASSIGNED**          | `aws_iam_role`        |
 | `okta_user`                            | **ASSIGNED**          | `mfa_device`          |

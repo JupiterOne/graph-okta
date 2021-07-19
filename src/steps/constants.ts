@@ -4,6 +4,8 @@ import {
   StepRelationshipMetadata,
 } from '@jupiterone/integration-sdk-core';
 
+export const DATA_ACCOUNT_ENTITY = 'DATA_ACCOUNT_ENTITY';
+
 export const Steps = {
   ACCOUNT: 'fetch-account',
   GROUPS: 'fetch-groups',
@@ -79,7 +81,8 @@ export const Relationships: Record<
   | 'USER_ASSIGNED_APPLICATION'
   | 'USER_ASSIGNED_AWS_IAM_ROLE'
   | 'USER_GROUP_ASSIGNED_AWS_IAM_ROLE'
-  | 'USER_ASSIGNED_MFA_DEVICE',
+  | 'USER_ASSIGNED_MFA_DEVICE'
+  | 'RULE_ALLOWS_USER_GROUP',
   StepRelationshipMetadata
 > = {
   ACCOUNT_HAS_SERVICE: {
@@ -159,5 +162,11 @@ export const Relationships: Record<
     _class: RelationshipClass.ASSIGNED,
     sourceType: Entities.USER._type,
     targetType: Entities.MFA_DEVICE._type,
+  },
+  RULE_ALLOWS_USER_GROUP: {
+    _type: 'okta_rule_allows_user_group',
+    _class: RelationshipClass.ALLOWS,
+    sourceType: Entities.RULE._type,
+    targetType: Entities.USER_GROUP._type,
   },
 };

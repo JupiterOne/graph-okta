@@ -9,8 +9,12 @@ import {
 } from '@jupiterone/integration-sdk-core';
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
-import { Entities, Relationships, Steps } from './constants';
+import {
+  DATA_ACCOUNT_ENTITY,
+  Entities,
+  Relationships,
+  Steps,
+} from './constants';
 
 export async function fetchRules({
   instance,
@@ -52,6 +56,26 @@ export async function fetchRules({
         to: ruleEntity,
       }),
     );
+
+    if (rule.actions && rule.actions.assignUserToGroups) {
+      for (const groupId of rule.actions.assignUserToGroups.groupIds) {
+        const groupEntity = await jobState.findEntity(groupId);
+
+        if (!groupEntity) {
+          logger.warn(
+            `Rule points to non-existent group. Expected group with key to exist (key=${groupId})`,
+          );
+        } else {
+          await jobState.addRelationship(
+            createDirectRelationship({
+              _class: RelationshipClass.ALLOWS,
+              from: ruleEntity,
+              to: groupEntity,
+            }),
+          );
+        }
+      }
+    }
   });
 }
 
@@ -60,8 +84,11 @@ export const ruleSteps: IntegrationStep<IntegrationConfig>[] = [
     id: Steps.RULES,
     name: 'Fetch Rules',
     entities: [Entities.RULE],
-    relationships: [Relationships.ACCOUNT_HAS_RULE],
-    dependsOn: [Steps.USERS],
+    relationships: [
+      Relationships.ACCOUNT_HAS_RULE,
+      Relationships.RULE_ALLOWS_USER_GROUP,
+    ],
+    dependsOn: [Steps.USERS, Steps.GROUPS],
     executionHandler: fetchRules,
   },
 ];

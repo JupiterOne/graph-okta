@@ -7,5 +7,11 @@ export interface OktaRule extends OktaResource {
   created: string;
   lastUpdated?: string;
   conditions: object;
-  actions: object;
+  actions: OktaActions;
+}
+
+export interface OktaActions {
+  assignUserToGroups: {
+    groupIds: string[];
+  };
 }

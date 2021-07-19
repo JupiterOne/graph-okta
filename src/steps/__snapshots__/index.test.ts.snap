@@ -915,6 +915,52 @@ Object {
       "status": "ACTIVE",
       "webLink": "https://dev-857255-admin.okta.com/admin/app/saasure/instance/0oas5to408GEd54s04x6",
     },
+    Object {
+      "_class": Array [
+        "Configuration",
+      ],
+      "_key": "0pr2yk9orqsTiGek64x7",
+      "_rawData": Array [
+        Object {
+          "name": "default",
+          "rawData": GroupRule {
+            "actions": GroupRuleAction {
+              "assignUserToGroups": GroupRuleGroupAssignment {
+                "groupIds": Array [
+                  "00g2yk804gBPDqdcz4x7",
+                ],
+              },
+            },
+            "allGroupsValid": true,
+            "conditions": GroupRuleConditions {
+              "expression": GroupRuleExpression {
+                "type": "urn:okta:expression:1.0",
+                "value": "String.stringContains(user.email,\\"jupiter\\")",
+              },
+            },
+            "created": "2021-04-20T15:02:49.000Z",
+            "id": "0pr2yk9orqsTiGek64x7",
+            "lastUpdated": "2021-04-20T17:24:45.000Z",
+            "name": "Adding to J1_Emps",
+            "status": "INACTIVE",
+            "type": "group_rule",
+          },
+        },
+      ],
+      "_type": "okta_rule",
+      "actions": "{\\"assignUserToGroups\\":{\\"groupIds\\":[\\"00g2yk804gBPDqdcz4x7\\"]}}",
+      "active": false,
+      "conditions": "{\\"expression\\":{\\"value\\":\\"String.stringContains(user.email,\\\\\\"jupiter\\\\\\")\\",\\"type\\":\\"urn:okta:expression:1.0\\"}}",
+      "created": 1618930969000,
+      "createdOn": 1618930969000,
+      "displayName": "Adding to J1_Emps",
+      "id": "0pr2yk9orqsTiGek64x7",
+      "lastUpdated": 1618939485000,
+      "lastUpdatedOn": 1618939485000,
+      "name": "Adding to J1_Emps",
+      "ruleType": "group_rule",
+      "status": "INACTIVE",
+    },
   ],
   "collectedRelationships": Array [
     Object {
@@ -1189,6 +1235,14 @@ Object {
       "userEmail": undefined,
       "userId": "00us5to77GW1mVs6w4x6",
     },
+    Object {
+      "_class": "HAS",
+      "_fromEntityKey": "okta_account_dev-857255.okta.com/",
+      "_key": "okta_account_dev-857255.okta.com/|has|0pr2yk9orqsTiGek64x7",
+      "_toEntityKey": "0pr2yk9orqsTiGek64x7",
+      "_type": "okta_account_has_rule",
+      "displayName": "HAS",
+    },
   ],
   "encounteredTypes": Array [
     "okta_account",
@@ -1203,8 +1257,10 @@ Object {
     "okta_account_has_application",
     "okta_group_assigned_application",
     "okta_user_assigned_application",
+    "okta_rule",
+    "okta_account_has_rule",
   ],
-  "numCollectedEntities": 15,
-  "numCollectedRelationships": 27,
+  "numCollectedEntities": 16,
+  "numCollectedRelationships": 28,
 }
 `;
