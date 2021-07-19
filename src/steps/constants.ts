@@ -82,7 +82,7 @@ export const Relationships: Record<
   | 'USER_ASSIGNED_AWS_IAM_ROLE'
   | 'USER_GROUP_ASSIGNED_AWS_IAM_ROLE'
   | 'USER_ASSIGNED_MFA_DEVICE'
-  | 'RULE_ALLOWS_USER_GROUP',
+  | 'RULE_MANAGES_USER_GROUP',
   StepRelationshipMetadata
 > = {
   ACCOUNT_HAS_SERVICE: {
@@ -163,9 +163,9 @@ export const Relationships: Record<
     sourceType: Entities.USER._type,
     targetType: Entities.MFA_DEVICE._type,
   },
-  RULE_ALLOWS_USER_GROUP: {
-    _type: 'okta_rule_allows_user_group',
-    _class: RelationshipClass.ALLOWS,
+  RULE_MANAGES_USER_GROUP: {
+    _type: 'okta_rule_manages_user_group',
+    _class: RelationshipClass.MANAGES,
     sourceType: Entities.RULE._type,
     targetType: Entities.USER_GROUP._type,
   },

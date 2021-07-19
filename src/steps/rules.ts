@@ -68,7 +68,7 @@ export async function fetchRules({
         } else {
           await jobState.addRelationship(
             createDirectRelationship({
-              _class: RelationshipClass.ALLOWS,
+              _class: RelationshipClass.MANAGES,
               from: ruleEntity,
               to: groupEntity,
             }),
@@ -86,7 +86,7 @@ export const ruleSteps: IntegrationStep<IntegrationConfig>[] = [
     entities: [Entities.RULE],
     relationships: [
       Relationships.ACCOUNT_HAS_RULE,
-      Relationships.RULE_ALLOWS_USER_GROUP,
+      Relationships.RULE_MANAGES_USER_GROUP,
     ],
     dependsOn: [Steps.USERS, Steps.GROUPS],
     executionHandler: fetchRules,
