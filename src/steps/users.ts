@@ -9,8 +9,12 @@ import {
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
 import { createUserEntity } from '../converters/user';
-import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
-import { Entities, Relationships, Steps } from './constants';
+import {
+  DATA_ACCOUNT_ENTITY,
+  Entities,
+  Relationships,
+  Steps,
+} from './constants';
 
 export async function fetchUsers({
   instance,

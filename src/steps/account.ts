@@ -12,9 +12,13 @@ import {
   createMFAServiceEntity,
   createSSOServiceEntity,
 } from '../converters/service';
-import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
 import getOktaAccountInfo from '../util/getOktaAccountInfo';
-import { Entities, Relationships, Steps } from './constants';
+import {
+  DATA_ACCOUNT_ENTITY,
+  Entities,
+  Relationships,
+  Steps,
+} from './constants';
 
 export async function fetchAccountDetails({
   jobState,

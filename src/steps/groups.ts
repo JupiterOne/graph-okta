@@ -11,9 +11,13 @@ import {
   createGroupUserRelationship,
   createUserGroupEntity,
 } from '../converters/group';
-import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
 import { StandardizedOktaAccount, StandardizedOktaUserGroup } from '../types';
-import { Entities, Relationships, Steps } from './constants';
+import {
+  DATA_ACCOUNT_ENTITY,
+  Entities,
+  Relationships,
+  Steps,
+} from './constants';
 
 export async function fetchGroups({
   instance,

@@ -12,9 +12,13 @@ import {
   createApplicationGroupRelationships,
   createApplicationUserRelationships,
 } from '../converters';
-import { DATA_ACCOUNT_ENTITY } from '../okta/constants';
 import { StandardizedOktaAccount, StandardizedOktaApplication } from '../types';
-import { Entities, Relationships, Steps } from './constants';
+import {
+  DATA_ACCOUNT_ENTITY,
+  Entities,
+  Relationships,
+  Steps,
+} from './constants';
 
 export async function fetchApplications({
   instance,
