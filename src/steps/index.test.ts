@@ -12,6 +12,7 @@ import { fetchApplications } from './applications';
 import { fetchAccountDetails } from './account';
 
 import { integrationConfig } from '../../test/config';
+import { fetchRules } from './rules';
 
 jest.setTimeout(1000 * 60 * 1);
 let recording: Recording;
@@ -36,6 +37,7 @@ test('should collect data', async () => {
   await fetchGroups(context);
   await fetchDevices(context);
   await fetchApplications(context);
+  await fetchRules(context);
 
   // Review snapshot, failure is a regression
   expect({
@@ -136,6 +138,27 @@ test('should collect data', async () => {
         },
       },
       required: ['webLink'],
+    },
+  });
+
+  const rules = context.jobState.collectedEntities.filter((e) =>
+    e._class.includes('Configuration'),
+  );
+  expect(rules.length).toBeGreaterThan(0);
+  expect(rules).toMatchGraphObjectSchema({
+    _class: ['Configuration'],
+    schema: {
+      properties: {
+        _type: { const: 'okta_rule' },
+        name: { type: 'string' },
+        ruleType: { type: 'string' },
+        status: { type: 'string' },
+        _rawData: {
+          type: 'array',
+          items: { type: 'object' },
+        },
+      },
+      required: ['name', 'ruleType', 'status'],
     },
   });
 });
