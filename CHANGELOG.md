@@ -8,6 +8,8 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.1.0 - 2021-07-22
+
 ### Added
 
 - New entity added:
@@ -16,11 +18,17 @@ and this project adheres to
 | --------- | -------------- | --------------- |
 | Okta Rule | `okta_rule`    | `Configuration` |
 
-- New relationship added:
+- New relationships added:
 
 | Source Entity `_type` | Relationship `_class` | Target Entity `_type` |
 | --------------------- | --------------------- | --------------------- |
 | `okta_account`        | **HAS**               | `okta_rule`           |
+| `okta_rule`           | **MANAGES**           | `okta_user_group`     |
+
+### Fixed
+
+- Fix `RequestExecutorWithEarlyRateLimiting` extending wrong built-in default
+  executor type to ensure we get the retry logic we expect.
 
 ## 2.0.0 - 2021-06-22
 
