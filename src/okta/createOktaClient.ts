@@ -16,7 +16,7 @@ interface RequestExecutorWithEarlyRateLimitingOptions {
  * A custom Okta request executor that throttles requests when `x-rate-limit-remaining` response
  * headers fall below a provided threshold.
  */
-export class RequestExecutorWithEarlyRateLimiting extends okta.RequestExecutor {
+export class RequestExecutorWithEarlyRateLimiting extends okta.DefaultRequestExecutor {
   logger: IntegrationLogger;
   minimumRateLimitRemaining: number;
   requestAfter: number | undefined;
