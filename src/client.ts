@@ -97,7 +97,15 @@ export class APIClient {
     userId: string,
     iteratee: ResourceIteratee<OktaFactor>,
   ): Promise<void> {
-    await this.oktaClient.listFactors(userId).each(iteratee);
+    try {
+      await this.oktaClient.listFactors(userId).each(iteratee);
+    } catch (err) {
+      if (err.status === 404) {
+        //ignore it. It's probably a user that got deleted between steps
+      } else {
+        throw err;
+      }
+    }
   }
 
   /**

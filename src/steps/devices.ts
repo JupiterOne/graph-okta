@@ -27,12 +27,10 @@ export async function fetchDevices({
           userEntity._key,
           async (device) => {
             const deviceEntity = createMFADeviceEntity(device);
-            await jobState.addEntity(createMFADeviceEntity(device));
-
+            await jobState.addEntity(deviceEntity);
             if (device.status === 'ACTIVE') {
               userEntity.mfaEnabled = true;
             }
-
             await jobState.addRelationship(
               createUserMfaDeviceRelationship(userEntity, deviceEntity),
             );

@@ -10,9 +10,9 @@ import { fetchGroups } from './groups';
 import { fetchDevices } from './devices';
 import { fetchApplications } from './applications';
 import { fetchAccountDetails } from './account';
-
-import { integrationConfig } from '../../test/config';
 import { fetchRules } from './rules';
+import { integrationConfig } from '../../test/config';
+import { createAPIClient } from '../client';
 
 jest.setTimeout(1000 * 60 * 1);
 let recording: Recording;
@@ -161,4 +161,24 @@ test('should collect data', async () => {
       required: ['name', 'ruleType', 'status'],
     },
   });
+});
+
+test('call for devices on a fake user', async () => {
+  recording = setupOktaRecording({
+    directory: __dirname,
+    name: 'callfakeuser',
+  });
+
+  const context = createMockStepExecutionContext<IntegrationConfig>({
+    instanceConfig: integrationConfig,
+  });
+
+  const apiClient = createAPIClient(context.instance.config, context.logger);
+  //call a fake user to test failure
+  //the 404 error should be suppressed
+  expect(
+    await apiClient.iterateDevicesForUser('thisisafakekey', () => {
+      jest.fn;
+    }),
+  ).toReturn;
 });
