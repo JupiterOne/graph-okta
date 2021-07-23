@@ -8,6 +8,8 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.1.1 - 2021-07-23
+
 ### Fixed
 
 - Fix duplicate relationship error for USER_ASSIGNED_AWS_IAM_ROLE when multiple
