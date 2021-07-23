@@ -10,6 +10,11 @@ and this project adheres to
 
 ### Fixed
 
+- Fix duplicate relationship error for USER_ASSIGNED_AWS_IAM_ROLE when multiple
+  apps point to the same IAM role.
+
+- Fix 404 error on non-existent user when fetching devices for users.
+
 - Fix `applications` step failure on `MISSING_KEY_ERROR` when group not found
   building relationship to application.
 

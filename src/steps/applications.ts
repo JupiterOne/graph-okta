@@ -1,6 +1,7 @@
 import {
   IntegrationStep,
   IntegrationStepExecutionContext,
+  Relationship,
 } from '@jupiterone/integration-sdk-core';
 
 import { createAPIClient } from '../client';
@@ -60,9 +61,19 @@ export async function fetchApplications({
       const userEntity = await jobState.findEntity(user.id);
 
       if (userEntity) {
-        await jobState.addRelationships(
-          createApplicationUserRelationships(appEntity, user),
+        const relationships: Relationship[] = createApplicationUserRelationships(
+          appEntity,
+          user,
         );
+        //these relationships include both USER_ASSIGNED_APPLICATION and USER_ASSIGNED_AWS_IAM_ROLE
+        //USER_ASSIGNED_APPLICATION will be unique to this user and app pair
+        //however, multiple apps for that user can use AWS and have the same IAM Role assigned
+        //therefore, the USER_ASSIGNED_AWS_IAM_ROLE relationship may have been specified in a previous app for this user
+        for (const rel of relationships) {
+          if (!jobState.hasKey(rel._key)) {
+            await jobState.addRelationship(rel);
+          }
+        }
       } else {
         logger.warn(
           { appId: app.id, appName: app.name, userId: user.id },
