@@ -1,5 +1,4 @@
 import {
-  IntegrationMissingKeyError,
   IntegrationStep,
   IntegrationStepExecutionContext,
 } from '@jupiterone/integration-sdk-core';
@@ -42,15 +41,16 @@ export async function fetchGroups({
     await apiClient.iterateUsersForGroup(group, async (user) => {
       const userEntity = await jobState.findEntity(user.id);
 
-      if (!userEntity) {
-        throw new IntegrationMissingKeyError(
-          `Expected user with key to exist (key=${user.id})`,
+      if (userEntity) {
+        await jobState.addRelationship(
+          createGroupUserRelationship(groupEntity, userEntity),
+        );
+      } else {
+        logger.warn(
+          { groupId: group.id, groupName: group.type, userId: user.id },
+          '[SKIP] User not found in job state, could not build relationship to group',
         );
       }
-
-      await jobState.addRelationship(
-        createGroupUserRelationship(groupEntity, userEntity),
-      );
     });
   });
 }

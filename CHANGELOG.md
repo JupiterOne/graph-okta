@@ -8,6 +8,17 @@ and this project adheres to
 
 ## Unreleased
 
+### Fixed
+
+- Fix `applications` step failure on `MISSING_KEY_ERROR` when group not found
+  building relationship to application.
+
+- Fix `applications` step failure on `MISSING_KEY_ERROR` when user not found
+  building relationship to application.
+
+- Fix `groups` step failure on `MISSING_KEY_ERROR` when user not found building
+  relationship to application.
+
 ## 2.1.0 - 2021-07-22
 
 ### Added

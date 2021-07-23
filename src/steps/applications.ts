@@ -1,5 +1,4 @@
 import {
-  IntegrationMissingKeyError,
   IntegrationStep,
   IntegrationStepExecutionContext,
 } from '@jupiterone/integration-sdk-core';
@@ -44,30 +43,32 @@ export async function fetchApplications({
     await apiClient.iterateGroupsForApp(app, async (group) => {
       const groupEntity = await jobState.findEntity(group.id);
 
-      if (!groupEntity) {
-        throw new IntegrationMissingKeyError(
-          `Expected group with key to exist (key=${group.id})`,
+      if (groupEntity) {
+        await jobState.addRelationships(
+          createApplicationGroupRelationships(appEntity, group),
+        );
+      } else {
+        logger.warn(
+          { appId: app.id, appName: app.name, groupId: group.id },
+          '[SKIP] Group not found in job state, could not build relationship to application',
         );
       }
-
-      await jobState.addRelationships(
-        createApplicationGroupRelationships(appEntity, group),
-      );
     });
 
     //get the individual users that are assigned to this app (ie. not assigned as part of group)
     await apiClient.iterateUsersForApp(app, async (user) => {
       const userEntity = await jobState.findEntity(user.id);
 
-      if (!userEntity) {
-        throw new IntegrationMissingKeyError(
-          `Expected user with key to exist (key=${user.id})`,
+      if (userEntity) {
+        await jobState.addRelationships(
+          createApplicationUserRelationships(appEntity, user),
+        );
+      } else {
+        logger.warn(
+          { appId: app.id, appName: app.name, userId: user.id },
+          '[SKIP] User not found in job state, could not build relationship to application',
         );
       }
-
-      await jobState.addRelationships(
-        createApplicationUserRelationships(appEntity, user),
-      );
     });
   });
 }
