@@ -27,8 +27,10 @@ import {
  */
 export class APIClient {
   oktaClient: OktaClient;
+  logger: IntegrationLogger;
   constructor(readonly config: IntegrationConfig, logger: IntegrationLogger) {
     this.oktaClient = createOktaClient(logger, config);
+    this.logger = logger;
   }
 
   public async verifyAuthentication(): Promise<void> {
@@ -177,7 +179,17 @@ export class APIClient {
   public async iterateRules(
     iteratee: ResourceIteratee<OktaRule>,
   ): Promise<void> {
-    await this.oktaClient.listGroupRules().each(iteratee);
+    try {
+      await this.oktaClient.listGroupRules().each(iteratee);
+    } catch (err) {
+      if (err.status === 400) {
+        this.logger.info(
+          'Rules not enabled for this account. Skipping processing of Okta Rules.',
+        );
+      } else {
+        throw err;
+      }
+    }
   }
 }
 

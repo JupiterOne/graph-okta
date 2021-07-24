@@ -15,6 +15,8 @@ and this project adheres to
 ### Updated
 
 - Updated to latest JupiterOne SDK and Okta node client versions.
+- Fix for 400 error while attempting to download Okta Rules on accounts where
+  the Rules feature is not enabled.
 
 ## 2.1.1 - 2021-07-23
 
