@@ -85,7 +85,15 @@ export class APIClient {
     group: OktaUserGroup,
     iteratee: ResourceIteratee<OktaUser>,
   ): Promise<void> {
-    await this.oktaClient.listGroupUsers(group.id).each(iteratee);
+    try {
+      await this.oktaClient.listGroupUsers(group.id).each(iteratee);
+    } catch (err) {
+      if (err.status === 404) {
+        //ignore it. It's probably a group that got deleted between steps
+      } else {
+        throw err;
+      }
+    }
   }
 
   /**
@@ -128,9 +136,17 @@ export class APIClient {
     app: OktaApplication,
     iteratee: ResourceIteratee<OktaApplicationGroup>,
   ): Promise<void> {
-    await this.oktaClient
-      .listApplicationGroupAssignments(app.id)
-      .each(iteratee);
+    try {
+      await this.oktaClient
+        .listApplicationGroupAssignments(app.id)
+        .each(iteratee);
+    } catch (err) {
+      if (err.status === 404) {
+        //ignore it. It's probably an app that got deleted between steps
+      } else {
+        throw err;
+      }
+    }
   }
 
   /**
@@ -142,7 +158,15 @@ export class APIClient {
     app: OktaApplication,
     iteratee: ResourceIteratee<OktaApplicationUser>,
   ): Promise<void> {
-    await this.oktaClient.listApplicationUsers(app.id).each(iteratee);
+    try {
+      await this.oktaClient.listApplicationUsers(app.id).each(iteratee);
+    } catch (err) {
+      if (err.status === 404) {
+        //ignore it. It's probably an app that got deleted between steps
+      } else {
+        throw err;
+      }
+    }
   }
 
   /**
