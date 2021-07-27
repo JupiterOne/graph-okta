@@ -8,6 +8,14 @@ and this project adheres to
 
 ## Unreleased
 
+### Fixed
+
+- Fix 404 errors on non-existent groups or apps when fetching details
+
+### Updated
+
+- Updated to latest JupiterOne SDK and Okta node client versions.
+
 ## 2.1.1 - 2021-07-23
 
 ### Fixed
