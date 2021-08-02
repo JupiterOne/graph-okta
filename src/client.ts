@@ -27,8 +27,10 @@ import {
  */
 export class APIClient {
   oktaClient: OktaClient;
+  logger: IntegrationLogger;
   constructor(readonly config: IntegrationConfig, logger: IntegrationLogger) {
     this.oktaClient = createOktaClient(logger, config);
+    this.logger = logger;
   }
 
   public async verifyAuthentication(): Promise<void> {
@@ -177,7 +179,18 @@ export class APIClient {
   public async iterateRules(
     iteratee: ResourceIteratee<OktaRule>,
   ): Promise<void> {
-    await this.oktaClient.listGroupRules().each(iteratee);
+    try {
+      await this.oktaClient.listGroupRules().each(iteratee);
+    } catch (err) {
+      //per https://developer.okta.com/docs/reference/error-codes/
+      if (/GROUP_MEMBERSHIP_RULES is not enabled/.test(err.errorSummary)) {
+        this.logger.info(
+          'Rules not enabled for this account. Skipping processing of Okta Rules.',
+        );
+      } else {
+        throw err;
+      }
+    }
   }
 }
 
