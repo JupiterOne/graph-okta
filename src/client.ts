@@ -182,7 +182,8 @@ export class APIClient {
     try {
       await this.oktaClient.listGroupRules().each(iteratee);
     } catch (err) {
-      if (err.status === 400) {
+      //per https://developer.okta.com/docs/reference/error-codes/
+      if (/GROUP_MEMBERSHIP_RULES is not enabled/.test(err.errorSummary)) {
         this.logger.info(
           'Rules not enabled for this account. Skipping processing of Okta Rules.',
         );
