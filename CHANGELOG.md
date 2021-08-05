@@ -8,6 +8,8 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.1.2 - 2021-08-04
+
 ### Fixed
 
 - Fix 404 errors on non-existent groups or apps when fetching details
