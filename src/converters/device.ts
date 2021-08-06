@@ -12,6 +12,7 @@ export function createMFADeviceEntity(
     _type: Entities.MFA_DEVICE._type,
     _class: Entities.MFA_DEVICE._class,
     displayName: `${data.provider} ${data.factorType}`,
+    name: `${data.provider} ${data.factorType}`,
     id: data.id,
     factorType: data.factorType,
     provider: data.provider,
