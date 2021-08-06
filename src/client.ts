@@ -183,7 +183,7 @@ export class APIClient {
       await this.oktaClient.listGroupRules().each(iteratee);
     } catch (err) {
       //per https://developer.okta.com/docs/reference/error-codes/
-      if (/\/api\/v1\/groups\/rules/.test(err.url)) {
+      if (/\/api\/v1\/groups\/rules/.test(err.url) && err.status === 400) {
         this.logger.info(
           'Rules not enabled for this account. Skipping processing of Okta Rules.',
         );
