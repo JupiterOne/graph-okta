@@ -8,6 +8,8 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.1.3 - 2021-08-09
+
 ### Fixed
 
 - Fix MFA device fails to validate in J1 SDK
