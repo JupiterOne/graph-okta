@@ -44,7 +44,7 @@ export class APIClient {
     } catch (err) {
       throw new IntegrationProviderAuthenticationError({
         cause: err,
-        endpoint: this.config.oktaOrgUrl + 'api/v1/groups',
+        endpoint: this.config.oktaOrgUrl + '/api/v1/users?limit=1',
         status: err.status,
         statusText: err.statusText,
       });
@@ -183,7 +183,7 @@ export class APIClient {
       await this.oktaClient.listGroupRules().each(iteratee);
     } catch (err) {
       //per https://developer.okta.com/docs/reference/error-codes/
-      if (/GROUP_MEMBERSHIP_RULES is not enabled/.test(err.errorSummary)) {
+      if (/\/api\/v1\/groups\/rules/.test(err.url) && err.status === 400) {
         this.logger.info(
           'Rules not enabled for this account. Skipping processing of Okta Rules.',
         );
