@@ -3,6 +3,7 @@
 import { IntegrationLogger } from '@jupiterone/integration-sdk-core';
 import { OktaClient } from './types';
 import { OktaIntegrationConfig } from '../types';
+import { AttemptContext, retry } from '@lifeomic/attempt';
 
 const okta = require('@okta/okta-sdk-nodejs');
 
@@ -33,14 +34,45 @@ export class RequestExecutorWithEarlyRateLimiting extends okta.DefaultRequestExe
   }
 
   async fetch(request: any) {
+    const { logger } = this;
     if (this.getThrottleActivated() && this.requestAfter) {
       const now = Date.now();
       const delayMs = this.requestAfter - now;
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
-    return super.fetch(request).then((response: any) => {
-      this.requestAfter = this.getRequestAfter(response);
-      return response;
+    const attemptFunction = () =>
+      super.fetch(request).then((response: any) => {
+        this.requestAfter = this.getRequestAfter(response);
+        return response;
+      });
+    return await retry(attemptFunction, {
+      maxAttempts: 3,
+      delay: 30_000, // 30 seconds to start
+      timeout: 180_000, // 3 min timeout. We need this in case Node hangs with ETIMEDOUT
+      factor: 2, //exponential backoff factor. with 30 sec start and 3 attempts, longest wait is 2 min
+      handleError(err: any, attemptContext: AttemptContext) {
+        /* retry will keep trying to the limits of retryOptions
+         * but it lets you intervene in this function
+         */
+        // don't keep trying if it's not going to get better
+        if (
+          err.retryable === false ||
+          err.status === 401 ||
+          err.status === 403 ||
+          err.status === 404
+        ) {
+          logger.warn(
+            { attemptContext, err },
+            `Hit an unrecoverable error when attempting fetch. Aborting.`,
+          );
+          attemptContext.abort();
+        } else {
+          logger.warn(
+            { attemptContext, err },
+            `Hit a possibly recoverable error when attempting fetch. Retrying in a moment.`,
+          );
+        }
+      },
     });
   }
 
