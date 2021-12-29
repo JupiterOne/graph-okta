@@ -8,6 +8,8 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.1.4 - 2021-12-29
+
 ### Changed
 
 - Will catch `403` error status from Okta API to throw
