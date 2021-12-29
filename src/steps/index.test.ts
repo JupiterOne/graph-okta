@@ -3,6 +3,8 @@ import {
   Recording,
 } from '@jupiterone/integration-sdk-testing';
 
+import { IntegrationProviderAuthorizationError } from '@jupiterone/integration-sdk-core';
+
 import { setupOktaRecording } from '../../test/setup/recording';
 import { IntegrationConfig } from '../config';
 import { fetchUsers } from './users';
@@ -181,4 +183,40 @@ test('call for devices on a fake user', async () => {
       jest.fn;
     }),
   ).toReturn;
+});
+
+test('mocked 403', async () => {
+  recording = setupOktaRecording({
+    directory: __dirname,
+    name: 'mock403Response',
+  });
+
+  const context = createMockStepExecutionContext<IntegrationConfig>({
+    instanceConfig: integrationConfig,
+  });
+
+  const okta403Response = {
+    err: {
+      name: 'OktaApiError',
+      status: 403,
+      errorCode: 'E0000006',
+      errorSummary:
+        'You do not have permission to perform the requested action',
+      url: 'https://mocked-response.com',
+      message:
+        'Okta HTTP 403 E0000006 You do not have permission to perform the requested action. ',
+    },
+  };
+  const apiClient = createAPIClient(context.instance.config, context.logger);
+
+  recording.server.any().intercept((req, res) => {
+    res.setHeader('content-type');
+    res.status(403).send(okta403Response);
+  });
+
+  await expect(
+    apiClient.iterateDevicesForUser('thisisafakekey', () => {
+      jest.fn;
+    }),
+  ).rejects.toThrowError(IntegrationProviderAuthorizationError);
 });
