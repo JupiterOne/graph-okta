@@ -8,6 +8,13 @@ and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- Will catch `403` error status from Okta API and throws and error and exposes
+  it to the customer so they are able to fix the permission issue themselves
+- Included more details around the relationship between token permissions and
+  the user that creates the token
+
 ## 2.1.3 - 2021-08-09
 
 ### Fixed

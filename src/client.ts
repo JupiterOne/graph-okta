@@ -2,6 +2,7 @@
 import {
   IntegrationLogger,
   IntegrationProviderAuthenticationError,
+  IntegrationProviderAuthorizationError,
 } from '@jupiterone/integration-sdk-core';
 import { IntegrationConfig } from './config';
 export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
@@ -59,12 +60,23 @@ export class APIClient {
   public async iterateUsers(
     iteratee: ResourceIteratee<OktaUser>,
   ): Promise<void> {
-    await this.oktaClient.listUsers().each(iteratee);
-    await this.oktaClient
-      .listUsers({
-        filter: 'status eq "DEPROVISIONED"',
-      })
-      .each(iteratee);
+    try {
+      await this.oktaClient.listUsers().each(iteratee);
+      await this.oktaClient
+        .listUsers({
+          filter: 'status eq "DEPROVISIONED"',
+        })
+        .each(iteratee);
+    } catch (err) {
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
+      }
+    }
   }
 
   /**
@@ -75,7 +87,18 @@ export class APIClient {
   public async iterateGroups(
     iteratee: ResourceIteratee<OktaUserGroup>,
   ): Promise<void> {
-    await this.oktaClient.listGroups().each(iteratee);
+    try {
+      await this.oktaClient.listGroups().each(iteratee);
+    } catch (err) {
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
+      }
+    }
   }
 
   /**
@@ -90,7 +113,14 @@ export class APIClient {
     try {
       await this.oktaClient.listGroupUsers(group.id).each(iteratee);
     } catch (err) {
-      if (err.status === 404) {
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
+      } else if (err.status === 404) {
         //ignore it. It's probably a group that got deleted between steps
       } else {
         throw err;
@@ -110,7 +140,14 @@ export class APIClient {
     try {
       await this.oktaClient.listFactors(userId).each(iteratee);
     } catch (err) {
-      if (err.status === 404) {
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
+      } else if (err.status === 404) {
         //ignore it. It's probably a user that got deleted between steps
       } else {
         throw err;
@@ -126,7 +163,20 @@ export class APIClient {
   public async iterateApplications(
     iteratee: ResourceIteratee<OktaApplication>,
   ): Promise<void> {
-    await this.oktaClient.listApplications().each(iteratee);
+    try {
+      await this.oktaClient.listApplications().each(iteratee);
+    } catch (err) {
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
+      } else {
+        throw err;
+      }
+    }
   }
 
   /**
@@ -143,7 +193,14 @@ export class APIClient {
         .listApplicationGroupAssignments(app.id)
         .each(iteratee);
     } catch (err) {
-      if (err.status === 404) {
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
+      } else if (err.status === 404) {
         //ignore it. It's probably an app that got deleted between steps
       } else {
         throw err;
@@ -163,7 +220,14 @@ export class APIClient {
     try {
       await this.oktaClient.listApplicationUsers(app.id).each(iteratee);
     } catch (err) {
-      if (err.status === 404) {
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
+      } else if (err.status === 404) {
         //ignore it. It's probably an app that got deleted between steps
       } else {
         throw err;
@@ -187,6 +251,13 @@ export class APIClient {
         this.logger.info(
           'Rules not enabled for this account. Skipping processing of Okta Rules.',
         );
+      } else if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
       } else {
         throw err;
       }
