@@ -8,6 +8,16 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.1.4 - 2021-12-29
+
+### Changed
+
+- Will catch `403` error status from Okta API to throw
+  `IntegrationProviderAuthorizationError` and exposes it to the customer so they
+  are able to fix the permission issue themselves
+- Included more details in the docs around the relationship between token
+  permissions and the user that creates the token
+
 ## 2.1.3 - 2021-08-09
 
 ### Fixed
