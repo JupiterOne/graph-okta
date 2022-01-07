@@ -8,6 +8,12 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.1.5 - 2022-01-07
+
+### Added
+
+- Added additional retry logic to handle occaisional 500 errors.
+
 ## 2.1.4 - 2021-12-29
 
 ### Changed
