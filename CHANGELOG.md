@@ -8,6 +8,12 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.1.7 - 2022-03-23
+
+### Added
+
+- Added ingestion of support enabled boolean and expiration date.
+
 ## 2.1.6 - 2022-01-07
 
 ### Added
