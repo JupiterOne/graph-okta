@@ -2,9 +2,10 @@ import {
   createDirectRelationship,
   Relationship,
   RelationshipClass,
+  parseTimePropertyValue,
 } from '@jupiterone/integration-sdk-core';
 
-import { OktaAccountInfo } from '../okta/types';
+import { OktaAccountInfo, OrgOktaSupportSettingsObj } from '../okta/types';
 import { Entities, Relationships } from '../steps/constants';
 import {
   OktaIntegrationConfig,
@@ -16,6 +17,7 @@ import {
 export function createAccountEntity(
   config: OktaIntegrationConfig,
   data: OktaAccountInfo,
+  supportData?: OrgOktaSupportSettingsObj,
 ): StandardizedOktaAccount {
   let displayName = data.name;
   if (data.preview) {
@@ -23,7 +25,16 @@ export function createAccountEntity(
   }
 
   const accountId = config.oktaOrgUrl.replace(/^https?:\/\//, '');
-
+  let supportEnabled: boolean | null = null;
+  let supportExpires: number | undefined = undefined;
+  if (supportData) {
+    if (supportData.support === 'ENABLED') {
+      supportEnabled = true;
+    } else {
+      supportEnabled = false;
+    }
+    supportExpires = parseTimePropertyValue(supportData.expiration);
+  }
   return {
     _type: Entities.ACCOUNT._type,
     _key: `okta_account_${accountId}`,
@@ -31,6 +42,8 @@ export function createAccountEntity(
     name: data.name,
     displayName,
     accountId,
+    supportEnabled: supportEnabled,
+    supportExpiresOn: supportExpires,
     webLink: config.oktaOrgUrl,
   };
 }

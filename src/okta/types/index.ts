@@ -4,6 +4,7 @@ export * from './devices';
 export * from './groups';
 export * from './users';
 export * from './rules';
+export * from './support';
 
 /**
  * Account information derived from the domain/url.

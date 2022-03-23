@@ -19,19 +19,26 @@ import {
   Relationships,
   Steps,
 } from './constants';
+import { createAPIClient } from '../client';
 
 export async function fetchAccountDetails({
   jobState,
   instance,
+  logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
+  const apiClient = createAPIClient(instance.config, logger);
+
   const oktaAccountInfo = getOktaAccountInfo({
     name: instance.name,
     config: instance.config,
   });
 
+  const oktaSupportInfo = await apiClient.getSupportInfo();
+
   const accountProperties = createAccountEntity(
     instance.config,
     oktaAccountInfo,
+    oktaSupportInfo,
   );
 
   const accountEntity = await jobState.addEntity(
