@@ -25,16 +25,7 @@ export function createAccountEntity(
   }
 
   const accountId = config.oktaOrgUrl.replace(/^https?:\/\//, '');
-  let supportEnabled: boolean | null = null;
-  let supportExpires: number | undefined = undefined;
-  if (supportData) {
-    if (supportData.support === 'ENABLED') {
-      supportEnabled = true;
-    } else {
-      supportEnabled = false;
-    }
-    supportExpires = parseTimePropertyValue(supportData.expiration);
-  }
+
   return {
     _type: Entities.ACCOUNT._type,
     _key: `okta_account_${accountId}`,
@@ -42,8 +33,8 @@ export function createAccountEntity(
     name: data.name,
     displayName,
     accountId,
-    supportEnabled: supportEnabled,
-    supportExpiresOn: supportExpires,
+    supportEnabled: supportData?.support === 'ENABLED',
+    supportExpiresOn: parseTimePropertyValue(supportData?.expiration),
     webLink: config.oktaOrgUrl,
   };
 }
