@@ -16,6 +16,7 @@ import {
   OktaApplicationGroup,
   OktaApplicationUser,
   OktaRule,
+  OrgOktaSupportSettingsObj,
 } from './okta/types';
 
 /**
@@ -261,6 +262,18 @@ export class APIClient {
       } else {
         throw err;
       }
+    }
+  }
+
+  public async getSupportInfo(): Promise<
+    OrgOktaSupportSettingsObj | undefined
+  > {
+    try {
+      const supportInfo = await this.oktaClient.getOrgOktaSupportSettings();
+      return supportInfo;
+    } catch (err) {
+      // No access to settings, so return undefined
+      return undefined;
     }
   }
 }

@@ -7,6 +7,7 @@ import { OktaFactor } from './devices';
 import { OktaUserGroup } from './groups';
 import { OktaUser } from './users';
 import { OktaRule } from './rules';
+import { OrgOktaSupportSettingsObj } from './support';
 import { RequestExecutorWithEarlyRateLimiting } from '../createOktaClient';
 
 export interface OktaCollection<T> {
@@ -95,4 +96,7 @@ export interface OktaClient {
   listGroupRules: (
     queryParameters?: OktaQueryParams,
   ) => OktaCollection<OktaRule>;
+
+  // [API Endpoint]: https://developer.okta.com/docs/reference/api/org/#okta-support-operations
+  getOrgOktaSupportSettings: () => Promise<OrgOktaSupportSettingsObj>;
 }
