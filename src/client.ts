@@ -265,16 +265,8 @@ export class APIClient {
     }
   }
 
-  public async getSupportInfo(): Promise<
-    OrgOktaSupportSettingsObj | undefined
-  > {
-    try {
-      const supportInfo = await this.oktaClient.getOrgOktaSupportSettings();
-      return supportInfo;
-    } catch (err) {
-      // No access to settings, so return undefined
-      return undefined;
-    }
+  public async getSupportInfo(): Promise<OrgOktaSupportSettingsObj> {
+    return await this.oktaClient.getOrgOktaSupportSettings();
   }
 }
 

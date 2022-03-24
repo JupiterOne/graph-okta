@@ -22,8 +22,8 @@ Object {
       "createdOn": undefined,
       "displayName": "dev-857255",
       "name": "dev-857255",
-      "supportEnabled": false,
-      "supportExpiresOn": undefined,
+      "supportEnabled": true,
+      "supportExpiresOn": 1648120394000,
       "webLink": "https://dev-857255.okta.com/",
     },
     Object {
