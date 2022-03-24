@@ -12,6 +12,13 @@ and this project adheres to
 
 ### Added
 
+- Errors pulling support enabled information will be logged as an informational
+  message.
+
+## 2.1.7 - 2022-03-23
+
+### Added
+
 - Added ingestion of support enabled boolean and expiration date.
 
 ## 2.1.6 - 2022-01-07
