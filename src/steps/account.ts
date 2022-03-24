@@ -20,6 +20,7 @@ import {
   Steps,
 } from './constants';
 import { createAPIClient } from '../client';
+import { OrgOktaSupportSettingsObj } from '../okta/types';
 
 export async function fetchAccountDetails({
   jobState,
@@ -33,7 +34,16 @@ export async function fetchAccountDetails({
     config: instance.config,
   });
 
-  const oktaSupportInfo = await apiClient.getSupportInfo();
+  let oktaSupportInfo: OrgOktaSupportSettingsObj | undefined = undefined;
+  try {
+    oktaSupportInfo = await apiClient.getSupportInfo();
+  } catch (err) {
+    logger.info(`Unable to query Okta Support Info due to ERROR:  `, err);
+    logger.publishEvent({
+      name: 'info',
+      description: `INFO:  Unable to query Okta Support Information. The okta_account.supportEnabled value cannot be set.`,
+    });
+  }
 
   const accountProperties = createAccountEntity(
     instance.config,
