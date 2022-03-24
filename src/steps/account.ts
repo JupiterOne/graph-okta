@@ -20,6 +20,7 @@ import {
   Steps,
 } from './constants';
 import { createAPIClient } from '../client';
+import { OrgOktaSupportSettingsObj } from '../okta/types';
 
 export async function fetchAccountDetails({
   jobState,
@@ -33,7 +34,7 @@ export async function fetchAccountDetails({
     config: instance.config,
   });
 
-  let oktaSupportInfo = undefined;
+  let oktaSupportInfo: OrgOktaSupportSettingsObj | undefined = undefined;
   try {
     oktaSupportInfo = await apiClient.getSupportInfo();
   } catch (err) {
