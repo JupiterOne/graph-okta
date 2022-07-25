@@ -963,6 +963,43 @@ Object {
       "ruleType": "group_rule",
       "status": "INACTIVE",
     },
+    Object {
+      "_class": Array [
+        "AccessRole",
+      ],
+      "_key": "okta_role:Super Organization Administrator:USER",
+      "_rawData": Array [
+        Object {
+          "name": "default",
+          "rawData": Role {
+            "_links": Object {
+              "assignee": Object {
+                "href": "https://dev-857255.okta.com/api/v1/users/00u1cagurdhtxqBdf4x7",
+              },
+            },
+            "assignmentType": "USER",
+            "created": "2020-11-06T15:47:32.000Z",
+            "id": "ra11cahe06bUINWAL4x7",
+            "label": "Super Organization Administrator",
+            "lastUpdated": "2020-11-06T15:47:32.000Z",
+            "status": "ACTIVE",
+            "type": "SUPER_ADMIN",
+          },
+        },
+      ],
+      "_type": "okta_role",
+      "active": true,
+      "created": 1604677652000,
+      "createdOn": 1604677652000,
+      "description": undefined,
+      "displayName": "Super Organization Administrator",
+      "id": "ra11cahe06bUINWAL4x7",
+      "lastUpdated": 1604677652000,
+      "lastUpdatedOn": 1604677652000,
+      "name": "Super Organization Administrator",
+      "roleType": "SUPER_ADMIN",
+      "status": "ACTIVE",
+    },
   ],
   "collectedRelationships": Array [
     Object {
@@ -1245,6 +1282,46 @@ Object {
       "_type": "okta_account_has_rule",
       "displayName": "HAS",
     },
+    Object {
+      "_class": "ASSIGNED",
+      "_fromEntityKey": "00u1cagurdhtxqBdf4x7",
+      "_key": "00u1cagurdhtxqBdf4x7|assigned|okta_role:Super Organization Administrator:USER",
+      "_toEntityKey": "okta_role:Super Organization Administrator:USER",
+      "_type": "okta_user_assigned_role",
+      "displayName": "ASSIGNED",
+    },
+    Object {
+      "_class": "ASSIGNED",
+      "_fromEntityKey": "00u2ot2iur46vIUsV4x7",
+      "_key": "00u2ot2iur46vIUsV4x7|assigned|okta_role:Super Organization Administrator:USER",
+      "_toEntityKey": "okta_role:Super Organization Administrator:USER",
+      "_type": "okta_user_assigned_role",
+      "displayName": "ASSIGNED",
+    },
+    Object {
+      "_class": "ASSIGNED",
+      "_fromEntityKey": "00us5to77GW1mVs6w4x6",
+      "_key": "00us5to77GW1mVs6w4x6|assigned|okta_role:Super Organization Administrator:USER",
+      "_toEntityKey": "okta_role:Super Organization Administrator:USER",
+      "_type": "okta_user_assigned_role",
+      "displayName": "ASSIGNED",
+    },
+    Object {
+      "_class": "ASSIGNED",
+      "_fromEntityKey": "00us5ty22kvu4NAxo4x6",
+      "_key": "00us5ty22kvu4NAxo4x6|assigned|okta_role:Super Organization Administrator:USER",
+      "_toEntityKey": "okta_role:Super Organization Administrator:USER",
+      "_type": "okta_user_assigned_role",
+      "displayName": "ASSIGNED",
+    },
+    Object {
+      "_class": "ASSIGNED",
+      "_fromEntityKey": "00us5zkpf7nGTeKXu4x6",
+      "_key": "00us5zkpf7nGTeKXu4x6|assigned|okta_role:Super Organization Administrator:USER",
+      "_toEntityKey": "okta_role:Super Organization Administrator:USER",
+      "_type": "okta_user_assigned_role",
+      "displayName": "ASSIGNED",
+    },
   ],
   "encounteredTypes": Array [
     "okta_account",
@@ -1261,8 +1338,10 @@ Object {
     "okta_user_assigned_application",
     "okta_rule",
     "okta_account_has_rule",
+    "okta_role",
+    "okta_user_assigned_role",
   ],
-  "numCollectedEntities": 16,
-  "numCollectedRelationships": 28,
+  "numCollectedEntities": 17,
+  "numCollectedRelationships": 33,
 }
 `;

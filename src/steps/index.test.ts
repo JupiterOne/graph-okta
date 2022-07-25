@@ -15,6 +15,7 @@ import { fetchAccountDetails } from './account';
 import { fetchRules } from './rules';
 import { integrationConfig } from '../../test/config';
 import { createAPIClient } from '../client';
+import { fetchRoles } from './roles';
 
 jest.setTimeout(1000 * 60 * 1);
 let recording: Recording;
@@ -40,6 +41,7 @@ test('should collect data', async () => {
   await fetchDevices(context);
   await fetchApplications(context);
   await fetchRules(context);
+  await fetchRoles(context);
 
   // Review snapshot, failure is a regression
   expect({
@@ -161,6 +163,28 @@ test('should collect data', async () => {
         },
       },
       required: ['name', 'ruleType', 'status'],
+    },
+  });
+
+  const roles = context.jobState.collectedEntities.filter((e) =>
+    e._type.includes('okta_role'),
+  );
+  expect(roles.length).toBeGreaterThan(0);
+  expect(roles).toMatchGraphObjectSchema({
+    _class: ['AccessRole'],
+    schema: {
+      properties: {
+        _type: { const: 'okta_role' },
+        description: { type: 'string' },
+        label: { type: 'string' },
+        name: { type: 'string' },
+        status: { type: 'string' },
+        _rawData: {
+          type: 'array',
+          items: { type: 'object' },
+        },
+      },
+      required: ['name'],
     },
   });
 });

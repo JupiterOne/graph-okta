@@ -2,9 +2,10 @@ export * from './applications';
 export * from './client';
 export * from './devices';
 export * from './groups';
-export * from './users';
+export * from './roles';
 export * from './rules';
 export * from './support';
+export * from './users';
 
 /**
  * Account information derived from the domain/url.
