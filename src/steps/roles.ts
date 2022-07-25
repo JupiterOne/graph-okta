@@ -57,13 +57,21 @@ export async function fetchRoles({
           roleEntity = await jobState.addEntity(createRoleEntity(role));
         }
 
-        await jobState.addRelationship(
-          createDirectRelationship({
-            _class: RelationshipClass.ASSIGNED,
-            from: user,
-            to: roleEntity,
-          }),
-        );
+        // Users may have access to the same role via multiple different groups.  We need to
+        // catch these duplicates to prevent key collisions.
+        const userToRoleRelationship = createDirectRelationship({
+          _class: RelationshipClass.ASSIGNED,
+          from: user,
+          to: roleEntity,
+        });
+        if (!jobState.hasKey(userToRoleRelationship._key)) {
+          await jobState.addRelationship(userToRoleRelationship);
+        } else {
+          logger.info(
+            { userToRoleRelationship },
+            'Skipping relationship creation.  Relationship already exists.',
+          );
+        }
       });
     },
   );
