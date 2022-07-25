@@ -999,6 +999,7 @@ Object {
       "name": "Super Organization Administrator",
       "roleType": "SUPER_ADMIN",
       "status": "ACTIVE",
+      "superAdmin": true,
     },
   ],
   "collectedRelationships": Array [
