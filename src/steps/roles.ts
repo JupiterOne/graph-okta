@@ -12,7 +12,15 @@ import { OktaRole } from '../okta/types';
 import { Entities, Relationships, Steps } from './constants';
 
 function generateRoleKey(role: OktaRole) {
-  return Entities.ROLE._type + ':' + role.label + ':' + role.assignmentType;
+  // We don't have an easy to use key, so construct one of our own.  Finally, we
+  // perform a replace to get rid of any spaces that came in on the label or type.
+  return (
+    Entities.ROLE._type +
+    ':' +
+    role.label +
+    ':' +
+    role.assignmentType
+  ).replace(/ /g, '');
 }
 
 function createRoleEntity(role: OktaRole) {
