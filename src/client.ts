@@ -18,6 +18,7 @@ import {
   OktaRule,
   OrgOktaSupportSettingsObj,
   OktaRole,
+  OktaLogEvent,
 } from './okta/types';
 
 /**
@@ -297,6 +298,32 @@ export class APIClient {
   ): Promise<void> {
     try {
       await this.oktaClient.listGroupAssignedRoles(groupId).each(iteratee);
+    } catch (err) {
+      //per https://developer.okta.com/docs/reference/error-codes/
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  public async getAppCreatedLogs(
+    iteratee: ResourceIteratee<OktaLogEvent>,
+  ): Promise<void> {
+    try {
+      // Use filter to only find instances of a newly created application.
+      await this.oktaClient
+        .getLogs({
+          filter:
+            'eventType eq "application.lifecycle.update" and debugContext.debugData.requestUri ew "_new_"',
+        })
+        .each(iteratee);
     } catch (err) {
       //per https://developer.okta.com/docs/reference/error-codes/
       if (err.status === 403) {

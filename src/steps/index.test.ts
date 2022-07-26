@@ -16,6 +16,7 @@ import { fetchRules } from './rules';
 import { integrationConfig } from '../../test/config';
 import { createAPIClient } from '../client';
 import { fetchRoles } from './roles';
+import { buildUserCreatedApplication } from './applicationCreation';
 
 jest.setTimeout(1000 * 60 * 1);
 let recording: Recording;
@@ -42,6 +43,7 @@ test('should collect data', async () => {
   await fetchApplications(context);
   await fetchRules(context);
   await fetchRoles(context);
+  await buildUserCreatedApplication(context);
 
   // Review snapshot, failure is a regression
   expect({

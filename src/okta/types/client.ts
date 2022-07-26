@@ -8,6 +8,7 @@ import { OktaUserGroup } from './groups';
 import { OktaUser } from './users';
 import { OktaRule } from './rules';
 import { OktaRole } from './roles';
+import { OktaLogEvent } from './logs';
 import { OrgOktaSupportSettingsObj } from './support';
 import { RequestExecutorWithEarlyRateLimiting } from '../createOktaClient';
 
@@ -112,4 +113,7 @@ export interface OktaClient {
     groupId: string,
     queryParameters?: OktaQueryParams,
   ) => OktaCollection<OktaRole>;
+
+  // [API Endpoint]: https://developer.okta.com/docs/reference/api/system-log/#get-started
+  getLogs: (queryParameters?: OktaQueryParams) => OktaCollection<OktaLogEvent>;
 }

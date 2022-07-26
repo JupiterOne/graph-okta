@@ -14,6 +14,7 @@ export const Steps = {
   MFA_DEVICES: 'fetch-devices',
   RULES: 'fetch-rules',
   ROLES: 'fetch-roles',
+  APPLICATION_CREATION: 'build-application-creation-relationship',
 };
 
 export const Entities: Record<
@@ -91,7 +92,8 @@ export const Relationships: Record<
   | 'USER_ASSIGNED_ROLE'
   | 'USER_GROUP_ASSIGNED_AWS_IAM_ROLE'
   | 'USER_ASSIGNED_MFA_DEVICE'
-  | 'RULE_MANAGES_USER_GROUP',
+  | 'RULE_MANAGES_USER_GROUP'
+  | 'USER_CREATED_APPLICATION',
   StepRelationshipMetadata
 > = {
   ACCOUNT_HAS_SERVICE: {
@@ -189,5 +191,11 @@ export const Relationships: Record<
     _class: RelationshipClass.MANAGES,
     sourceType: Entities.RULE._type,
     targetType: Entities.USER_GROUP._type,
+  },
+  USER_CREATED_APPLICATION: {
+    _type: 'okta_user_created_application',
+    _class: RelationshipClass.CREATED,
+    sourceType: Entities.USER._type,
+    targetType: Entities.APPLICATION._type,
   },
 };

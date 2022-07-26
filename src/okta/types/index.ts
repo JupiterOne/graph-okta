@@ -2,6 +2,7 @@ export * from './applications';
 export * from './client';
 export * from './devices';
 export * from './groups';
+export * from './logs';
 export * from './roles';
 export * from './rules';
 export * from './support';
