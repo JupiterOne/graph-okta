@@ -13,6 +13,8 @@ export const Steps = {
   APPLICATIONS: 'fetch-applications',
   MFA_DEVICES: 'fetch-devices',
   RULES: 'fetch-rules',
+  ROLES: 'fetch-roles',
+  APPLICATION_CREATION: 'build-application-creation-relationship',
 };
 
 export const Entities: Record<
@@ -23,7 +25,8 @@ export const Entities: Record<
   | 'APP_USER_GROUP'
   | 'APPLICATION'
   | 'MFA_DEVICE'
-  | 'RULE',
+  | 'RULE'
+  | 'ROLE',
   StepEntityMetadata
 > = {
   ACCOUNT: {
@@ -66,6 +69,11 @@ export const Entities: Record<
     _type: 'okta_rule',
     _class: ['Configuration'],
   },
+  ROLE: {
+    resourceName: 'Okta Role',
+    _type: 'okta_role',
+    _class: ['AccessRole'],
+  },
 };
 
 export const Relationships: Record<
@@ -78,11 +86,14 @@ export const Relationships: Record<
   | 'APP_USER_GROUP_HAS_USER'
   | 'ACCOUNT_HAS_APPLICATION'
   | 'GROUP_ASSIGNED_APPLICATION'
+  | 'GROUP_ASSIGNED_ROLE'
   | 'USER_ASSIGNED_APPLICATION'
   | 'USER_ASSIGNED_AWS_IAM_ROLE'
+  | 'USER_ASSIGNED_ROLE'
   | 'USER_GROUP_ASSIGNED_AWS_IAM_ROLE'
   | 'USER_ASSIGNED_MFA_DEVICE'
-  | 'RULE_MANAGES_USER_GROUP',
+  | 'RULE_MANAGES_USER_GROUP'
+  | 'USER_CREATED_APPLICATION',
   StepRelationshipMetadata
 > = {
   ACCOUNT_HAS_SERVICE: {
@@ -139,6 +150,12 @@ export const Relationships: Record<
     sourceType: 'okta_user_group, okta_app_user_group',
     targetType: Entities.APPLICATION._type,
   },
+  GROUP_ASSIGNED_ROLE: {
+    _type: 'okta_user_group_assigned_role',
+    _class: RelationshipClass.ASSIGNED,
+    sourceType: Entities.USER_GROUP._type,
+    targetType: Entities.ROLE._type,
+  },
   USER_ASSIGNED_APPLICATION: {
     _type: 'okta_user_assigned_application',
     _class: RelationshipClass.ASSIGNED,
@@ -150,6 +167,12 @@ export const Relationships: Record<
     _class: RelationshipClass.ASSIGNED,
     sourceType: Entities.USER._type,
     targetType: 'aws_iam_role',
+  },
+  USER_ASSIGNED_ROLE: {
+    _type: 'okta_user_assigned_role',
+    _class: RelationshipClass.ASSIGNED,
+    sourceType: Entities.USER._type,
+    targetType: Entities.ROLE._type,
   },
   USER_GROUP_ASSIGNED_AWS_IAM_ROLE: {
     _type: 'okta_user_group_assigned_aws_iam_role',
@@ -168,5 +191,11 @@ export const Relationships: Record<
     _class: RelationshipClass.MANAGES,
     sourceType: Entities.RULE._type,
     targetType: Entities.USER_GROUP._type,
+  },
+  USER_CREATED_APPLICATION: {
+    _type: 'okta_user_created_application',
+    _class: RelationshipClass.CREATED,
+    sourceType: Entities.USER._type,
+    targetType: Entities.APPLICATION._type,
   },
 };

@@ -72,7 +72,7 @@ export function createApplicationEntity(
         name: data.name || data.label,
         shortName: appShortName,
         label: data.label,
-        status: data.status,
+        status: data.status.toLowerCase(),
         active: data.status === 'ACTIVE',
         lastUpdated: data.lastUpdated,
         created: data.created,

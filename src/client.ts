@@ -17,6 +17,8 @@ import {
   OktaApplicationUser,
   OktaRule,
   OrgOktaSupportSettingsObj,
+  OktaRole,
+  OktaLogEvent,
 } from './okta/types';
 
 /**
@@ -267,6 +269,74 @@ export class APIClient {
 
   public async getSupportInfo(): Promise<OrgOktaSupportSettingsObj> {
     return await this.oktaClient.getOrgOktaSupportSettings();
+  }
+
+  public async iterateRolesByUser(
+    userId: string,
+    iteratee: ResourceIteratee<OktaRole>,
+  ): Promise<void> {
+    try {
+      await this.oktaClient.listAssignedRolesForUser(userId).each(iteratee);
+    } catch (err) {
+      //per https://developer.okta.com/docs/reference/error-codes/
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  public async iterateRolesByGroup(
+    groupId: string,
+    iteratee: ResourceIteratee<OktaRole>,
+  ): Promise<void> {
+    try {
+      await this.oktaClient.listGroupAssignedRoles(groupId).each(iteratee);
+    } catch (err) {
+      //per https://developer.okta.com/docs/reference/error-codes/
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  public async iterateAppCreatedLogs(
+    iteratee: ResourceIteratee<OktaLogEvent>,
+  ): Promise<void> {
+    try {
+      // Use filter to only find instances of a newly created application.
+      await this.oktaClient
+        .getLogs({
+          filter:
+            'eventType eq "application.lifecycle.update" and debugContext.debugData.requestUri ew "_new_"',
+        })
+        .each(iteratee);
+    } catch (err) {
+      //per https://developer.okta.com/docs/reference/error-codes/
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
+      } else {
+        throw err;
+      }
+    }
   }
 }
 

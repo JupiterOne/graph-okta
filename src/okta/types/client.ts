@@ -7,6 +7,8 @@ import { OktaFactor } from './devices';
 import { OktaUserGroup } from './groups';
 import { OktaUser } from './users';
 import { OktaRule } from './rules';
+import { OktaRole } from './roles';
+import { OktaLogEvent } from './logs';
 import { OrgOktaSupportSettingsObj } from './support';
 import { RequestExecutorWithEarlyRateLimiting } from '../createOktaClient';
 
@@ -99,4 +101,19 @@ export interface OktaClient {
 
   // [API Endpoint]: https://developer.okta.com/docs/reference/api/org/#okta-support-operations
   getOrgOktaSupportSettings: () => Promise<OrgOktaSupportSettingsObj>;
+
+  // [API Endpoint]: https://developer.okta.com/docs/reference/api/roles/#list-roles-2
+  listAssignedRolesForUser: (
+    userId: string,
+    queryParameters?: OktaQueryParams,
+  ) => OktaCollection<OktaRole>;
+
+  // [API Endpoint]: https://developer.okta.com/docs/reference/api/roles/#list-roles-assigned-to-a-group
+  listGroupAssignedRoles: (
+    groupId: string,
+    queryParameters?: OktaQueryParams,
+  ) => OktaCollection<OktaRole>;
+
+  // [API Endpoint]: https://developer.okta.com/docs/reference/api/system-log/#get-started
+  getLogs: (queryParameters?: OktaQueryParams) => OktaCollection<OktaLogEvent>;
 }
