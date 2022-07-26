@@ -11,12 +11,12 @@ export interface OktaRole extends OktaResource {
   type: string;
 }
 
-declare enum OktaRoleAssignmentType {
+export enum OktaRoleAssignmentType {
   GROUP = 'GROUP',
   USER = 'USER',
 }
 
-declare enum OktaRoleStatus {
+export enum OktaRoleStatus {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
 }

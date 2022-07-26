@@ -16,7 +16,7 @@ export async function buildUserCreatedApplication({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   const apiClient = createAPIClient(instance.config, logger);
 
-  await apiClient.getAppCreatedLogs(async (log) => {
+  await apiClient.iterateAppCreatedLogs(async (log) => {
     const createdBy = await jobState.findEntity(log.actor.id);
     const createdApp = await jobState.findEntity(log.target[0].id);
 

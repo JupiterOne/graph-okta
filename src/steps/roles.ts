@@ -8,7 +8,11 @@ import {
 } from '@jupiterone/integration-sdk-core';
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import { OktaRole } from '../okta/types';
+import {
+  OktaRole,
+  OktaRoleAssignmentType,
+  OktaRoleStatus,
+} from '../okta/types';
 import { Entities, Relationships, Steps } from './constants';
 
 function generateRoleKey(role: OktaRole) {
@@ -31,7 +35,7 @@ function createRoleEntity(role: OktaRole) {
         displayName: role.label,
         roleType: role.type,
         status: role.status.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
-        active: role.status === 'ACTIVE',
+        active: role.status === OktaRoleStatus.ACTIVE,
         superAdmin: role.type === 'SUPER_ADMIN',
         createdOn: parseTimePropertyValue(role.created)!,
         lastUpdatedOn: parseTimePropertyValue(role.lastUpdated)!,
@@ -59,7 +63,7 @@ export async function fetchRoles({
         }
 
         // Only create relationships if this is a direct USER assignment
-        if (role.assignmentType == 'USER') {
+        if (role.assignmentType == OktaRoleAssignmentType.USER) {
           // Users may have already been granted access to the same role via multiple different groups.
           // We need to catch these duplicates to prevent key collisions.
           const userToRoleRelationship = createDirectRelationship({

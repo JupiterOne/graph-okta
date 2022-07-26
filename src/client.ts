@@ -313,7 +313,7 @@ export class APIClient {
     }
   }
 
-  public async getAppCreatedLogs(
+  public async iterateAppCreatedLogs(
     iteratee: ResourceIteratee<OktaLogEvent>,
   ): Promise<void> {
     try {
