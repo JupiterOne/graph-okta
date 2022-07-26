@@ -278,11 +278,7 @@ export class APIClient {
       await this.oktaClient.listAssignedRolesForUser(userId).each(iteratee);
     } catch (err) {
       //per https://developer.okta.com/docs/reference/error-codes/
-      if (/\/api\/v1\/groups\/rules/.test(err.url) && err.status === 400) {
-        this.logger.info(
-          'Roles not enabled for this account. Skipping processing of Okta Roles.',
-        );
-      } else if (err.status === 403) {
+      if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({
           cause: err,
           endpoint: err.url,
@@ -303,11 +299,7 @@ export class APIClient {
       await this.oktaClient.listGroupAssignedRoles(groupId).each(iteratee);
     } catch (err) {
       //per https://developer.okta.com/docs/reference/error-codes/
-      if (/\/api\/v1\/groups\/rules/.test(err.url) && err.status === 400) {
-        this.logger.info(
-          'Roles not enabled for this account. Skipping processing of Okta Roles.',
-        );
-      } else if (err.status === 403) {
+      if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({
           cause: err,
           endpoint: err.url,

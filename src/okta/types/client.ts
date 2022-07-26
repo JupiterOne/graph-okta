@@ -107,7 +107,7 @@ export interface OktaClient {
     queryParameters?: OktaQueryParams,
   ) => OktaCollection<OktaRole>;
 
-  // https://developer.okta.com/docs/reference/api/roles/#list-roles-assigned-to-a-group
+  // [API Endpoint]: https://developer.okta.com/docs/reference/api/roles/#list-roles-assigned-to-a-group
   listGroupAssignedRoles: (
     groupId: string,
     queryParameters?: OktaQueryParams,
