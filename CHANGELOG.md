@@ -8,6 +8,24 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.2.0 - 2022-07-26
+
+### Added
+
+- New entity added:
+
+| Resources | Entity `_type` | Entity `_class` |
+| --------- | -------------- | --------------- |
+| Okta Role | `okta_role`    | `AccessRole`    |
+
+- New relationships added:
+
+| Source Entity `_type` | Relationship `_class` | Target Entity `_type` |
+| --------------------- | --------------------- | --------------------- |
+| `okta_user`           | **ASSIGNED**          | `okta_role`           |
+| `okta_user`           | **CREATED**           | `okta_application`    |
+| `okta_user_group`     | **ASSIGNED**          | `okta_role`           |
+
 ## 2.1.7 - 2022-03-23
 
 ### Added
