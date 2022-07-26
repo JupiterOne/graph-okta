@@ -36,11 +36,10 @@ function createRoleEntity(role: OktaRole) {
         name: role.label,
         displayName: role.label,
         roleType: role.type,
-        status: role.status, //example: 'ACTIVE' or 'INACTIVE'
+        status: role.status.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
+        active: role.status === 'ACTIVE',
         superAdmin: role.type === 'SUPER_ADMIN',
-        created: parseTimePropertyValue(role.created)!,
         createdOn: parseTimePropertyValue(role.created)!,
-        lastUpdated: parseTimePropertyValue(role.lastUpdated)!,
         lastUpdatedOn: parseTimePropertyValue(role.lastUpdated)!,
       },
     },

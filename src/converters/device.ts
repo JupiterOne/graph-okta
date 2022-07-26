@@ -19,7 +19,7 @@ export function createMFADeviceEntity(
     vendorName: data.vendorName,
     device: data.device,
     deviceType: data.deviceType,
-    status: data.status,
+    status: data.status.toLowerCase(),
     created: data.created,
     lastUpdated: data.lastUpdated,
     active: data.status === 'ACTIVE',

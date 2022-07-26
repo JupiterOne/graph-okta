@@ -37,7 +37,7 @@ export async function fetchRules({
             id: rule.id,
             name: rule.name,
             ruleType: rule.type, //example: 'group_rule', 'policy_rule'
-            status: rule.status, //example: 'ACTIVE' or 'INACTIVE'
+            status: rule.status.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
             created: parseTimePropertyValue(rule.created)!,
             createdOn: parseTimePropertyValue(rule.created)!,
             lastUpdated: parseTimePropertyValue(rule.lastUpdated)!,

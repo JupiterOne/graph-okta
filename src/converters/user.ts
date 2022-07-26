@@ -58,7 +58,7 @@ export function createUserEntity(
         name: `${profile.firstName} ${profile.lastName}`,
         username: profile.login.split('@')[0],
         email: profile.email.toLowerCase(),
-        status,
+        status: status.toLowerCase(),
         active: status === 'ACTIVE',
         created: parseTimePropertyValue(created)!,
         createdOn: parseTimePropertyValue(created)!,

@@ -21,7 +21,7 @@ export async function fetchDevices({
       _type: 'okta_user',
     },
     async (userEntity: StandardizedOktaUser) => {
-      if (userEntity.status !== 'DEPROVISIONED') {
+      if (userEntity.status !== 'deprovisioned') {
         //asking for factors for DEPROV users throws error
         await apiClient.iterateDevicesForUser(
           userEntity._key,
