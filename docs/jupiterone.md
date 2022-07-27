@@ -99,6 +99,16 @@ This allows you to find non-interactive users with a query like
 Find User that !is Person
 ```
 
+For the following relationship:
+
+| `okta_user` | **CREATED** | `okta_application` |
+
+we are using information found in Okta's System Logs. As a result, we are
+limited to the last 90 days available at time of execution. This limits how far
+back the integration can view this particular data, however this relationship is
+set up so that it will not delete any existing relationships when the creation
+event is no longer available in System Logs.
+
 ## Okta API Rate Limits
 
 [Okta API rate limits][2] are sophisticated, depending on a number of factors
