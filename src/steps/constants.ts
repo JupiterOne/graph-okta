@@ -197,5 +197,6 @@ export const Relationships: Record<
     _class: RelationshipClass.CREATED,
     sourceType: Entities.USER._type,
     targetType: Entities.APPLICATION._type,
+    partial: true,
   },
 };

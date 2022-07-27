@@ -21,6 +21,8 @@ import {
   OktaLogEvent,
 } from './okta/types';
 
+const NINETY_DAYS_AGO = 90 * 24 * 60 * 60 * 1000;
+
 /**
  * An APIClient maintains authentication state and provides an interface to
  * third party data APIs.
@@ -318,10 +320,16 @@ export class APIClient {
   ): Promise<void> {
     try {
       // Use filter to only find instances of a newly created application.
+      // We must specify 'since' to a time far in the past, otherwise we
+      // will only get the last 7 days of data.  Okta only saves the last
+      // 90 days, so this is not us limiting what we're able to get.
+      const daysAgo = Date.now() - NINETY_DAYS_AGO;
+      const startDate = new Date(daysAgo).toISOString();
       await this.oktaClient
         .getLogs({
           filter:
             'eventType eq "application.lifecycle.update" and debugContext.debugData.requestUri ew "_new_"',
+          since: startDate,
         })
         .each(iteratee);
     } catch (err) {
