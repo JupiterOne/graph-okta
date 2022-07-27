@@ -30,6 +30,11 @@ export async function buildUserCreatedApplication({
       });
       if (!jobState.hasKey(createdByRelationship._key)) {
         await jobState.addRelationship(createdByRelationship);
+      } else {
+        logger.info(
+          { createdByRelationship },
+          'Skipping relationship creation.  Relationship already exists.',
+        );
       }
     }
   });
