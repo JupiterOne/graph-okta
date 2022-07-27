@@ -23,13 +23,19 @@ export async function buildUserCreatedApplication({
     // Logs will contain all apps in the last 90 days, even if we've deleted them, so check before
     // trying to create the relationship.
     if (createdBy && createdApp) {
-      await jobState.addRelationship(
-        createDirectRelationship({
-          _class: RelationshipClass.CREATED,
-          from: createdBy,
-          to: createdApp,
-        }),
-      );
+      const createdByRelationship = createDirectRelationship({
+        _class: RelationshipClass.CREATED,
+        from: createdBy,
+        to: createdApp,
+      });
+      if (!jobState.hasKey(createdByRelationship._key)) {
+        await jobState.addRelationship(createdByRelationship);
+      } else {
+        logger.info(
+          { createdByRelationship },
+          'Skipping relationship creation.  Relationship already exists.',
+        );
+      }
     }
   });
 }
