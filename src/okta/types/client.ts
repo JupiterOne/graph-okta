@@ -38,6 +38,7 @@ export interface OktaQueryParams {
   filter?: string;
   format?: string;
   search?: string;
+  since?: string;
   expand?: string;
 }
 

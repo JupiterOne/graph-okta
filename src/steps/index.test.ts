@@ -18,6 +18,11 @@ import { createAPIClient } from '../client';
 import { fetchRoles } from './roles';
 import { buildUserCreatedApplication } from './applicationCreation';
 
+// Force the same date to allow Polly to save/find the same URL for
+// the below test of buildUserCreatedApplication().  This date can be
+// changed, but please re-run yarn test:env after doing so.
+Date.now = jest.fn(() => new Date(Date.UTC(2022, 7, 27)).valueOf());
+
 jest.setTimeout(1000 * 60 * 1);
 let recording: Recording;
 afterEach(async () => {
