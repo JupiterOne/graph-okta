@@ -8,6 +8,15 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.2.1 - 2022-07-27
+
+### Changed
+
+- The **CREATED** relationship between okta_user and okta_application is now set
+  to partial so data will not be removed when events are no longer available in
+  Okta's system logs.
+- The query of Okta's system logs now pulls the full 90 days avaiable.
+
 ## 2.2.0 - 2022-07-26
 
 ### Added
