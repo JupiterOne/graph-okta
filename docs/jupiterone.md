@@ -60,6 +60,11 @@ have Super Administrator privileges, but will be skipped without failing the
 rest of the data ingestion if Read Only Administrator or Organization
 Administrator are provided instead.
 
+Additionally, fetching role information requires the supplied token to have
+Super Administrator privileges. If Read Only Administrator or Organization
+Administrator are provided instead, the step will fail, but all other ingestion
+steps will remain unaffected.
+
 ### In JupiterOne
 
 1. From the configuration **Gear Icon**, select **Integrations**.
