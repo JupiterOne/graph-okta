@@ -8,6 +8,12 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.3.0 - 2022-10-21
+
+### Fixed
+
+- Add `lastVerified` and `authenticatorName` properties to `mfa_device`
+
 ## 2.2.2 - 2022-07-27
 
 ### Fixed
