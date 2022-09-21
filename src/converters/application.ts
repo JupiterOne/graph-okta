@@ -282,7 +282,7 @@ function mapAWSRoleAssignment({
           displayName: roleName,
           'tag.AccountName': awsAccountName,
         },
-        skipTargetCreation: true,
+        skipTargetCreation: false,
       },
       displayName: 'ASSIGNED',
     };
@@ -304,7 +304,7 @@ function mapAWSRoleAssignment({
           name: role,
           displayName: role,
         },
-        skipTargetCreation: true,
+        skipTargetCreation: false,
       },
       displayName: 'ASSIGNED',
     };
