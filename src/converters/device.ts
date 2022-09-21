@@ -25,7 +25,7 @@ export function createMFADeviceEntity(
     status: data.status.toLowerCase(),
     created: data.created,
     lastUpdated: data.lastUpdated,
-    lastVerified: parseTimePropertyValue(data.lastVerified),
+    lastVerifiedOn: parseTimePropertyValue(data.lastVerified),
     active: data.status === 'ACTIVE',
     authenticatorName: data.profile?.authenticatorName,
   };

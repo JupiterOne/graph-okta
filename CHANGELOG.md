@@ -12,7 +12,7 @@ and this project adheres to
 
 ### Fixed
 
-- Add `lastVerified` and `authenticatorName` properties to `mfa_device`
+- Add `lastVerifiedOn` and `authenticatorName` properties to `mfa_device`
 
 ## 2.2.2 - 2022-07-27
 
