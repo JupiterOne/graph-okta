@@ -1,4 +1,4 @@
-# Integration with JupiterOne
+# Okta
 
 ## Okta + JupiterOne Integration Benefits
 
@@ -25,6 +25,11 @@
   Okta. You need permission to create an Admin user in Okta that will be used to
   [create the API key](https://developer.okta.com/docs/api/getting_started/getting_a_token).
 - You must have permission in JupiterOne to install new integrations.
+-  JupiterOne pulls in information regarding whether or not Okta Support has
+  access to a given account. This query currently requires the supplied token to
+  have Super Administrator privileges, but will be omitted without failing the
+  rest of the data ingestion if Read Only Administrator or Organization
+  Administrator are provided instead.
 
 ## Support
 
@@ -35,7 +40,7 @@ If you need help with this integration, please contact
 
 ### In Okta
 
-1. Login to Okta at https://yoursubdomain.okta.com, using an account with Admin
+1. Log in to Okta at https://yoursubdomain.okta.com, using an account with Admin
    privileges. It is important to note that the token inherits the privileges of
    the user that creates the token, "API token are generated with the
    permissions of the user that created the token. If a user’s permissions
@@ -67,7 +72,7 @@ steps will remain unaffected.
 
 ### In JupiterOne
 
-1. From the configuration **Gear Icon**, select **Integrations**.
+1. From the top navigation of the J1 Search homepage, select  **Integrations**.
 2. Scroll to the **Okta** integration tile and click it.
 3. Click the **Add Configuration** button and configure the following settings:
 
@@ -85,7 +90,7 @@ steps will remain unaffected.
 
 ## How to Uninstall
 
-1. From the configuration **Gear Icon**, select **Integrations**.
+1. From the top navigation of the J1 Search homepage, select **Integrations**.
 2. Scroll to the **Okta** integration tile and click it.
 3. Identify and click the **integration to delete**.
 4. Click the **trash can** icon.
