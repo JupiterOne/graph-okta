@@ -234,8 +234,7 @@ function convertAWSRolesToRelationships(
  * has an `awsAccountId`), the application user or group profile may define a
  * `role` or `samlRoles` property that identifies one or more AWS IAM roles that
  * may be assumed by the user or group. The roles are parsed to create mapped
- * relationships to the AWS IAM roles. The relationship is not created unless
- * the role is already in the graph.
+ * relationships to the AWS IAM roles.
  *
  * See
  * https://saml-doc.okta.com/SAML_Docs/How-to-Configure-SAML-2.0-for-Amazon-Web-Service#scenarioB,
