@@ -1,4 +1,7 @@
-import { createIntegrationEntity } from '@jupiterone/integration-sdk-core';
+import {
+  createIntegrationEntity,
+  parseTimePropertyValue,
+} from '@jupiterone/integration-sdk-core';
 
 import { OktaFactor } from '../okta/types';
 import { Entities } from '../steps/constants';
@@ -22,8 +25,11 @@ export function createMFADeviceEntity(
     status: data.status.toLowerCase(),
     created: data.created,
     lastUpdated: data.lastUpdated,
+    lastVerifiedOn: parseTimePropertyValue(data.lastVerified),
     active: data.status === 'ACTIVE',
+    authenticatorName: data.profile?.authenticatorName,
   };
+
   return createIntegrationEntity({
     entityData: {
       source: data,

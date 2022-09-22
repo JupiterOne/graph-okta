@@ -109,4 +109,6 @@ export interface StandardizedOktaFactor extends Entity {
   status: string;
   created: string;
   lastUpdated: string;
+  lastVerifiedOn?: number;
+  authenticatorName?: string;
 }
