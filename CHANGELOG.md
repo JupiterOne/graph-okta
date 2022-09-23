@@ -8,6 +8,10 @@ and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- Mapped relationships to aws_iam_roles now create placeholder entities.
+
 ## 2.3.0 - 2022-10-21
 
 ### Fixed
