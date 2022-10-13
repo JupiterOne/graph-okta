@@ -45,7 +45,12 @@ export function createUserEntity(
 
   return createIntegrationEntity({
     entityData: {
-      source,
+      source: {
+        ...source,
+        // NOTE: This property can be quite large and doesn't seem to be
+        // documented in Okta's API documentation anymore
+        memberOfGroupId: undefined,
+      },
       assign: {
         ...convertProperties(profile),
         ...convertCredentialEmails(credentials),
@@ -72,6 +77,7 @@ export function createUserEntity(
         lastUpdatedOn: parseTimePropertyValue(lastUpdated)!,
         passwordChanged: parseTimePropertyValue(passwordChanged),
         passwordChangedOn: parseTimePropertyValue(passwordChanged),
+        memberOfGroupId: undefined,
       },
     },
   }) as StandardizedOktaUser;
