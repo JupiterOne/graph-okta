@@ -8,6 +8,12 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.3.1 - 2022-10-13
+
+### Fixed
+
+- Remove large `memberOfGroupId` property from `okta_user`
+
 ## 2.3.0 - 2022-10-21
 
 ### Fixed
