@@ -106,6 +106,14 @@ async function buildGroupEntityToUserRelationships(
       await jobState.addRelationship(
         createGroupUserRelationship(groupEntity, userEntity),
       );
+
+      logger.info(
+        {
+          groupId,
+          userId: user.id,
+        },
+        'Successfully created user group relationship',
+      );
     } else {
       logger.warn(
         { groupId, userId: user.id },
