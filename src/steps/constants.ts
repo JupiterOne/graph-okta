@@ -5,6 +5,7 @@ import {
 } from '@jupiterone/integration-sdk-core';
 
 export const DATA_ACCOUNT_ENTITY = 'DATA_ACCOUNT_ENTITY';
+export const DATA_USER_ENTITIES_MAP = 'DATA_USER_ENTITIES_MAP';
 
 export const Steps = {
   ACCOUNT: 'fetch-account',
@@ -133,12 +134,18 @@ export const Relationships: Record<
     _class: RelationshipClass.HAS,
     sourceType: Entities.USER_GROUP._type,
     targetType: Entities.USER._type,
+    indexMetadata: {
+      enabled: false,
+    },
   },
   APP_USER_GROUP_HAS_USER: {
     _type: 'okta_app_user_group_has_user',
     _class: RelationshipClass.HAS,
     sourceType: Entities.APP_USER_GROUP._type,
     targetType: Entities.USER._type,
+    indexMetadata: {
+      enabled: false,
+    },
   },
   ACCOUNT_HAS_APPLICATION: {
     _type: 'okta_account_has_application',

@@ -1,18 +1,24 @@
 import {
+  Entity,
+  GraphObjectFilter,
+  GraphObjectIteratee,
   IntegrationStep,
   IntegrationStepExecutionContext,
 } from '@jupiterone/integration-sdk-core';
+import pMap from 'p-map';
 
-import { createAPIClient } from '../client';
+import { APIClient, createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
 import { createAccountGroupRelationship } from '../converters';
 import {
   createGroupUserRelationship,
   createUserGroupEntity,
 } from '../converters/group';
+import { OktaUser } from '../okta/types';
 import { StandardizedOktaAccount, StandardizedOktaUserGroup } from '../types';
 import {
   DATA_ACCOUNT_ENTITY,
+  DATA_USER_ENTITIES_MAP,
   Entities,
   Relationships,
   Steps,
@@ -74,13 +80,13 @@ export async function buildUserGroupUserRelationships(
 
 async function buildGroupEntityToUserRelationships(
   groupEntityType: string,
-  {
-    instance,
-    logger,
-    jobState,
-  }: IntegrationStepExecutionContext<IntegrationConfig>,
+  context: IntegrationStepExecutionContext<IntegrationConfig>,
 ) {
+  const { instance, logger, jobState } = context;
   const apiClient = createAPIClient(instance.config, logger);
+  const userIdToUserEntityMap = (await jobState.getData<Map<string, Entity>>(
+    DATA_USER_ENTITIES_MAP,
+  ))!;
 
   logger.info(
     {
@@ -89,49 +95,96 @@ async function buildGroupEntityToUserRelationships(
     'Starting to build user group relationships',
   );
 
-  await jobState.iterateEntities(
-    {
-      _type: groupEntityType,
+  async function createGroupUserRelationshipWithJob(
+    groupEntity: Entity,
+    user: OktaUser,
+  ) {
+    const groupId = groupEntity.id as string;
+    const userEntity = userIdToUserEntityMap.get(user.id);
+
+    if (userEntity) {
+      await jobState.addRelationship(
+        createGroupUserRelationship(groupEntity, userEntity),
+      );
+    } else {
+      logger.warn(
+        { groupId, userId: user.id },
+        '[SKIP] User not found in job state, could not build relationship to group',
+      );
+    }
+  }
+
+  await batchIterateEntities({
+    context,
+    batchSize: 1000,
+    filter: { _type: groupEntityType },
+    async iteratee(groupEntities) {
+      const usersForGroupEntities = await collectUsersForGroupEntities(
+        apiClient,
+        groupEntities,
+      );
+
+      for (const { groupEntity, users } of usersForGroupEntities) {
+        for (const user of users) {
+          await createGroupUserRelationshipWithJob(groupEntity, user);
+        }
+      }
     },
+  });
+}
+
+async function collectUsersForGroupEntities(
+  apiClient: APIClient,
+  groupEntities: Entity[],
+) {
+  return await pMap(
+    groupEntities,
     async (groupEntity) => {
       const groupId = groupEntity.id as string;
-
-      let totalUsersInGroup = 0;
-
-      logger.info(
-        {
-          groupId,
-          groupEntityType,
-        },
-        'Starting to iterate users in group',
-      );
+      const users: OktaUser[] = [];
 
       await apiClient.iterateUsersForGroup(groupId, async (user) => {
-        totalUsersInGroup++;
-        const userEntity = await jobState.findEntity(user.id);
-
-        if (userEntity) {
-          await jobState.addRelationship(
-            createGroupUserRelationship(groupEntity, userEntity),
-          );
-        } else {
-          logger.warn(
-            { groupId, userId: user.id },
-            '[SKIP] User not found in job state, could not build relationship to group',
-          );
-        }
+        users.push(user);
+        return Promise.resolve();
       });
 
-      logger.info(
-        {
-          groupEntityType,
-          groupId,
-          totalUsersInGroup,
-        },
-        'Finished iterating users in group',
-      );
+      return { groupEntity, users };
+    },
+    {
+      concurrency: 10,
     },
   );
+}
+
+interface IterateEntitiesWithBufferParams {
+  context: IntegrationStepExecutionContext<IntegrationConfig>;
+  batchSize: number;
+  filter: GraphObjectFilter;
+  iteratee: GraphObjectIteratee<Entity[]>;
+}
+
+async function batchIterateEntities({
+  context: { jobState },
+  batchSize,
+  filter,
+  iteratee,
+}: IterateEntitiesWithBufferParams) {
+  let entitiesBuffer: Entity[] = [];
+
+  async function processBufferedEntities() {
+    if (entitiesBuffer.length) await iteratee(entitiesBuffer);
+    entitiesBuffer = [];
+  }
+
+  await jobState.iterateEntities(filter, async (e) => {
+    entitiesBuffer.push(e);
+
+    if (entitiesBuffer.length >= batchSize) {
+      await processBufferedEntities();
+    }
+  });
+
+  await processBufferedEntities();
 }
 
 export const groupSteps: IntegrationStep<IntegrationConfig>[] = [
