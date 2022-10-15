@@ -8,6 +8,11 @@ and this project adheres to
 
 ## Unreleased
 
+### Changed
+
+- Increase page size when fetching members of a group
+- Separate group to user relationship logic into separate steps
+
 ## 2.3.1 - 2022-10-13
 
 ### Fixed
