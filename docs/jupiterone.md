@@ -25,7 +25,7 @@
   Okta. You need permission to create an Admin user in Okta that will be used to
   [create the API key](https://developer.okta.com/docs/api/getting_started/getting_a_token).
 - You must have permission in JupiterOne to install new integrations.
--  JupiterOne pulls in information regarding whether or not Okta Support has
+- JupiterOne pulls in information regarding whether or not Okta Support has
   access to a given account. This query currently requires the supplied token to
   have Super Administrator privileges, but will be omitted without failing the
   rest of the data ingestion if Read Only Administrator or Organization
@@ -72,7 +72,7 @@ steps will remain unaffected.
 
 ### In JupiterOne
 
-1. From the top navigation of the J1 Search homepage, select  **Integrations**.
+1. From the top navigation of the J1 Search homepage, select **Integrations**.
 2. Scroll to the **Okta** integration tile and click it.
 3. Click the **Add Configuration** button and configure the following settings:
 
@@ -174,6 +174,7 @@ The following relationships are created:
 | `okta_account`                         | **HAS**               | `okta_rule`           |
 | `okta_account`                         | **HAS**               | `okta_service`        |
 | `okta_account`                         | **HAS**               | `okta_user`           |
+| `okta_app_user_group`                  | **HAS**               | `okta_user`           |
 | `okta_user_group, okta_app_user_group` | **ASSIGNED**          | `okta_application`    |
 | `okta_user_group`                      | **HAS**               | `okta_user`           |
 | `okta_rule`                            | **MANAGES**           | `okta_user_group`     |

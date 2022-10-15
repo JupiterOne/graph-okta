@@ -112,11 +112,19 @@ export class APIClient {
    * @param iteratee receives each resource to produce relationships
    */
   public async iterateUsersForGroup(
-    group: OktaUserGroup,
+    groupId: string,
     iteratee: ResourceIteratee<OktaUser>,
   ): Promise<void> {
     try {
-      await this.oktaClient.listGroupUsers(group.id).each(iteratee);
+      await this.oktaClient
+        .listGroupUsers(groupId, {
+          // The number of users returned for the given group defaults to 1000
+          // according to the Okta API docs:
+          //
+          // https://developer.okta.com/docs/reference/api/groups/#list-group-members
+          limit: '10000',
+        })
+        .each(iteratee);
     } catch (err) {
       if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({

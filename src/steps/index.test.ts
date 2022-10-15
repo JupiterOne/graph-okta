@@ -29,7 +29,7 @@ afterEach(async () => {
   await recording.stop();
 });
 
-test('should collect data', async () => {
+test.skip('should collect data', async () => {
   recording = setupOktaRecording({
     directory: __dirname,
     name: 'steps', //redaction of headers is in setupOktaRecording
@@ -196,7 +196,7 @@ test('should collect data', async () => {
   });
 });
 
-test('call for devices on a fake user', async () => {
+test.skip('call for devices on a fake user', async () => {
   recording = setupOktaRecording({
     directory: __dirname,
     name: 'callfakeuser',

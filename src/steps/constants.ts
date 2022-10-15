@@ -15,6 +15,8 @@ export const Steps = {
   RULES: 'fetch-rules',
   ROLES: 'fetch-roles',
   APPLICATION_CREATION: 'build-application-creation-relationship',
+  APP_USER_GROUP_USERS_RELATIONSHIP: 'build-app-user-group-users-relationships',
+  USER_GROUP_USERS_RELATIONSHIP: 'build-user-group-users-relationships',
 };
 
 export const Entities: Record<
@@ -133,7 +135,7 @@ export const Relationships: Record<
     targetType: Entities.USER._type,
   },
   APP_USER_GROUP_HAS_USER: {
-    _type: 'okta_group_has_user',
+    _type: 'okta_app_user_group_has_user',
     _class: RelationshipClass.HAS,
     sourceType: Entities.APP_USER_GROUP._type,
     targetType: Entities.USER._type,
