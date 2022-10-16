@@ -18,7 +18,6 @@ export const Steps = {
   APPLICATION_CREATION: 'build-application-creation-relationship',
   APP_USER_GROUP_USERS_RELATIONSHIP: 'build-app-user-group-users-relationships',
   USER_GROUP_USERS_RELATIONSHIP: 'build-user-group-users-relationships',
-  BUILD_GROUP_ROLE_RELATIONSHIPS: 'build-group-role-relationships',
 };
 
 export const Entities: Record<
