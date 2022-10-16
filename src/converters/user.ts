@@ -45,12 +45,7 @@ export function createUserEntity(
 
   return createIntegrationEntity({
     entityData: {
-      source: {
-        ...source,
-        // NOTE: This property can be quite large and doesn't seem to be
-        // documented in Okta's API documentation anymore
-        memberOfGroupId: undefined,
-      },
+      source: {},
       assign: {
         ...convertProperties(profile),
         ...convertCredentialEmails(credentials),
