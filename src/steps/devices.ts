@@ -12,7 +12,7 @@ import { createUserMfaDeviceRelationship } from '../converters';
 import { createMFADeviceEntity } from '../converters/device';
 import { OktaFactor } from '../okta/types';
 import { StandardizedOktaUser } from '../types';
-import { batchIterateEntities } from '../util/jobState';
+import { getUserIdToUserEntityMap } from '../util/jobState';
 import { Entities, Relationships, Steps } from './constants';
 
 export async function fetchDevices(
@@ -21,33 +21,35 @@ export async function fetchDevices(
   const { jobState, instance, logger } = context;
   const apiClient = createAPIClient(instance.config, logger);
 
-  async function handleBatchUserEntities(userEntities: Entity[]) {
-    const activeOktaUsers = userEntities.filter(
-      (e) => !isOktaUserEntityDeprovisioned(e),
-    );
+  const devicesForUserEntities = await collectDevicesForUserEntities(
+    apiClient,
+    await getActiveOktaUserEntities(jobState),
+  );
 
-    const devicesForUserEntities = await collectDevicesForUserEntities(
-      apiClient,
-      activeOktaUsers,
-    );
+  for (const { userEntity, devices } of devicesForUserEntities) {
+    for (const device of devices) {
+      await createOktaUserFactorGraph(
+        jobState,
+        userEntity as StandardizedOktaUser,
+        device,
+      );
+    }
+  }
+}
 
-    for (const { userEntity, devices } of devicesForUserEntities) {
-      for (const device of devices) {
-        await createOktaUserFactorGraph(
-          jobState,
-          userEntity as StandardizedOktaUser,
-          device,
-        );
-      }
+async function getActiveOktaUserEntities(
+  jobState: JobState,
+): Promise<Entity[]> {
+  const userIdToUserEntityMap = await getUserIdToUserEntityMap(jobState);
+  const activeOktaUserEntities: Entity[] = [];
+
+  for (const [_, userEntity] of userIdToUserEntityMap) {
+    if (!isOktaUserEntityDeprovisioned(userEntity)) {
+      activeOktaUserEntities.push(userEntity);
     }
   }
 
-  await batchIterateEntities({
-    context,
-    batchSize: 1000,
-    filter: { _type: Entities.USER._type },
-    iteratee: handleBatchUserEntities,
-  });
+  return activeOktaUserEntities;
 }
 
 async function createOktaUserFactorGraph(
