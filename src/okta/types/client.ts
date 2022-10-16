@@ -87,7 +87,6 @@ export interface OktaClient {
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/apps/#list-groups-assigned-to-application
   listApplicationGroupAssignments: (
     appId: string,
-    queryParameters?: OktaQueryParams,
   ) => OktaCollection<OktaApplicationGroup>;
 
   // [API Endpoint]: https://developer.okta.com/docs/api/resources/factors/#list-enrolled-factors

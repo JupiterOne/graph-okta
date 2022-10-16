@@ -167,9 +167,5 @@ export default function createOktaClient(
     orgUrl: config.oktaOrgUrl,
     token: config.oktaApiKey,
     requestExecutor: defaultRequestExecutor,
-    // Disable caching as it may be causing high memory usage
-    //
-    // See: https://github.com/okta/okta-sdk-nodejs#middleware
-    cacheMiddleware: null,
-  });
+  }) as OktaClient;
 }
