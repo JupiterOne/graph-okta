@@ -15,6 +15,8 @@ and this project adheres to
 - Batch process user group relationship data
 - Disable Okta Node.js client caching
 - Batch process application data
+- Batch process device data
+- Improve error handling around invalid role formats
 
 ## 2.3.1 - 2022-10-13
 

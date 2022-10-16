@@ -119,6 +119,24 @@ export async function buildUserApplicationRelationships(
   });
 }
 
+function createOnInvalidRoleFormatFunction(
+  logger: IntegrationLogger,
+  loggedData: any,
+) {
+  return (invalidRole: any) => {
+    logger.info(
+      {
+        ...loggedData,
+        typeInvalidRole: typeof invalidRole,
+        invalidRoleLen: Array.isArray(invalidRole)
+          ? invalidRole.length
+          : undefined,
+      },
+      'Found invalid role',
+    );
+  };
+}
+
 async function createGroupApplicationRelationships({
   appEntity,
   group,
@@ -137,7 +155,14 @@ async function createGroupApplicationRelationships({
 
   if (groupEntity) {
     await jobState.addRelationships(
-      createApplicationGroupRelationships(appEntity, group),
+      createApplicationGroupRelationships(
+        appEntity,
+        group,
+        createOnInvalidRoleFormatFunction(logger, {
+          appId,
+          groupId: group.id,
+        }),
+      ),
     );
   } else {
     logger.warn(
@@ -168,6 +193,10 @@ async function createUserApplicationRelationships({
     const relationships: Relationship[] = createApplicationUserRelationships(
       appEntity,
       user,
+      createOnInvalidRoleFormatFunction(logger, {
+        appId,
+        userId: user.id,
+      }),
     );
 
     // These relationships include both USER_ASSIGNED_APPLICATION and USER_ASSIGNED_AWS_IAM_ROLE
