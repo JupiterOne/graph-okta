@@ -128,6 +128,7 @@ export function createApplicationEntity(
 export function createApplicationGroupRelationships(
   application: StandardizedOktaApplication,
   group: OktaApplicationGroup,
+  onInvalidRoleFormat: (invalidRole: any) => void,
 ): Relationship[] {
   const relationships: Relationship[] = [];
 
@@ -152,7 +153,7 @@ export function createApplicationGroupRelationships(
         group.profile && group.profile.samlRoles
           ? JSON.stringify(group.profile.samlRoles)
           : undefined,
-      role: group.profile ? group.profile.role : undefined,
+      role: stringifyIfArray(group.profile ? group.profile.role : undefined),
     },
   });
 
@@ -162,6 +163,7 @@ export function createApplicationGroupRelationships(
         application,
         group,
         MappedRelationships.USER_GROUP_ASSIGNED_AWS_IAM_ROLE._type,
+        onInvalidRoleFormat,
       ),
     );
   }
@@ -174,6 +176,7 @@ export function createApplicationGroupRelationships(
 export function createApplicationUserRelationships(
   application: StandardizedOktaApplication,
   user: OktaApplicationUser,
+  onInvalidRoleFormat: (invalidRole: any) => void,
 ): Relationship[] {
   const relationships: Relationship[] = [];
 
@@ -191,7 +194,7 @@ export function createApplicationUserRelationships(
       roles: user.profile.samlRoles
         ? JSON.stringify(user.profile.samlRoles)
         : undefined,
-      role: user.profile.role,
+      role: stringifyIfArray(user.profile.role),
     },
   });
 
@@ -201,6 +204,7 @@ export function createApplicationUserRelationships(
         application,
         user,
         Relationships.USER_ASSIGNED_AWS_IAM_ROLE._type,
+        onInvalidRoleFormat,
       ),
     );
   }
@@ -214,11 +218,17 @@ function convertAWSRolesToRelationships(
   application: StandardizedOktaApplication,
   oktaPrincipal: OktaApplicationUser | OktaApplicationGroup,
   relationshipType: string,
+  onInvalidRoleFormat: (invalidRole: any) => void,
 ): MappedRelationship[] {
   const relationships: MappedRelationship[] = [];
   if (application.awsAccountId && oktaPrincipal.profile) {
     const profile = oktaPrincipal.profile;
     for (const role of profile.samlRoles || [profile.role]) {
+      if (Array.isArray(role)) {
+        onInvalidRoleFormat(role);
+        continue;
+      }
+
       const relationship = mapAWSRoleAssignment({
         sourceKey: oktaPrincipal.id,
         role,
@@ -267,6 +277,7 @@ function mapAWSRoleAssignment({
 }): MappedRelationship | undefined {
   const regex = /\[?([a-zA-Z0-9_-]+)\]? -- ([a-zA-Z0-9_-]+)/;
   const match = role && regex.exec(role);
+
   if (match) {
     const awsAccountName = match[1];
     const roleName = match[2];
@@ -313,4 +324,8 @@ function mapAWSRoleAssignment({
       displayName: 'ASSIGNED',
     };
   }
+}
+
+function stringifyIfArray<T>(v: T) {
+  return Array.isArray(v) ? JSON.stringify(v) : v;
 }
