@@ -2,9 +2,12 @@ import {
   Entity,
   GraphObjectFilter,
   GraphObjectIteratee,
+  IntegrationError,
   IntegrationStepExecutionContext,
+  JobState,
 } from '@jupiterone/integration-sdk-core';
 import { IntegrationConfig } from '../config';
+import { DATA_USER_ENTITIES_MAP } from '../steps/constants';
 
 interface IterateEntitiesWithBufferParams {
   context: IntegrationStepExecutionContext<IntegrationConfig>;
@@ -37,4 +40,20 @@ async function batchIterateEntities({
   await processBufferedEntities();
 }
 
-export { batchIterateEntities };
+async function getUserIdToUserEntityMap(jobState: JobState) {
+  const userIdToUserEntityMap = await jobState.getData<Map<string, Entity>>(
+    DATA_USER_ENTITIES_MAP,
+  );
+
+  if (!userIdToUserEntityMap) {
+    throw new IntegrationError({
+      message: 'Missing required user data in job state',
+      code: 'MISSING_JOB_STATE_DATA',
+      fatal: true,
+    });
+  }
+
+  return userIdToUserEntityMap;
+}
+
+export { batchIterateEntities, getUserIdToUserEntityMap };

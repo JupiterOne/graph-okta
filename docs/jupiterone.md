@@ -183,8 +183,15 @@ The following relationships are created:
 | `okta_user`                            | **ASSIGNED**          | `mfa_device`          |
 | `okta_user`                            | **ASSIGNED**          | `okta_role`           |
 | `okta_user`                            | **CREATED**           | `okta_application`    |
-| `okta_user_group`                      | **ASSIGNED**          | `aws_iam_role`        |
 | `okta_user_group`                      | **ASSIGNED**          | `okta_role`           |
+
+### Mapped Relationships
+
+The following mapped relationships are created:
+
+| Source Entity `_type` | Relationship `_class` | Target Entity `_type` | Direction |
+| --------------------- | --------------------- | --------------------- | --------- |
+| `okta_user_group`     | **ASSIGNED**          | `*aws_iam_role*`      | FORWARD   |
 
 <!--
 ********************************************************************************

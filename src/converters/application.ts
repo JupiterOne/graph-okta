@@ -15,7 +15,11 @@ import {
   OktaApplicationGroup,
   OktaApplicationUser,
 } from '../okta/types';
-import { Entities, Relationships } from '../steps/constants';
+import {
+  Entities,
+  MappedRelationships,
+  Relationships,
+} from '../steps/constants';
 import { OktaIntegrationConfig, StandardizedOktaApplication } from '../types';
 import buildAppShortName from '../util/buildAppShortName';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
@@ -157,7 +161,7 @@ export function createApplicationGroupRelationships(
       ...convertAWSRolesToRelationships(
         application,
         group,
-        Relationships.USER_GROUP_ASSIGNED_AWS_IAM_ROLE._type,
+        MappedRelationships.USER_GROUP_ASSIGNED_AWS_IAM_ROLE._type,
       ),
     );
   }

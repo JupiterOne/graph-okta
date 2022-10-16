@@ -14,10 +14,12 @@ import {
 } from '../converters/group';
 import { OktaUser } from '../okta/types';
 import { StandardizedOktaAccount, StandardizedOktaUserGroup } from '../types';
-import { batchIterateEntities } from '../util/jobState';
+import {
+  batchIterateEntities,
+  getUserIdToUserEntityMap,
+} from '../util/jobState';
 import {
   DATA_ACCOUNT_ENTITY,
-  DATA_USER_ENTITIES_MAP,
   Entities,
   Relationships,
   Steps,
@@ -83,9 +85,7 @@ async function buildGroupEntityToUserRelationships(
 ) {
   const { instance, logger, jobState } = context;
   const apiClient = createAPIClient(instance.config, logger);
-  const userIdToUserEntityMap = (await jobState.getData<Map<string, Entity>>(
-    DATA_USER_ENTITIES_MAP,
-  ))!;
+  const userIdToUserEntityMap = await getUserIdToUserEntityMap(jobState);
 
   logger.info(
     {

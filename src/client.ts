@@ -177,7 +177,14 @@ export class APIClient {
     iteratee: ResourceIteratee<OktaApplication>,
   ): Promise<void> {
     try {
-      await this.oktaClient.listApplications().each(iteratee);
+      await this.oktaClient
+        .listApplications({
+          // Maximum is 200, default is 20 if not specified:
+          //
+          // See: https://developer.okta.com/docs/reference/api/apps/#list-applications
+          limit: '200',
+        })
+        .each(iteratee);
     } catch (err) {
       if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({
@@ -198,12 +205,17 @@ export class APIClient {
    * @param iteratee receives each resource to produce entities/relationships
    */
   public async iterateGroupsForApp(
-    app: OktaApplication,
+    appId: string,
     iteratee: ResourceIteratee<OktaApplicationGroup>,
   ): Promise<void> {
     try {
       await this.oktaClient
-        .listApplicationGroupAssignments(app.id)
+        .listApplicationGroupAssignments(appId, {
+          // Maximum is 200, default is 20 if not specified:
+          //
+          // See: https://developer.okta.com/docs/reference/api/apps/#list-groups-assigned-to-application
+          limit: '200',
+        })
         .each(iteratee);
     } catch (err) {
       if (err.status === 403) {
@@ -227,11 +239,18 @@ export class APIClient {
    * @param iteratee receives each resource to produce entities/relationships
    */
   public async iterateUsersForApp(
-    app: OktaApplication,
+    appId: string,
     iteratee: ResourceIteratee<OktaApplicationUser>,
   ): Promise<void> {
     try {
-      await this.oktaClient.listApplicationUsers(app.id).each(iteratee);
+      await this.oktaClient
+        .listApplicationUsers(appId, {
+          // Maximum is 500, default is 50 if not specified:
+          //
+          // See: https://developer.okta.com/docs/reference/api/apps/#list-users-assigned-to-application
+          limit: '500',
+        })
+        .each(iteratee);
     } catch (err) {
       if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({
