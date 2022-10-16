@@ -22,6 +22,7 @@ import {
   batchIterateEntities,
   getUserIdToUserEntityMap,
 } from '../util/jobState';
+import { timeOperation } from '../util/timing';
 import {
   DATA_ACCOUNT_ENTITY,
   Entities,
@@ -63,10 +64,12 @@ export async function buildGroupApplicationRelationships(
     batchSize: 1000,
     filter: { _type: Entities.APPLICATION._type },
     async iteratee(appEntities) {
-      const groupsForAppEntities = await collectGroupsForAppEntities(
-        apiClient,
-        appEntities,
-      );
+      const groupsForAppEntities = await timeOperation({
+        operationName: 'collectGroupsForAppEntities',
+        logger,
+        operation: async () =>
+          collectGroupsForAppEntities(apiClient, appEntities),
+      });
 
       for (const { appEntity, groups } of groupsForAppEntities) {
         for (const group of groups) {
@@ -94,10 +97,12 @@ export async function buildUserApplicationRelationships(
     batchSize: 1000,
     filter: { _type: Entities.APPLICATION._type },
     async iteratee(appEntities) {
-      const usersForAppEntities = await collectUsersForAppEntities(
-        apiClient,
-        appEntities,
-      );
+      const usersForAppEntities = await timeOperation({
+        operationName: 'collectUsersForAppEntities',
+        logger,
+        operation: async () =>
+          collectUsersForAppEntities(apiClient, appEntities),
+      });
 
       for (const { appEntity, users } of usersForAppEntities) {
         for (const user of users) {

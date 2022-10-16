@@ -13,6 +13,7 @@ import { createMFADeviceEntity } from '../converters/device';
 import { OktaFactor } from '../okta/types';
 import { StandardizedOktaUser } from '../types';
 import { getUserIdToUserEntityMap } from '../util/jobState';
+import { timeOperation } from '../util/timing';
 import { Entities, Relationships, Steps } from './constants';
 
 export async function fetchDevices(
@@ -21,10 +22,13 @@ export async function fetchDevices(
   const { jobState, instance, logger } = context;
   const apiClient = createAPIClient(instance.config, logger);
 
-  const devicesForUserEntities = await collectDevicesForUserEntities(
-    apiClient,
-    await getActiveOktaUserEntities(jobState),
-  );
+  const activeOktaUserEntities = await getActiveOktaUserEntities(jobState);
+  const devicesForUserEntities = await timeOperation({
+    operationName: 'collectDevicesForUserEntities',
+    logger,
+    operation: async () =>
+      collectDevicesForUserEntities(apiClient, activeOktaUserEntities),
+  });
 
   for (const { userEntity, devices } of devicesForUserEntities) {
     for (const device of devices) {
