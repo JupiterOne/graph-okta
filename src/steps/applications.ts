@@ -18,7 +18,10 @@ import {
 } from '../converters';
 import { OktaApplicationGroup, OktaApplicationUser } from '../okta/types';
 import { StandardizedOktaAccount, StandardizedOktaApplication } from '../types';
-import { batchIterateEntities } from '../util/jobState';
+import {
+  batchIterateEntities,
+  getUserIdToUserEntityMap,
+} from '../util/jobState';
 import {
   DATA_ACCOUNT_ENTITY,
   Entities,
@@ -84,6 +87,7 @@ export async function buildUserApplicationRelationships(
 ) {
   const { jobState, instance, logger } = context;
   const apiClient = createAPIClient(instance.config, logger);
+  const userIdToUserEntityMap = await getUserIdToUserEntityMap(jobState);
 
   await batchIterateEntities({
     context,
@@ -98,6 +102,7 @@ export async function buildUserApplicationRelationships(
       for (const { appEntity, users } of usersForAppEntities) {
         for (const user of users) {
           await createUserApplicationRelationships({
+            userIdToUserEntityMap,
             appEntity: appEntity as StandardizedOktaApplication,
             user,
             jobState,
@@ -138,11 +143,13 @@ async function createGroupApplicationRelationships({
 }
 
 async function createUserApplicationRelationships({
+  userIdToUserEntityMap,
   appEntity,
   user,
   jobState,
   logger,
 }: {
+  userIdToUserEntityMap: Map<string, Entity>;
   appEntity: StandardizedOktaApplication;
   user: OktaApplicationUser;
   logger: IntegrationLogger;
@@ -150,8 +157,7 @@ async function createUserApplicationRelationships({
 }) {
   const appId = appEntity.id as string;
   const appName = appEntity.name as string;
-
-  const userEntity = await jobState.findEntity(user.id);
+  const userEntity = userIdToUserEntityMap.get(user.id);
 
   if (userEntity) {
     const relationships: Relationship[] = createApplicationUserRelationships(
