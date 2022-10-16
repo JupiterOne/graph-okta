@@ -13,6 +13,7 @@ and this project adheres to
 - Increase page size when fetching members of a group
 - Separate group to user relationship logic into separate steps
 - Batch process user group relationship data
+- Batch process role collection
 
 ## 2.3.1 - 2022-10-13
 

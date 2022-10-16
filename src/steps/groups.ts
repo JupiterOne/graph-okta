@@ -1,7 +1,5 @@
 import {
   Entity,
-  GraphObjectFilter,
-  GraphObjectIteratee,
   IntegrationStep,
   IntegrationStepExecutionContext,
 } from '@jupiterone/integration-sdk-core';
@@ -16,6 +14,7 @@ import {
 } from '../converters/group';
 import { OktaUser } from '../okta/types';
 import { StandardizedOktaAccount, StandardizedOktaUserGroup } from '../types';
+import { batchIterateEntities } from '../util/jobState';
 import {
   DATA_ACCOUNT_ENTITY,
   DATA_USER_ENTITIES_MAP,
@@ -127,6 +126,16 @@ async function buildGroupEntityToUserRelationships(
     batchSize: 1000,
     filter: { _type: groupEntityType },
     async iteratee(groupEntities) {
+      const iterateGroupEntitiesBatchStartTime = Date.now();
+
+      logger.info(
+        {
+          groupEntityType,
+          numGroupEntities: groupEntities.length,
+        },
+        'Iterating batch of group entities',
+      );
+
       const usersForGroupEntities = await collectUsersForGroupEntities(
         apiClient,
         groupEntities,
@@ -137,6 +146,19 @@ async function buildGroupEntityToUserRelationships(
           await createGroupUserRelationshipWithJob(groupEntity, user);
         }
       }
+
+      const iterateGroupEntitiesBatchTotalTime =
+        Date.now() - iterateGroupEntitiesBatchStartTime;
+
+      logger.info(
+        {
+          iterateGroupEntitiesBatchTotalTime,
+          groupEntityType,
+          numGroupEntities: groupEntities.length,
+          iterateGroupEntitiesBatchStartTime,
+        },
+        'Finished iterating batch of group entities',
+      );
     },
   });
 }
@@ -162,37 +184,6 @@ async function collectUsersForGroupEntities(
       concurrency: 10,
     },
   );
-}
-
-interface IterateEntitiesWithBufferParams {
-  context: IntegrationStepExecutionContext<IntegrationConfig>;
-  batchSize: number;
-  filter: GraphObjectFilter;
-  iteratee: GraphObjectIteratee<Entity[]>;
-}
-
-async function batchIterateEntities({
-  context: { jobState },
-  batchSize,
-  filter,
-  iteratee,
-}: IterateEntitiesWithBufferParams) {
-  let entitiesBuffer: Entity[] = [];
-
-  async function processBufferedEntities() {
-    if (entitiesBuffer.length) await iteratee(entitiesBuffer);
-    entitiesBuffer = [];
-  }
-
-  await jobState.iterateEntities(filter, async (e) => {
-    entitiesBuffer.push(e);
-
-    if (entitiesBuffer.length >= batchSize) {
-      await processBufferedEntities();
-    }
-  });
-
-  await processBufferedEntities();
 }
 
 export const groupSteps: IntegrationStep<IntegrationConfig>[] = [
