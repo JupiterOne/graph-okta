@@ -66,6 +66,11 @@ export async function fetchGroups({
 export async function buildAppUserGroupUserRelationships(
   context: IntegrationStepExecutionContext<IntegrationConfig>,
 ) {
+  if (process.env.SKIP_STEP_APP_USER_GROUP_USERS_RELATIONSHIP) {
+    context.logger.info('Skipping app user group relationships step');
+    return;
+  }
+
   await buildGroupEntityToUserRelationships(
     Entities.APP_USER_GROUP._type,
     context,
