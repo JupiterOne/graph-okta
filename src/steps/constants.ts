@@ -1,8 +1,6 @@
 import {
   RelationshipClass,
-  RelationshipDirection,
   StepEntityMetadata,
-  StepMappedRelationshipMetadata,
   StepRelationshipMetadata,
 } from '@jupiterone/integration-sdk-core';
 
@@ -20,9 +18,6 @@ export const Steps = {
   APPLICATION_CREATION: 'build-application-creation-relationship',
   APP_USER_GROUP_USERS_RELATIONSHIP: 'build-app-user-group-users-relationships',
   USER_GROUP_USERS_RELATIONSHIP: 'build-user-group-users-relationships',
-  BUILD_GROUP_APPLICATION_RELATIONSHIPS:
-    'build-group-application-relationships',
-  BUILD_USER_APPLICATION_RELATIONSHIPS: 'build-user-application-relationships',
 };
 
 export const Entities: Record<
@@ -71,9 +66,6 @@ export const Entities: Record<
     resourceName: 'Okta Factor Device',
     _type: 'mfa_device',
     _class: ['Key', 'AccessKey'],
-    indexMetadata: {
-      enabled: false,
-    },
   },
   RULE: {
     resourceName: 'Okta Rule',
@@ -101,6 +93,7 @@ export const Relationships: Record<
   | 'USER_ASSIGNED_APPLICATION'
   | 'USER_ASSIGNED_AWS_IAM_ROLE'
   | 'USER_ASSIGNED_ROLE'
+  | 'USER_GROUP_ASSIGNED_AWS_IAM_ROLE'
   | 'USER_ASSIGNED_MFA_DEVICE'
   | 'RULE_MANAGES_USER_GROUP'
   | 'USER_CREATED_APPLICATION',
@@ -190,7 +183,12 @@ export const Relationships: Record<
     sourceType: Entities.USER._type,
     targetType: Entities.ROLE._type,
   },
-
+  USER_GROUP_ASSIGNED_AWS_IAM_ROLE: {
+    _type: 'okta_user_group_assigned_aws_iam_role',
+    _class: RelationshipClass.ASSIGNED,
+    sourceType: Entities.USER_GROUP._type,
+    targetType: 'aws_iam_role',
+  },
   USER_ASSIGNED_MFA_DEVICE: {
     _type: 'okta_user_assigned_factor',
     _class: RelationshipClass.ASSIGNED,
@@ -209,18 +207,5 @@ export const Relationships: Record<
     sourceType: Entities.USER._type,
     targetType: Entities.APPLICATION._type,
     partial: true,
-  },
-};
-
-export const MappedRelationships: Record<
-  'USER_GROUP_ASSIGNED_AWS_IAM_ROLE',
-  StepMappedRelationshipMetadata
-> = {
-  USER_GROUP_ASSIGNED_AWS_IAM_ROLE: {
-    _type: 'okta_user_group_assigned_aws_iam_role',
-    _class: RelationshipClass.ASSIGNED,
-    sourceType: Entities.USER_GROUP._type,
-    targetType: 'aws_iam_role',
-    direction: RelationshipDirection.FORWARD,
   },
 };

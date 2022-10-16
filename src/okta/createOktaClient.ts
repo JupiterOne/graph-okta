@@ -171,5 +171,5 @@ export default function createOktaClient(
     //
     // See: https://github.com/okta/okta-sdk-nodejs#middleware
     cacheMiddleware: null,
-  });
+  }) as OktaClient;
 }
