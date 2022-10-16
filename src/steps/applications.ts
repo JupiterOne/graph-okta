@@ -22,6 +22,7 @@ import { batchIterateEntities } from '../util/jobState';
 import {
   DATA_ACCOUNT_ENTITY,
   Entities,
+  MappedRelationships,
   Relationships,
   Steps,
 } from './constants';
@@ -227,17 +228,15 @@ export const applicationSteps: IntegrationStep<IntegrationConfig>[] = [
     name: 'Fetch Applications',
     entities: [Entities.APPLICATION],
     relationships: [Relationships.ACCOUNT_HAS_APPLICATION],
-    dependsOn: [Steps.GROUPS],
+    dependsOn: [],
     executionHandler: fetchApplications,
   },
   {
     id: Steps.BUILD_GROUP_APPLICATION_RELATIONSHIPS,
     name: 'Build group application relationships',
     entities: [],
-    relationships: [
-      Relationships.GROUP_ASSIGNED_APPLICATION,
-      Relationships.USER_GROUP_ASSIGNED_AWS_IAM_ROLE,
-    ],
+    relationships: [Relationships.GROUP_ASSIGNED_APPLICATION],
+    mappedRelationships: [MappedRelationships.USER_GROUP_ASSIGNED_AWS_IAM_ROLE],
     dependsOn: [Steps.APPLICATIONS, Steps.GROUPS],
     executionHandler: buildGroupApplicationRelationships,
   },
