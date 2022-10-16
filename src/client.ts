@@ -151,6 +151,10 @@ export class APIClient {
     iteratee: ResourceIteratee<OktaFactor>,
   ): Promise<void> {
     try {
+      // Okta API does not currently allow a limit to be specified on the list
+      // factors API.
+      //
+      // See: https://developer.okta.com/docs/reference/api/factors/#list-enrolled-factors
       await this.oktaClient.listFactors(userId).each(iteratee);
     } catch (err) {
       if (err.status === 403) {
