@@ -14,6 +14,7 @@ and this project adheres to
 - Separate group to user relationship logic into separate steps
 - Batch process user group relationship data
 - Disable Okta Node.js client caching
+- Batch process application data
 
 ## 2.3.1 - 2022-10-13
 
