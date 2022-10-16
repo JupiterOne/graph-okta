@@ -66,6 +66,9 @@ export const Entities: Record<
     resourceName: 'Okta Factor Device',
     _type: 'mfa_device',
     _class: ['Key', 'AccessKey'],
+    indexMetadata: {
+      enabled: false,
+    },
   },
   RULE: {
     resourceName: 'Okta Rule',
