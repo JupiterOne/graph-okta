@@ -1,4 +1,5 @@
 import {
+  IntegrationLogger,
   IntegrationStep,
   IntegrationStepExecutionContext,
   Relationship,
@@ -40,13 +41,22 @@ export async function fetchApplications({
       createAccountApplicationRelationship(accountEntity, appEntity),
     );
 
+    const appId = app.id;
+
     //get the groups that are assigned to this app
     await apiClient.iterateGroupsForApp(app, async (group) => {
       const groupEntity = await jobState.findEntity(group.id);
 
       if (groupEntity) {
         await jobState.addRelationships(
-          createApplicationGroupRelationships(appEntity, group),
+          createApplicationGroupRelationships(
+            appEntity,
+            group,
+            createOnInvalidRoleFormatFunction(logger, {
+              appId,
+              groupId: group.id,
+            }),
+          ),
         );
       } else {
         logger.warn(
@@ -64,6 +74,10 @@ export async function fetchApplications({
         const relationships: Relationship[] = createApplicationUserRelationships(
           appEntity,
           user,
+          createOnInvalidRoleFormatFunction(logger, {
+            appId,
+            userId: user.id,
+          }),
         );
         //these relationships include both USER_ASSIGNED_APPLICATION and USER_ASSIGNED_AWS_IAM_ROLE
         //USER_ASSIGNED_APPLICATION will be unique to this user and app pair
@@ -82,6 +96,24 @@ export async function fetchApplications({
       }
     });
   });
+}
+
+function createOnInvalidRoleFormatFunction(
+  logger: IntegrationLogger,
+  loggedData: any,
+) {
+  return (invalidRole: any) => {
+    logger.info(
+      {
+        ...loggedData,
+        typeInvalidRole: typeof invalidRole,
+        invalidRoleLen: Array.isArray(invalidRole)
+          ? invalidRole.length
+          : undefined,
+      },
+      'Found invalid role',
+    );
+  };
 }
 
 export const applicationSteps: IntegrationStep<IntegrationConfig>[] = [
