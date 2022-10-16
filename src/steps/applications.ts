@@ -44,7 +44,7 @@ export async function fetchApplications({
     const appId = app.id;
 
     //get the groups that are assigned to this app
-    await apiClient.iterateGroupsForApp(app, async (group) => {
+    await apiClient.iterateGroupsForApp(appId, async (group) => {
       const groupEntity = await jobState.findEntity(group.id);
 
       if (groupEntity) {
@@ -67,7 +67,7 @@ export async function fetchApplications({
     });
 
     //get the individual users that are assigned to this app (ie. not assigned as part of group)
-    await apiClient.iterateUsersForApp(app, async (user) => {
+    await apiClient.iterateUsersForApp(appId, async (user) => {
       const userEntity = await jobState.findEntity(user.id);
 
       if (userEntity) {
