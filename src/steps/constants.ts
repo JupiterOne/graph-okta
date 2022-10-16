@@ -22,7 +22,7 @@ export const Steps = {
   USER_GROUP_USERS_RELATIONSHIP: 'build-user-group-users-relationships',
   BUILD_GROUP_APPLICATION_RELATIONSHIPS:
     'build-group-application-relationships',
-  BUILD_USER_APPLICATION_RELATIONSHIPS: 'build-group-application-relationships',
+  BUILD_USER_APPLICATION_RELATIONSHIPS: 'build-user-application-relationships',
 };
 
 export const Entities: Record<

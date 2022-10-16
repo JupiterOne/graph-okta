@@ -228,7 +228,7 @@ export const applicationSteps: IntegrationStep<IntegrationConfig>[] = [
     name: 'Fetch Applications',
     entities: [Entities.APPLICATION],
     relationships: [Relationships.ACCOUNT_HAS_APPLICATION],
-    dependsOn: [],
+    dependsOn: [Steps.ACCOUNT],
     executionHandler: fetchApplications,
   },
   {
