@@ -52,6 +52,8 @@ export interface OktaUserProfile {
   generic?: boolean;
   bitbucketUsername?: string;
   githubUsername?: string;
+  hireDate?: string;
+  terminationDate?: string;
 }
 
 export interface OktaUserCredentials {

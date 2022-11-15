@@ -8,6 +8,10 @@ and this project adheres to
 
 ## Unreleased
 
+### Added
+
+- Added `hiredOn` and `terminatedOn` properties to `okta_user` entity.
+
 ### Changed
 
 - Increase page size when fetching members of a group

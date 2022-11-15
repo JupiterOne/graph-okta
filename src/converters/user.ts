@@ -73,6 +73,8 @@ export function createUserEntity(
         passwordChanged: parseTimePropertyValue(passwordChanged),
         passwordChangedOn: parseTimePropertyValue(passwordChanged),
         memberOfGroupId: undefined,
+        hiredOn: parseTimePropertyValue(profile.hireDate),
+        terminatedOn: parseTimePropertyValue(profile.terminationDate),
       },
     },
   }) as StandardizedOktaUser;
