@@ -8,9 +8,13 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.4.0 - 2022-11-16
+
 ### Added
 
 - Added `hiredOn` and `terminatedOn` properties to `okta_user` entity.
+
+## 2.3.2 - 2022-10-17
 
 ### Changed
 
