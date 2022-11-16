@@ -75,6 +75,7 @@ export function createUserEntity(
         memberOfGroupId: undefined,
         hiredOn: parseTimePropertyValue(profile.hireDate),
         terminatedOn: parseTimePropertyValue(profile.terminationDate),
+        countryCode: profile.countryCode,
       },
     },
   }) as StandardizedOktaUser;

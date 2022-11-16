@@ -51,6 +51,7 @@ export interface StandardizedOktaUser extends Entity {
   githubUsername?: string;
   verifiedEmails?: string[];
   unverifiedEmails?: string[];
+  countryCode?: string;
 }
 
 export interface StandardizedOktaUserGroup extends Entity {
