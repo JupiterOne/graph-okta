@@ -54,6 +54,7 @@ export interface OktaUserProfile {
   githubUsername?: string;
   hireDate?: string;
   terminationDate?: string;
+  countryCode?: string;
 }
 
 export interface OktaUserCredentials {

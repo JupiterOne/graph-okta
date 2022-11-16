@@ -8,6 +8,12 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.5.0 - 2022-11-16
+
+### Added
+
+- Added `countryCode` property to `okta_user` entity.
+
 ## 2.4.0 - 2022-11-16
 
 ### Added
