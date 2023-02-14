@@ -8,6 +8,12 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.5.1 - 2023-02-14
+
+### Added
+
+- Added support for the okta-gov.com domain.
+
 ## 2.5.0 - 2022-11-16
 
 ### Added
