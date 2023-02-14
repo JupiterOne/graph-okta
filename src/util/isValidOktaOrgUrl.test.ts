@@ -4,6 +4,7 @@ for (const url of [
   'https://abc.okta.com/',
   'https://abc.oktapreview.com/',
   'https://abc.okta-emea.com',
+  'https://abc.okta-gov.com',
 ]) {
   test(`valid okta org url: ${url}`, () => {
     expect(isValidOktaOrgUrl(url)).toEqual(true);
