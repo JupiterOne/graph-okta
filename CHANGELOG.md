@@ -8,6 +8,13 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.5.2 - 2023-03-09
+
+### Updated
+
+- Reduced concurrency on `/api/v1/groups/<group-id>/users` from 10 to 4 to
+  reduce throttling.
+
 ## 2.5.1 - 2023-02-14
 
 ### Added
