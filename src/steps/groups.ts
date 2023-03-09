@@ -164,7 +164,13 @@ async function collectUsersForGroupEntities(
       return { groupEntity, users };
     },
     {
-      concurrency: 10,
+      /**
+       * We throttle requests when the x-rate-limit-remaining header drops below
+       * 5. Previously, our concurrency here was 10, which meant that even if a
+       * request was throttled, there could be 9 additional requests coming right
+       * on its tail - which will result in throttling.
+       */
+      concurrency: 4,
     },
   );
 }
