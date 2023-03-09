@@ -11,7 +11,6 @@ const DEFAULT_MINIMUM_RATE_LIMIT_REMAINING = 5;
 
 interface RequestExecutorWithEarlyRateLimitingOptions {
   minimumRateLimitRemaining?: number;
-  m;
 }
 
 /**
