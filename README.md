@@ -157,20 +157,24 @@ merged into `main`. An administrator of the GitHub project should:
 3. Create the version and tag with `yarn version [--major] [--minor] [--patch]`
 4. Push the commit and tag with `git push --follow-tags`
 
-That's it! Travis will deploy the necessary bits to NPM. Manual deployment is
+That's it! [Travis](https://www.travis-ci.com) will deploy the necessary bits to NPM. Manual deployment is
 possible of course, just be certain to follow the `yarn build` road.
 
 ### How to create a new Okta API token and configure environment variables
 1. Require **Super Admin** access to the [development account](https://dev-857255.okta.com/).
 2. Login into the *Okta Admin Dashboard* using [this link](https://dev-857255-admin.okta.com/) and your credentials.
 3. Navigate to *Security > API > Tokens*.
+
 ![navigateToTokens](/docs/images/navigateToTokens.gif)
+
 4. Now you need to create a new token following the next steps:
     - Click on **Create token** button.
     - Enter a token name.
     - Click on **Create token** button.
     - Copy and save the token value, you will need it in the next step.
+
 ![createNewToken](/docs/images/createNewToken.gif)
+
 5. In your .env file set the values of:
     - **OKTA_ORG_URL**: `https://dev-857255.okta.com/`
     - **OKTA_API_KEY**: `<token-obtined-in-the-step-4>`
