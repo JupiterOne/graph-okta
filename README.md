@@ -160,6 +160,12 @@ merged into `main`. An administrator of the GitHub project should:
 That's it! Travis will deploy the necessary bits to NPM. Manual deployment is
 possible of course, just be certain to follow the `yarn build` road.
 
-
 ### Required Role
-The required role to perform all fetch operations that this integration includes and according to [this documentation](https://help.okta.com/oie/en-us/Content/Topics/Security/administrators-admin-comparison.htm) is the **Super Administrator** role. Since the logic in ``src/steps/roles.ts`` initially collects the list of users and performs queries to fetch the roles associated with each user through `apiClient.iterateRolesByUser` and you can't get the role from a user with a higher role than yours.
+
+The required role to perform all fetch operations that this integration includes
+and according to
+[this documentation](https://help.okta.com/oie/en-us/Content/Topics/Security/administrators-admin-comparison.htm)
+is the **Super Administrator** role. Since the logic in `src/steps/roles.ts`
+initially collects the list of users and performs queries to fetch the roles
+associated with each user through `apiClient.iterateRolesByUser` and you can't
+get the role from a user with a higher role than yours.
