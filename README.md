@@ -167,7 +167,7 @@ possible of course, just be certain to follow the `yarn build` road.
 
 ![navigateToTokens](/docs/images/navigateToTokens.gif)
 
-4. Now you need to create a new token following the next steps:
+4. Create a new token following the next steps:
     - Click on **Create token** button.
     - Enter a token name.
     - Click on **Create token** button.
@@ -180,4 +180,11 @@ possible of course, just be certain to follow the `yarn build` road.
     - **OKTA_API_KEY**: `<token-obtined-in-the-step-4>`
 
 **Note:** If you don't have a .env file change the name of `.env.example` to `.env` and use this one)
+
+### How to invite a new User to Okta development account
+1. Access to Okta [Admin Dashboard](https://dev-857255-admin.okta.com/)
+2. Navigate to *Directory > People*.
+3. Click on *Add Person* button.
+4. Fill the form and press *Save* button.
+ 
 
