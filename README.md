@@ -157,34 +157,46 @@ merged into `main`. An administrator of the GitHub project should:
 3. Create the version and tag with `yarn version [--major] [--minor] [--patch]`
 4. Push the commit and tag with `git push --follow-tags`
 
-That's it! [Travis](https://www.travis-ci.com) will deploy the necessary bits to NPM. Manual deployment is
-possible of course, just be certain to follow the `yarn build` road.
+That's it! [Travis](https://www.travis-ci.com) will deploy the necessary bits to
+NPM. Manual deployment is possible of course, just be certain to follow the
+`yarn build` road.
 
 ### How to create a new Okta API token and configure environment variables
-1. Require **Super Admin** access to the [development account](https://dev-857255.okta.com/).
-2. Login into the *Okta Admin Dashboard* using [this link](https://dev-857255-admin.okta.com/) and your credentials.
-3. Navigate to *Security > API > Tokens*.
+
+1. Require **Super Admin** access to the
+   [development account](https://dev-857255.okta.com/).
+2. Login into the _Okta Admin Dashboard_ using
+   [this link](https://dev-857255-admin.okta.com/) and your credentials.
+3. Navigate to _Security > API > Tokens_.
 
 ![navigateToTokens](/docs/images/navigateToTokens.gif)
 
 4. Create a new token following the next steps:
-    - Click on **Create token** button.
-    - Enter a token name.
-    - Click on **Create token** button.
-    - Copy and save the token value, you will need it in the next step.
+   - Click on **Create token** button.
+   - Enter a token name.
+   - Click on **Create token** button.
+   - Copy and save the token value, you will need it in the next step.
 
 ![createNewToken](/docs/images/createNewToken.gif)
 
 5. In your .env file set the values of:
-    - **OKTA_ORG_URL**: `https://dev-857255.okta.com/`
-    - **OKTA_API_KEY**: `<token-obtined-in-the-step-4>`
+   - **OKTA_ORG_URL**: `https://dev-857255.okta.com/`
+   - **OKTA_API_KEY**: `<token-obtined-in-the-step-4>`
 
-**Note:** If you don't have a .env file change the name of `.env.example` to `.env` and use this one)
+**Note:** If you don't have a .env file change the name of `.env.example` to
+`.env` and use this one)
 
-### How to invite a new User to Okta development account
+### How to invite a new User to the Okta development account
+
 1. Access to Okta [Admin Dashboard](https://dev-857255-admin.okta.com/)
-2. Navigate to *Directory > People*.
-3. Click on *Add Person* button.
-4. Fill the form and press *Save* button.
- 
+2. Navigate to _Directory > People_.
+   ![navigateToPeople](/docs/images/navigateToPeople.gif)
 
+3. Click on _Add Person_ button.
+   ![openAddPersonForm](/docs/images/clickAddPerson.gif)
+
+4. Fill all the required fields, select **J1_Devs** in the _Groups_ input and
+   press the _Save_ button. ![fillNewPersonForm](/docs/images/fillUserForm.gif)
+
+After pressing the _Save_ button the new user must receive an email with
+instructions to confirm their new account.
