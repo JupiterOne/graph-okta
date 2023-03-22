@@ -55,21 +55,21 @@ Integrations mutate the graph to reflect configurations and metadata from the
 provider. Developing an integration involves:
 
 1.  Establishing a secure connection to a provider API
-1.  Fetching provider data and converting it to entities and relationships
-1.  Collecting the existing set of entities and relationships already in the
+2.  Fetching provider data and converting it to entities and relationships
+3.  Collecting the existing set of entities and relationships already in the
     graph
-1.  Performing a diff to determine which entites/relationships to
+4.  Performing a diff to determine which entites/relationships to
     create/update/delete
-1.  Delivering create/update/delete operations to the persister to update the
+5.  Delivering create/update/delete operations to the persister to update the
     graph
 
 Run the integration to see what happens. You may use use Node to execute
 directly on your machine (NVM is recommended).
 
 1.  Install Docker
-1.  `yarn install`
-1.  `yarn start:graph`
-1.  `yarn start`
+2.  `yarn install`
+3.  `yarn start:graph`
+4.  `yarn start`
 
 Activity is logged to the console indicating the operations produced and
 processed. View raw data in the graph database using
@@ -100,7 +100,7 @@ development provider account.
 
 1. Update `tools/execute.ts` to provide the properties required by the
    `executionHandler` function
-1. Create a `.env` file to provide the environment variables transferred into
+2. Create a `.env` file to provide the environment variables transferred into
    the properties
 
 For example, given this execution script:
@@ -153,9 +153,9 @@ Create a PR with changes and request review. Once approved, the branch will be
 merged into `main`. An administrator of the GitHub project should:
 
 1. Pull the latest from `main`
-1. Determine the new semantic version number
-1. Create the version and tag with `yarn version [--major] [--minor] [--patch]`
-1. Push the commit and tag with `git push --follow-tags`
+2. Determine the new semantic version number
+3. Create the version and tag with `yarn version [--major] [--minor] [--patch]`
+4. Push the commit and tag with `git push --follow-tags`
 
 That's it! Travis will deploy the necessary bits to NPM. Manual deployment is
 possible of course, just be certain to follow the `yarn build` road.

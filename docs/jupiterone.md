@@ -51,13 +51,22 @@ If you need help with this integration, please contact
 3. On the left-side menu, select Security, and then API.
 4. On the screen which appears, select Tokens. You should now be at
    https://yoursubdomain-admin.okta.com/admin/access/api/tokens.
-5. Press the Create Token button and name the token.
-6. Copy the token value which appears to a safe location, because it will not be
-   available after closing this screen. Note that, per the Okta website, "API
-   tokens are valid for 30 days and automatically renew every time they are used
-   with an API request. When a token has been inactive for more than 30 days it
-   is revoked and cannot be used again. Tokens are also only valid if the user
-   who created the token is also active."
+
+   ![navigateToTokens](/docs/images/navigateToTokens.gif)
+
+5. Press the Create Token button, then name the token and press `Create token`
+   button.
+
+   ![createNewToken](./images/createNewToken.gif)
+
+   Note that, per the Okta website, "API tokens are valid for 30 days and
+   automatically renew every time they are used with an API request. When a
+   token has been inactive for more than 30 days it is revoked and cannot be
+   used again. Tokens are also only valid if the user who created the token is
+   also active."
+
+6. Copy the token value appears to a safe location, because it will not be
+   available after closing this screen.
 
 NOTE: JupiterOne pulls in information regarding whether or not Okta Support has
 access to a given account. This query currently requires the supplied token to
