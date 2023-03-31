@@ -48,16 +48,19 @@ export async function fetchApplications({
       const groupEntity = await jobState.findEntity(group.id);
 
       if (groupEntity) {
-        await jobState.addRelationships(
-          createApplicationGroupRelationships(
-            appEntity,
-            group,
-            createOnInvalidRoleFormatFunction(logger, {
-              appId,
-              groupId: group.id,
-            }),
-          ),
-        );
+        const relationshipId = `${group.id}|assigned|${appEntity._key}`;
+        if (!jobState.hasKey(relationshipId)) {
+          await jobState.addRelationships(
+            createApplicationGroupRelationships(
+              appEntity,
+              group,
+              createOnInvalidRoleFormatFunction(logger, {
+                appId,
+                groupId: group.id,
+              }),
+            ),
+          );
+        }
       } else {
         logger.warn(
           { appId: app.id, appName: app.name, groupId: group.id },
