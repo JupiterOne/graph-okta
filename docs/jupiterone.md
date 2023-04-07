@@ -180,6 +180,7 @@ The following relationships are created:
 | -------------------------------------- | --------------------- | --------------------- |
 | `okta_account`                         | **HAS**               | `okta_application`    |
 | `okta_account`                         | **HAS**               | `okta_user_group`     |
+| `okta_account`                         | **HAS**               | `okta_app_user_group` |
 | `okta_account`                         | **HAS**               | `okta_rule`           |
 | `okta_account`                         | **HAS**               | `okta_service`        |
 | `okta_account`                         | **HAS**               | `okta_user`           |
