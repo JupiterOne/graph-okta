@@ -4,6 +4,7 @@ import * as url from 'url';
 import {
   createDirectRelationship,
   createIntegrationEntity,
+  IntegrationLogger,
   MappedRelationship,
   Relationship,
   RelationshipClass,
@@ -25,6 +26,7 @@ import {
   getVendorName,
   isMultiInstanceApp,
 } from '../util/knownVendors';
+import buildApplicationGroupRelationshipId from '../util/buildEntityRelationships';
 
 interface IntegrationInstance {
   id: string;
@@ -125,6 +127,7 @@ export function createApplicationGroupRelationships(
   application: StandardizedOktaApplication,
   group: OktaApplicationGroup,
   onInvalidRoleFormat: (invalidRole: any) => void,
+  logger: IntegrationLogger,
 ): Relationship[] {
   const relationships: Relationship[] = [];
 
@@ -139,7 +142,11 @@ export function createApplicationGroupRelationships(
     properties: {
       // Override generated values for _key, _type to maintain
       // values before migration to new SDK
-      _key: `${group.id}|assigned|${application._key}`,
+      _key: buildApplicationGroupRelationshipId(
+        group.id,
+        application._key,
+        logger,
+      ),
       _type: Relationships.GROUP_ASSIGNED_APPLICATION._type,
 
       applicationId: application.id,

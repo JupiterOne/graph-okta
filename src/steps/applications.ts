@@ -20,6 +20,7 @@ import {
   Relationships,
   Steps,
 } from './constants';
+import buildApplicationGroupRelationshipId from '../util/buildEntityRelationships';
 
 export async function fetchApplications({
   instance,
@@ -48,8 +49,12 @@ export async function fetchApplications({
       const groupEntity = await jobState.findEntity(group.id);
 
       if (groupEntity) {
-        const relationshipId = `${group.id}|assigned|${appEntity._key}`;
-        if (!jobState.hasKey(relationshipId)) {
+        const relationshipId = buildApplicationGroupRelationshipId(
+          group.id,
+          appEntity._key,
+          logger,
+        );
+        if (relationshipId && !jobState.hasKey(relationshipId)) {
           await jobState.addRelationships(
             createApplicationGroupRelationships(
               appEntity,
@@ -58,6 +63,7 @@ export async function fetchApplications({
                 appId,
                 groupId: group.id,
               }),
+              logger,
             ),
           );
         }
