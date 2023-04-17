@@ -78,11 +78,9 @@ export async function fetchApplications({
          *    profile: { role: 'DeveloperExternal' },
          *  }
          */
-        if (relationships && relationships.length) {
-          for (const r of relationships) {
-            if (r._key && !jobState.hasKey(r._key)) {
-              await jobState.addRelationship(r);
-            }
+        for (const r of relationships) {
+          if (r._key && !jobState.hasKey(r._key)) {
+            await jobState.addRelationship(r);
           }
         }
       } else {
