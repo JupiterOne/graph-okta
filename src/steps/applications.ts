@@ -60,6 +60,23 @@ export async function fetchApplications({
         /**
          * Multiple relationships for the same group can be encountered if the
          * app has specific profiles associated.
+         * *
+         * For example, the AWS Account Federation app has a profile that
+         * specifies "role". The same group could be assigned multiple roles,
+         * such as `Developer` and `DeveloperExternal`.
+         *
+         *  {
+         *    id: '00gc3frhdodo90K6Q4x7',
+         *    lastUpdated: '2023-04-07T19:19:30.000Z',
+         *    priority: 0,
+         *    profile: { role: 'Developer' },
+         *  }
+         *  {
+         *    id: '00gc3frhdodo90K6Q4x7',
+         *    lastUpdated: '2023-04-07T19:19:30.000Z',
+         *    priority: 1,
+         *    profile: { role: 'DeveloperExternal' },
+         *  }
          */
         if (relationships && relationships.length) {
           for (const r of relationships) {
