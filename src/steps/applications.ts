@@ -20,7 +20,6 @@ import {
   Relationships,
   Steps,
 } from './constants';
-import buildApplicationGroupRelationshipId from '../util/buildEntityRelationships';
 
 export async function fetchApplications({
   instance,
@@ -49,23 +48,25 @@ export async function fetchApplications({
       const groupEntity = await jobState.findEntity(group.id);
 
       if (groupEntity) {
-        const relationshipId = buildApplicationGroupRelationshipId(
-          group.id,
-          appEntity._key,
-          logger,
+        const relationships = createApplicationGroupRelationships(
+          appEntity,
+          group,
+          createOnInvalidRoleFormatFunction(logger, {
+            appId,
+            groupId: group.id,
+          }),
         );
-        if (relationshipId && !jobState.hasKey(relationshipId)) {
-          await jobState.addRelationships(
-            createApplicationGroupRelationships(
-              appEntity,
-              group,
-              createOnInvalidRoleFormatFunction(logger, {
-                appId,
-                groupId: group.id,
-              }),
-              logger,
-            ),
-          );
+
+        /**
+         * Multiple relationships for the same group can be encountered if the
+         * app has specific profiles associated.
+         */
+        if (relationships && relationships.length) {
+          for (const r of relationships) {
+            if (r._key && !jobState.hasKey(r._key)) {
+              await jobState.addRelationship(r);
+            }
+          }
         }
       } else {
         logger.warn(
