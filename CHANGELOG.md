@@ -12,7 +12,7 @@ and this project adheres to
 
 ### Updated
 
-- Support multiple relationships for the same applications group.
+- Support multiple relationships for the same application group.
 
 ## 2.5.2 - 2023-03-09
 
