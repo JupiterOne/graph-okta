@@ -8,6 +8,12 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.5.4 - 2023-04-18
+
+### Updated
+
+- Support multiple relationships for the same applications group.
+
 ## 2.5.2 - 2023-03-09
 
 ### Updated
