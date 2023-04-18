@@ -25,7 +25,6 @@ import {
   getVendorName,
   isMultiInstanceApp,
 } from '../util/knownVendors';
-
 interface IntegrationInstance {
   id: string;
   name: string;

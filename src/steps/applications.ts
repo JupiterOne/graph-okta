@@ -48,16 +48,41 @@ export async function fetchApplications({
       const groupEntity = await jobState.findEntity(group.id);
 
       if (groupEntity) {
-        await jobState.addRelationships(
-          createApplicationGroupRelationships(
-            appEntity,
-            group,
-            createOnInvalidRoleFormatFunction(logger, {
-              appId,
-              groupId: group.id,
-            }),
-          ),
+        const relationships = createApplicationGroupRelationships(
+          appEntity,
+          group,
+          createOnInvalidRoleFormatFunction(logger, {
+            appId,
+            groupId: group.id,
+          }),
         );
+
+        /**
+         * Multiple relationships for the same group can be encountered if the
+         * app has specific profiles associated.
+         * *
+         * For example, the AWS Account Federation app has a profile that
+         * specifies "role". The same group could be assigned multiple roles,
+         * such as `Developer` and `DeveloperExternal`.
+         *
+         *  {
+         *    id: '00gc3frhdodo90K6Q4x7',
+         *    lastUpdated: '2023-04-07T19:19:30.000Z',
+         *    priority: 0,
+         *    profile: { role: 'Developer' },
+         *  }
+         *  {
+         *    id: '00gc3frhdodo90K6Q4x7',
+         *    lastUpdated: '2023-04-07T19:19:30.000Z',
+         *    priority: 1,
+         *    profile: { role: 'DeveloperExternal' },
+         *  }
+         */
+        for (const r of relationships) {
+          if (r._key && !jobState.hasKey(r._key)) {
+            await jobState.addRelationship(r);
+          }
+        }
       } else {
         logger.warn(
           { appId: app.id, appName: app.name, groupId: group.id },
