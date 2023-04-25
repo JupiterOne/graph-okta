@@ -21,13 +21,16 @@ export function createMFADeviceEntity(
     provider: data.provider,
     vendorName: data.vendorName,
     device: data.device,
-    deviceType: data.deviceType,
     status: data.status.toLowerCase(),
     created: data.created,
     lastUpdated: data.lastUpdated,
     lastVerifiedOn: parseTimePropertyValue(data.lastVerified),
     active: data.status === 'ACTIVE',
     authenticatorName: data.profile?.authenticatorName,
+    platform: data.profile?.platform,
+    deviceType: data.profile?.deviceType,
+    credentialId: data.profile?.credentialId,
+    profileName: data.profile?.name,
   };
 
   return createIntegrationEntity({

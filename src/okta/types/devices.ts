@@ -5,7 +5,6 @@ export interface OktaFactor extends OktaResource {
   provider: string;
   vendorName?: string;
   device?: string;
-  deviceType?: string;
   status: string;
   created: string;
   lastUpdated: string;
@@ -15,4 +14,9 @@ export interface OktaFactor extends OktaResource {
 
 interface OktaFactorProfile {
   authenticatorName?: string; // // e.g. MacBook Touch ID, YubiKey 5 FIPS, etc.
+  platform?: string;
+  name?: string;
+  credentialId?: string;
+  version?: string;
+  deviceType: string;
 }
