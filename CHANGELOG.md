@@ -8,6 +8,19 @@ and this project adheres to
 
 ## Unreleased
 
+## 2.6.0 - 2023-04-25
+
+### Added
+
+- Added the following properties to `mfa_device`
+
+  | Property       | Type     |
+  | -------------- | -------- |
+  | `platform`     | `string` |
+  | `deviceType`   | `string` |
+  | `credentialId` | `string` |
+  | `profileName`  | `string` |
+
 ## 2.5.4 - 2023-04-18
 
 ### Updated
