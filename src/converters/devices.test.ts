@@ -1,15 +1,5 @@
 import { OktaFactor } from '../okta/types';
-import {
-  OktaIntegrationConfig,
-  StandardizedOktaUser,
-  StandardizedOktaUserGroup,
-} from '../types';
 import { createMFADeviceEntity } from './device';
-
-const config: OktaIntegrationConfig = {
-  oktaApiKey: '',
-  oktaOrgUrl: '',
-};
 
 describe('creating device entity', () => {
   test('with profile info', () => {
