@@ -24,7 +24,6 @@
     "test:ci": "yarn lint && yarn type-check && yarn test",
     "build": "tsc -p tsconfig.dist.json --declaration",
     "prepush": "yarn lint && yarn type-check && jest --changedSince main",
-    "postversion": "cp package.json ./dist/package.json",
     "prepack": "yarn build"
   },
   "dependencies": {
@@ -50,7 +49,7 @@
         "npm",
         {
           "setRcToken": false,
-          "publishFolder": "./dist"
+          "publishFolder": "."
         }
       ],
       "released"
