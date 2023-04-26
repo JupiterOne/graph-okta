@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { IntegrationLogger } from '@jupiterone/integration-sdk-core';
-import { OktaClient } from './types';
 import { OktaIntegrationConfig } from '../types';
 import { AttemptContext, retry } from '@lifeomic/attempt';
 
-const okta = require('@okta/okta-sdk-nodejs');
+import {
+  DefaultRequestExecutor,
+  Client as OktaClient,
+} from '@okta/okta-sdk-nodejs';
+export { OktaClient };
 
 const DEFAULT_MINIMUM_RATE_LIMIT_REMAINING = 5;
 
@@ -17,7 +20,7 @@ interface RequestExecutorWithEarlyRateLimitingOptions {
  * A custom Okta request executor that throttles requests when `x-rate-limit-remaining` response
  * headers fall below a provided threshold.
  */
-export class RequestExecutorWithEarlyRateLimiting extends okta.DefaultRequestExecutor {
+export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor {
   logger: IntegrationLogger;
   minimumRateLimitRemaining: number;
   requestAfter: number | undefined;
@@ -163,7 +166,7 @@ export default function createOktaClient(
     logger.trace('Okta client received response');
   });
 
-  return new okta.Client({
+  return new OktaClient({
     orgUrl: config.oktaOrgUrl,
     token: config.oktaApiKey,
     requestExecutor: defaultRequestExecutor,
@@ -171,5 +174,5 @@ export default function createOktaClient(
     //
     // See: https://github.com/okta/okta-sdk-nodejs#middleware
     cacheMiddleware: null,
-  }) as OktaClient;
+  });
 }
