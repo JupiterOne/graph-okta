@@ -10,6 +10,8 @@ and this project adheres to
 
 ## 2.6.1 - 2023-04-27
 
+### Added
+
 - Added `auto` package to help with builds, versioning and npm packaging.
 
 ## 2.6.0 - 2023-04-25
