@@ -1,9 +1,9 @@
-import { OktaFactor } from '../okta/types';
+import { UserFactor } from '@okta/okta-sdk-nodejs';
 import { createMFADeviceEntity } from './device';
 
 describe('creating device entity', () => {
   test('with profile info', () => {
-    const device: OktaFactor = {
+    const device = {
       id: 'id',
       created: '2019-04-22T21:43:53.000Z',
       lastUpdated: '2019-04-22T21:43:53.000Z',
@@ -18,7 +18,7 @@ describe('creating device entity', () => {
       provider: 'OKTA',
       status: 'ACTIVE',
       lastVerified: '2019-04-22T21:43:53.000Z',
-    };
+    } as unknown as UserFactor;
     expect(createMFADeviceEntity(device)).toMatchObject({
       _class: ['Key', 'AccessKey'],
       _key: 'id',

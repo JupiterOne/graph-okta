@@ -8,20 +8,16 @@ import {
 } from '@jupiterone/integration-sdk-core';
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import {
-  OktaRole,
-  OktaRoleAssignmentType,
-  OktaRoleStatus,
-} from '../okta/types';
 import { Entities, Relationships, Steps } from './constants';
+import { Role, RoleAssignmentType, RoleStatus } from '@okta/okta-sdk-nodejs';
 
-function generateRoleKey(role: OktaRole) {
+function generateRoleKey(role: Role) {
   // We don't have an easy to use key, so construct one of our own.  Finally, we
   // perform a replace to get rid of any spaces that came in on the label or type.
   return (Entities.ROLE._type + ':' + role.label).replace(/ /g, '');
 }
 
-function createRoleEntity(role: OktaRole) {
+function createRoleEntity(role: Role) {
   return createIntegrationEntity({
     entityData: {
       source: role,
@@ -35,7 +31,7 @@ function createRoleEntity(role: OktaRole) {
         displayName: role.label,
         roleType: role.type,
         status: role.status.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
-        active: role.status === OktaRoleStatus.ACTIVE,
+        active: role.status === RoleStatus.ACTIVE,
         superAdmin: role.type === 'SUPER_ADMIN',
         createdOn: parseTimePropertyValue(role.created)!,
         lastUpdatedOn: parseTimePropertyValue(role.lastUpdated)!,
@@ -63,7 +59,7 @@ export async function fetchRoles({
         }
 
         // Only create relationships if this is a direct USER assignment
-        if (role.assignmentType == OktaRoleAssignmentType.USER) {
+        if (role.assignmentType == RoleAssignmentType.USER) {
           // Users may have already been granted access to the same role via multiple different groups.
           // We need to catch these duplicates to prevent key collisions.
           const userToRoleRelationship = createDirectRelationship({

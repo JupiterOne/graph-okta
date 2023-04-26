@@ -1,4 +1,4 @@
-import { OktaUserGroup } from '../okta/types';
+import { Group } from '@okta/okta-sdk-nodejs';
 import {
   OktaIntegrationConfig,
   StandardizedOktaUser,
@@ -13,7 +13,7 @@ const config: OktaIntegrationConfig = {
 
 describe('creating group entity', () => {
   test('with APP_GROUP type', () => {
-    const group: OktaUserGroup = {
+    const group = ({
       id: 'id',
       created: '2019-04-22T21:43:53.000Z',
       lastUpdated: '2019-04-22T21:43:53.000Z',
@@ -24,7 +24,7 @@ describe('creating group entity', () => {
         description: 'description',
       },
       _links: '_links',
-    };
+    } as unknown) as Group;
     expect(createUserGroupEntity(config, group)).toEqual({
       _class: ['UserGroup'],
       _key: 'id',
@@ -62,7 +62,7 @@ describe('creating group entity', () => {
   });
 
   test('without APP_GROUP type', () => {
-    const group: OktaUserGroup = {
+    const group = ({
       id: 'id',
       created: '2019-04-22T21:43:53.000Z',
       lastUpdated: '2019-04-22T21:43:53.000Z',
@@ -73,7 +73,7 @@ describe('creating group entity', () => {
         description: 'description',
       },
       _links: '_links',
-    };
+    } as unknown) as Group;
     expect(createUserGroupEntity(config, group)).toEqual({
       _class: ['UserGroup'],
       _key: 'id',
