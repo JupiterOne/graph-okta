@@ -1,4 +1,4 @@
-import { OktaUser } from '../okta/types';
+import { User } from '@okta/okta-sdk-nodejs';
 import {
   OktaIntegrationConfig,
   StandardizedOktaFactor,
@@ -13,7 +13,7 @@ const config: OktaIntegrationConfig = {
 
 describe('creating user entity', () => {
   test('with received all optional data', () => {
-    const user: OktaUser = {
+    const user: User = ({
       id: 'id',
       status: 'status',
       created: '2019-04-22T21:43:53.000Z',
@@ -63,7 +63,7 @@ describe('creating user entity', () => {
           },
         ],
       },
-    };
+    } as unknown) as User;
     expect(createUserEntity(config, user)).toEqual({
       _class: ['User'],
       _key: 'id',
@@ -109,7 +109,7 @@ describe('creating user entity', () => {
   });
 
   test('with not received all optional data', () => {
-    const user: OktaUser = {
+    const user = ({
       id: 'id',
       status: 'status',
       created: '2019-04-22T21:43:53.000Z',
@@ -133,7 +133,7 @@ describe('creating user entity', () => {
         bitbucketUsername: 'bitbucketUsername',
         githubUsername: 'githubUsername',
       },
-    };
+    } as unknown) as User;
     expect(createUserEntity(config, user)).toEqual({
       _class: ['User'],
       _key: 'id',

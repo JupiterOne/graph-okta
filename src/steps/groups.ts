@@ -14,7 +14,6 @@ import {
   createGroupUserRelationship,
   createUserGroupEntity,
 } from '../converters/group';
-import { OktaUser } from '../okta/types';
 import { StandardizedOktaAccount, StandardizedOktaUserGroup } from '../types';
 import {
   DATA_ACCOUNT_ENTITY,
@@ -23,6 +22,7 @@ import {
   Relationships,
   Steps,
 } from './constants';
+import { User } from '@okta/okta-sdk-nodejs';
 
 export async function fetchGroups({
   instance,
@@ -102,7 +102,7 @@ async function buildGroupEntityToUserRelationships(
 
   async function createGroupUserRelationshipWithJob(
     groupEntity: Entity,
-    user: OktaUser,
+    user: User,
   ) {
     const groupId = groupEntity.id as string;
     const userEntity = userIdToUserEntityMap.get(user.id);
@@ -154,7 +154,7 @@ async function collectUsersForGroupEntities(
     groupEntities,
     async (groupEntity) => {
       const groupId = groupEntity.id as string;
-      const users: OktaUser[] = [];
+      const users: User[] = [];
 
       await apiClient.iterateUsersForGroup(groupId, async (user) => {
         users.push(user);

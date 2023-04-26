@@ -15,14 +15,14 @@ import {
  *
  * See https://developer.okta.com/docs/api/resources/groups#group-type
  */
-import { OktaUserGroup } from '../okta/types';
 import { Entities, Relationships } from '../steps/constants';
 import { OktaIntegrationConfig, StandardizedOktaUserGroup } from '../types';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
+import { Group } from '@okta/okta-sdk-nodejs';
 
 export function createUserGroupEntity(
   config: OktaIntegrationConfig,
-  data: OktaUserGroup,
+  data: Group,
 ): StandardizedOktaUserGroup {
   const {
     id,

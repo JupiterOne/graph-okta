@@ -1,8 +1,6 @@
-import { OktaResource } from '.';
+type OktaPasswordCredential = string;
 
-export type OktaPasswordCredential = string;
-
-export interface OktaEmailCredential {
+interface OktaEmailCredential {
   value: string;
   // TODO: Change these to Enums when the Okta documentation
   // actually lists the values...
@@ -10,51 +8,13 @@ export interface OktaEmailCredential {
   type: string;
 }
 
-export interface OktaRecoveryQuestionCredential {
+interface OktaRecoveryQuestionCredential {
   question: string;
 }
 
-export interface OktaAuthenticationIntegration {
+interface OktaAuthenticationIntegration {
   type: string;
   name: string;
-}
-
-export interface OktaUser extends OktaResource {
-  status: string;
-  created: string;
-  activated: string;
-  statusChanged?: string;
-  lastLogin?: string;
-  lastUpdated: string;
-  passwordChanged?: string;
-  profile: OktaUserProfile;
-  credentials?: OktaUserCredentials;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _links?: any;
-}
-
-export interface OktaUserProfile {
-  firstName: string;
-  lastName: string;
-  displayName?: string;
-  mobilePhone: string;
-  secondEmail: string;
-  login: string;
-  tenant: string[];
-  email: string;
-  location?: string;
-  title?: string;
-  userType?: string;
-  employeeType?: string;
-  employeeNumber?: string;
-  manager?: string;
-  managerId?: string;
-  generic?: boolean;
-  bitbucketUsername?: string;
-  githubUsername?: string;
-  hireDate?: string;
-  terminationDate?: string;
-  countryCode?: string;
 }
 
 export interface OktaUserCredentials {

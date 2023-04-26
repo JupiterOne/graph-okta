@@ -10,11 +10,6 @@ import {
   RelationshipDirection,
 } from '@jupiterone/integration-sdk-core';
 
-import {
-  OktaApplication,
-  OktaApplicationGroup,
-  OktaApplicationUser,
-} from '../okta/types';
 import { Entities, Relationships } from '../steps/constants';
 import { OktaIntegrationConfig, StandardizedOktaApplication } from '../types';
 import buildAppShortName from '../util/buildAppShortName';
@@ -25,15 +20,35 @@ import {
   getVendorName,
   isMultiInstanceApp,
 } from '../util/knownVendors';
+import {
+  Application,
+  ApplicationGroupAssignment,
+  AppUser,
+} from '@okta/okta-sdk-nodejs';
 interface IntegrationInstance {
   id: string;
   name: string;
   config: object;
 }
 
+interface _Application extends Application {
+  settings: Application['settings'] & {
+    app: Application['settings']['app'] & {
+      awsEnvironmentType?: string;
+      identityProviderArn?: string;
+      groupFilter?: string;
+      roleValuePattern?: string;
+      joinAllRoles?: boolean;
+      sessionDuration?: number;
+      githubOrg?: string;
+      domain?: string;
+    };
+  };
+}
+
 export function createApplicationEntity(
   instance: IntegrationInstance,
-  data: OktaApplication,
+  data: _Application,
 ): StandardizedOktaApplication {
   const webLink = url.resolve(
     getOktaAccountAdminUrl(instance.config as OktaIntegrationConfig),
@@ -56,7 +71,7 @@ export function createApplicationEntity(
   const oktaAccountInfo = getOktaAccountInfo(instance);
   const appShortName = buildAppShortName(oktaAccountInfo, data.name);
 
-  const source = { ...data };
+  const source = { ...data, credentials: undefined };
   delete source.credentials; //some OAuth config options stored here
 
   const entity = createIntegrationEntity({
@@ -120,9 +135,16 @@ export function createApplicationEntity(
   return entity;
 }
 
+interface _ApplicationGroupAssignment extends ApplicationGroupAssignment {
+  profile: ApplicationGroupAssignment['profile'] & {
+    role?: string;
+    samlRoles?: string;
+  };
+}
+
 export function createApplicationGroupRelationships(
   application: StandardizedOktaApplication,
-  group: OktaApplicationGroup,
+  group: _ApplicationGroupAssignment,
   onInvalidRoleFormat: (invalidRole: any) => void,
 ): Relationship[] {
   const relationships: Relationship[] = [];
@@ -168,9 +190,17 @@ export function createApplicationGroupRelationships(
   return relationships;
 }
 
+interface _AppUser extends AppUser {
+  profile: AppUser['profile'] & {
+    email?: string;
+    role?: any;
+    samlRoles?: string;
+  };
+}
+
 export function createApplicationUserRelationships(
   application: StandardizedOktaApplication,
-  user: OktaApplicationUser,
+  user: _AppUser,
   onInvalidRoleFormat: (invalidRole: any) => void,
 ): Relationship[] {
   const relationships: Relationship[] = [];
@@ -211,7 +241,7 @@ export function createApplicationUserRelationships(
 
 function convertAWSRolesToRelationships(
   application: StandardizedOktaApplication,
-  oktaPrincipal: OktaApplicationUser | OktaApplicationGroup,
+  oktaPrincipal: _AppUser | _ApplicationGroupAssignment,
   relationshipType: string,
   onInvalidRoleFormat: (invalidRole: any) => void,
 ): MappedRelationship[] {

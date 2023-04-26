@@ -67,20 +67,22 @@ test('should delay next request after hitting minimumRateLimitRemaining', async 
 
   // show that requestAfter was set by the above API call. It should not be undefined.
   // requestAfter is expected to be set during any API call by the 'x-rate-limit-reset' header
-  expect(oktaClient.requestExecutor.requestAfter).toEqual(expect.any(Number));
-  const requestAfter = oktaClient.requestExecutor.requestAfter!;
+  expect((oktaClient as any).requestExecutor.requestAfter).toEqual(
+    expect.any(Number),
+  );
+  const requestAfter = (oktaClient as any).requestExecutor.requestAfter!;
 
   // mock Date.now() to return 1 second earlier than `requestAfter`,
   // so that requestAfter is > Date.now()
   // that's what getThrottleActivated should be checking
   const delayMs = 1000;
   jest.spyOn(Date, 'now').mockReturnValueOnce(requestAfter - delayMs);
-  expect(oktaClient.requestExecutor.getThrottleActivated()).toBe(true);
+  expect((oktaClient as any).requestExecutor.getThrottleActivated()).toBe(true);
 
   // now manually update the requestAfter time to 1 second after real-time now, and call the API again
   // it should return after a 1 second delay
   const realTimeBeforeCall = Date.now();
-  oktaClient.requestExecutor.delayRequests(delayMs); //sets requestAfter to now + delayms
+  (oktaClient as any).requestExecutor.delayRequests(delayMs); //sets requestAfter to now + delayms
   await oktaClient.listUsers().each(jest.fn());
   const realTimeAfterCall = Date.now();
   // this proves that if requestAfter > Date.now(), the API call is delayed by the difference

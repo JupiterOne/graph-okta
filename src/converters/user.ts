@@ -7,7 +7,6 @@ import {
   Relationship,
 } from '@jupiterone/integration-sdk-core';
 
-import { OktaUser, OktaUserCredentials } from '../okta/types';
 import { Entities, Relationships } from '../steps/constants';
 import {
   OktaIntegrationConfig,
@@ -15,10 +14,24 @@ import {
   StandardizedOktaUser,
 } from '../types';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
+import { User } from '@okta/okta-sdk-nodejs';
+
+interface _User extends User {
+  profile: User['profile'] & {
+    hireDate?: string;
+    terminationDate?: string;
+  };
+  credentials: User['credentials'] & {
+    emails?: {
+      status: string;
+      value: string;
+    }[];
+  };
+}
 
 export function createUserEntity(
   config: OktaIntegrationConfig,
-  data: OktaUser,
+  data: _User,
 ): StandardizedOktaUser {
   const {
     id,
@@ -40,6 +53,7 @@ export function createUserEntity(
 
   const source = {
     ...data,
+    credentials: undefined,
   };
   delete source.credentials;
 
@@ -97,7 +111,7 @@ export function createUserMfaDeviceRelationship(
   };
 }
 
-function convertCredentialEmails(credentials?: OktaUserCredentials) {
+function convertCredentialEmails(credentials?: _User['credentials']) {
   if (credentials && credentials.emails) {
     const verifiedEmails: string[] = [];
     const unverifiedEmails: string[] = [];

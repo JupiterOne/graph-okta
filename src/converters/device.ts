@@ -3,12 +3,22 @@ import {
   parseTimePropertyValue,
 } from '@jupiterone/integration-sdk-core';
 
-import { OktaFactor } from '../okta/types';
 import { Entities } from '../steps/constants';
 import { StandardizedOktaFactor } from '../types';
+import { UserFactor } from '@okta/okta-sdk-nodejs';
+
+interface _UserFactor extends UserFactor {
+  vendorName?: string;
+  device?: string;
+  deviceType?: string;
+  lastVerified?: string;
+  profile?: {
+    authenticatorName?: string;
+  };
+}
 
 export function createMFADeviceEntity(
-  data: OktaFactor,
+  data: _UserFactor,
 ): StandardizedOktaFactor {
   const entityProperties: StandardizedOktaFactor = {
     _key: data.id,

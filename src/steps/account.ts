@@ -20,7 +20,7 @@ import {
   Steps,
 } from './constants';
 import { createAPIClient } from '../client';
-import { OrgOktaSupportSettingsObj } from '../okta/types';
+import { OrgOktaSupportSettingsObj } from '@okta/okta-sdk-nodejs';
 
 export async function fetchAccountDetails({
   jobState,
