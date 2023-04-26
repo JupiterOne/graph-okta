@@ -32,7 +32,7 @@ export async function fetchUsers({
       createUserEntity(instance.config, user),
     );
 
-    userIdToUserEntityMap.set(user.id, userEntity);
+    userIdToUserEntityMap.set(user.id!, userEntity);
 
     await jobState.addRelationship(
       createDirectRelationship({

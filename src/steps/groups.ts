@@ -105,7 +105,7 @@ async function buildGroupEntityToUserRelationships(
     user: User,
   ) {
     const groupId = groupEntity.id as string;
-    const userEntity = userIdToUserEntityMap.get(user.id);
+    const userEntity = userIdToUserEntityMap.get(user.id!);
 
     if (userEntity) {
       await jobState.addRelationship(

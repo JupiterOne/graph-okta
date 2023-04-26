@@ -5,6 +5,7 @@ import {
   createDirectRelationship,
   createIntegrationEntity,
   MappedRelationship,
+  parseTimePropertyValue,
   Relationship,
   RelationshipClass,
   RelationshipDirection,
@@ -31,28 +32,13 @@ interface IntegrationInstance {
   config: object;
 }
 
-interface _Application extends Application {
-  settings: Application['settings'] & {
-    app: Application['settings']['app'] & {
-      awsEnvironmentType?: string;
-      identityProviderArn?: string;
-      groupFilter?: string;
-      roleValuePattern?: string;
-      joinAllRoles?: boolean;
-      sessionDuration?: number;
-      githubOrg?: string;
-      domain?: string;
-    };
-  };
-}
-
 export function createApplicationEntity(
   instance: IntegrationInstance,
-  data: _Application,
+  data: Application,
 ): StandardizedOktaApplication {
   const webLink = url.resolve(
     getOktaAccountAdminUrl(instance.config as OktaIntegrationConfig),
-    `/admin/app/${data.name}/instance/${data.id}`,
+    `/admin/app/${(data as any).name}/instance/${data.id}`,
   );
 
   let imageUrl;
@@ -62,14 +48,14 @@ export function createApplicationEntity(
     imageUrl = lodash.flatten([data._links.logo])[0].href;
   }
 
-  if (data._links?.appLinks) {
-    const links = lodash.flatten([data._links.appLinks]);
+  if ((data._links as any)?.appLinks) {
+    const links = lodash.flatten([(data._links as any)?.appLinks]);
     const link = links.find((l) => l.name === 'login') || links[0];
     loginUrl = link && link.href;
   }
 
   const oktaAccountInfo = getOktaAccountInfo(instance);
-  const appShortName = buildAppShortName(oktaAccountInfo, data.name);
+  const appShortName = buildAppShortName(oktaAccountInfo, (data as any).name);
 
   const source = { ...data, credentials: undefined };
   delete source.credentials; //some OAuth config options stored here
@@ -78,18 +64,18 @@ export function createApplicationEntity(
     entityData: {
       source,
       assign: {
-        _key: data.id,
+        _key: data.id!,
         _type: Entities.APPLICATION._type,
         _class: Entities.APPLICATION._class,
-        displayName: data.label || data.name || data.id,
+        displayName: data.label || (data as any).name || data.id,
         id: data.id,
-        name: data.name || data.label,
+        name: (data as any).name || data.label,
         shortName: appShortName,
         label: data.label,
-        status: data.status.toLowerCase(),
+        status: data.status?.toLowerCase(),
         active: data.status === 'ACTIVE',
-        lastUpdated: data.lastUpdated,
-        created: data.created,
+        lastUpdated: parseTimePropertyValue(data.lastUpdated),
+        created: parseTimePropertyValue(data.created),
         features: data.features,
         signOnMode: data.signOnMode,
         appVendorName: getVendorName(appShortName),
@@ -103,7 +89,7 @@ export function createApplicationEntity(
     },
   }) as StandardizedOktaApplication;
 
-  const appSettings = data.settings && data.settings.app;
+  const appSettings = (data as any).settings?.app;
   if (appSettings) {
     if (appSettings.awsEnvironmentType === 'aws.amazon') {
       if (appSettings.identityProviderArn) {
@@ -135,23 +121,16 @@ export function createApplicationEntity(
   return entity;
 }
 
-interface _ApplicationGroupAssignment extends ApplicationGroupAssignment {
-  profile: ApplicationGroupAssignment['profile'] & {
-    role?: string;
-    samlRoles?: string;
-  };
-}
-
 export function createApplicationGroupRelationships(
   application: StandardizedOktaApplication,
-  group: _ApplicationGroupAssignment,
+  group: ApplicationGroupAssignment,
   onInvalidRoleFormat: (invalidRole: any) => void,
 ): Relationship[] {
   const relationships: Relationship[] = [];
 
   const relationship: Relationship = createDirectRelationship({
     _class: Relationships.GROUP_ASSIGNED_APPLICATION._class,
-    fromKey: group.id,
+    fromKey: group.id!,
     // Actually okta_user_group or okta_app_user_group.
     // See `createUserGroupEntity`.
     fromType: 'okta_group',
@@ -190,36 +169,28 @@ export function createApplicationGroupRelationships(
   return relationships;
 }
 
-interface _AppUser extends AppUser {
-  profile: AppUser['profile'] & {
-    email?: string;
-    role?: any;
-    samlRoles?: string;
-  };
-}
-
 export function createApplicationUserRelationships(
   application: StandardizedOktaApplication,
-  user: _AppUser,
+  user: AppUser,
   onInvalidRoleFormat: (invalidRole: any) => void,
 ): Relationship[] {
   const relationships: Relationship[] = [];
 
   const relationship: Relationship = createDirectRelationship({
     _class: RelationshipClass.ASSIGNED,
-    fromKey: user.id,
+    fromKey: user.id!,
     fromType: Entities.USER._type,
     toKey: application._key,
     toType: Entities.APPLICATION._type,
     properties: {
       applicationId: application.id,
       userId: user.id,
-      userEmail: user.profile.email,
+      userEmail: user.profile?.email,
       // Array property not supported on the edge in Neptune
-      roles: user.profile.samlRoles
-        ? JSON.stringify(user.profile.samlRoles)
+      roles: user.profile?.samlRoles
+        ? JSON.stringify(user.profile?.samlRoles)
         : undefined,
-      role: stringifyIfArray(user.profile.role),
+      role: stringifyIfArray(user.profile?.role),
     },
   });
 
@@ -241,7 +212,7 @@ export function createApplicationUserRelationships(
 
 function convertAWSRolesToRelationships(
   application: StandardizedOktaApplication,
-  oktaPrincipal: _AppUser | _ApplicationGroupAssignment,
+  oktaPrincipal: AppUser | ApplicationGroupAssignment,
   relationshipType: string,
   onInvalidRoleFormat: (invalidRole: any) => void,
 ): MappedRelationship[] {
@@ -255,7 +226,7 @@ function convertAWSRolesToRelationships(
       }
 
       const relationship = mapAWSRoleAssignment({
-        sourceKey: oktaPrincipal.id,
+        sourceKey: oktaPrincipal.id!,
         role,
         relationshipType,
         awsAccountId: application.awsAccountId,

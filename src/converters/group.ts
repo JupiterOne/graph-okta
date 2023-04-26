@@ -31,7 +31,7 @@ export function createUserGroupEntity(
     lastMembershipUpdated,
     objectClass,
     type,
-    profile: { name: profileName, description: profileDescription },
+    profile: { name: profileName, description: profileDescription } = {},
   } = data;
 
   const webLink = url.resolve(
@@ -48,7 +48,7 @@ export function createUserGroupEntity(
     entityData: {
       source: data,
       assign: {
-        _key: data.id,
+        _key: data.id!,
         _type: entityType,
         _class: 'UserGroup',
         id,

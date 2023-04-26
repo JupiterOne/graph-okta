@@ -9,7 +9,7 @@ import {
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
 import { Entities, Relationships, Steps } from './constants';
-import { Role, RoleAssignmentType, RoleStatus } from '@okta/okta-sdk-nodejs';
+import { Role } from '@okta/okta-sdk-nodejs';
 
 function generateRoleKey(role: Role) {
   // We don't have an easy to use key, so construct one of our own.  Finally, we
@@ -30,8 +30,8 @@ function createRoleEntity(role: Role) {
         name: role.label,
         displayName: role.label,
         roleType: role.type,
-        status: role.status.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
-        active: role.status === RoleStatus.ACTIVE,
+        status: role.status?.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
+        active: role.status === 'ACTIVE',
         superAdmin: role.type === 'SUPER_ADMIN',
         createdOn: parseTimePropertyValue(role.created)!,
         lastUpdatedOn: parseTimePropertyValue(role.lastUpdated)!,
@@ -59,7 +59,7 @@ export async function fetchRoles({
         }
 
         // Only create relationships if this is a direct USER assignment
-        if (role.assignmentType == RoleAssignmentType.USER) {
+        if (role.assignmentType == 'USER') {
           // Users may have already been granted access to the same role via multiple different groups.
           // We need to catch these duplicates to prevent key collisions.
           const userToRoleRelationship = createDirectRelationship({

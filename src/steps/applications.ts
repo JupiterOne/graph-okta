@@ -44,7 +44,7 @@ export async function fetchApplications({
     const appId = app.id;
 
     //get the groups that are assigned to this app
-    await apiClient.iterateGroupsForApp(appId, async (group) => {
+    await apiClient.iterateGroupsForApp(appId!, async (group) => {
       const groupEntity = await jobState.findEntity(group.id);
 
       if (groupEntity) {
@@ -85,14 +85,14 @@ export async function fetchApplications({
         }
       } else {
         logger.warn(
-          { appId: app.id, appName: app.name, groupId: group.id },
+          { appId: app.id, appName: (app as any).name, groupId: group.id },
           '[SKIP] Group not found in job state, could not build relationship to application',
         );
       }
     });
 
     //get the individual users that are assigned to this app (ie. not assigned as part of group)
-    await apiClient.iterateUsersForApp(appId, async (user) => {
+    await apiClient.iterateUsersForApp(appId!, async (user) => {
       const userEntity = await jobState.findEntity(user.id);
 
       if (userEntity) {
@@ -115,7 +115,7 @@ export async function fetchApplications({
         }
       } else {
         logger.warn(
-          { appId: app.id, appName: app.name, userId: user.id },
+          { appId: app.id, appName: (app as any).name, userId: user.id },
           '[SKIP] User not found in job state, could not build relationship to application',
         );
       }

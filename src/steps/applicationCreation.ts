@@ -17,8 +17,8 @@ export async function buildUserCreatedApplication({
   const apiClient = createAPIClient(instance.config, logger);
 
   await apiClient.iterateAppCreatedLogs(async (log) => {
-    const createdBy = await jobState.findEntity(log.actor.id);
-    const createdApp = await jobState.findEntity(log.target[0].id);
+    const createdBy = await jobState.findEntity(log.actor?.id);
+    const createdApp = await jobState.findEntity(log.target?.[0].id);
 
     // Logs will contain all apps in the last 90 days, even if we've deleted them, so check before
     // trying to create the relationship.

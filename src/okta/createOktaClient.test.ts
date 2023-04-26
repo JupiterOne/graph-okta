@@ -7,7 +7,7 @@ import { OktaIntegrationConfig } from '../types';
 
 const config: OktaIntegrationConfig = {
   oktaApiKey: process.env.OKTA_API_KEY || 'fake-api-key',
-  oktaOrgUrl: 'https://dev-857255-admin.okta.com/',
+  oktaOrgUrl: 'https://dev-857255-admin.okta.com',
 };
 
 const logger = createMockIntegrationLogger();
@@ -37,7 +37,7 @@ test('should log when minimum x-rate-limit-remaining header reached', async () =
   });
 
   // call response.each in order to execute API request
-  await oktaClient.listUsers().each(jest.fn());
+  await (await oktaClient.userApi.listUsers()).each(jest.fn());
 
   expect(loggerInfoSpy).toHaveBeenCalledTimes(1);
   expect(loggerInfoSpy).toHaveBeenCalledWith(
@@ -54,6 +54,7 @@ test('should delay next request after hitting minimumRateLimitRemaining', async 
   recording = setupOktaRecording({
     directory: __dirname,
     name: 'delayNextApiRequest',
+    options: { recordFailedRequests: true },
   });
 
   // this particular endpoint has a limit of 600 API requests. We throttle after 1 call.
@@ -63,7 +64,7 @@ test('should delay next request after hitting minimumRateLimitRemaining', async 
   });
 
   // call response.each in order to execute API request one time
-  await oktaClient.listUsers().each(jest.fn());
+  await (await oktaClient.userApi.listUsers()).each(jest.fn());
 
   // show that requestAfter was set by the above API call. It should not be undefined.
   // requestAfter is expected to be set during any API call by the 'x-rate-limit-reset' header
@@ -83,7 +84,7 @@ test('should delay next request after hitting minimumRateLimitRemaining', async 
   // it should return after a 1 second delay
   const realTimeBeforeCall = Date.now();
   (oktaClient as any).requestExecutor.delayRequests(delayMs); //sets requestAfter to now + delayms
-  await oktaClient.listUsers().each(jest.fn());
+  await (await oktaClient.userApi.listUsers()).each(jest.fn());
   const realTimeAfterCall = Date.now();
   // this proves that if requestAfter > Date.now(), the API call is delayed by the difference
   expect(realTimeAfterCall - realTimeBeforeCall).toBeGreaterThanOrEqual(

@@ -31,13 +31,13 @@ export async function fetchRules({
         entityData: {
           source: rule,
           assign: {
-            _key: rule.id,
+            _key: rule.id!,
             _type: Entities.RULE._type,
             _class: Entities.RULE._class,
             id: rule.id,
             name: rule.name,
             ruleType: rule.type, //example: 'group_rule', 'policy_rule'
-            status: rule.status.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
+            status: rule.status?.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
             created: parseTimePropertyValue(rule.created)!,
             createdOn: parseTimePropertyValue(rule.created)!,
             lastUpdated: parseTimePropertyValue(rule.lastUpdated)!,
@@ -57,7 +57,7 @@ export async function fetchRules({
       }),
     );
 
-    if (rule.actions && rule.actions.assignUserToGroups) {
+    if (rule.actions?.assignUserToGroups?.groupIds) {
       for (const groupId of rule.actions.assignUserToGroups.groupIds) {
         const groupEntity = await jobState.findEntity(groupId);
 

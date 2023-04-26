@@ -31,7 +31,7 @@ interface _User extends User {
 
 export function createUserEntity(
   config: OktaIntegrationConfig,
-  data: _User,
+  data: User,
 ): StandardizedOktaUser {
   const {
     id,
@@ -68,11 +68,11 @@ export function createUserEntity(
         _type: Entities.USER._type,
         id,
         webLink,
-        displayName: profile.login,
-        name: `${profile.firstName} ${profile.lastName}`,
-        username: profile.login.split('@')[0],
-        email: profile.email.toLowerCase(),
-        status: status.toLowerCase(),
+        displayName: profile?.login,
+        name: `${profile?.firstName} ${profile?.lastName}`,
+        username: profile?.login?.split('@')[0],
+        email: profile?.email?.toLowerCase(),
+        status: status?.toLowerCase(),
         active: status === 'ACTIVE',
         created: parseTimePropertyValue(created)!,
         createdOn: parseTimePropertyValue(created)!,
@@ -87,9 +87,11 @@ export function createUserEntity(
         passwordChanged: parseTimePropertyValue(passwordChanged),
         passwordChangedOn: parseTimePropertyValue(passwordChanged),
         memberOfGroupId: undefined,
-        hiredOn: parseTimePropertyValue(profile.hireDate),
-        terminatedOn: parseTimePropertyValue(profile.terminationDate),
-        countryCode: profile.countryCode,
+        hiredOn: parseTimePropertyValue(profile?.hireDate as string),
+        terminatedOn: parseTimePropertyValue(
+          profile?.terminationDate as string,
+        ),
+        countryCode: profile?.countryCode,
       },
     },
   }) as StandardizedOktaUser;
