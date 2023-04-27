@@ -1,3 +1,17 @@
+# v2.6.2 (Thu Apr 27 2023)
+
+#### 🐛 Bug Fix
+
+- INT-7814 - Adding auto versioning [#225](https://github.com/JupiterOne/graph-okta/pull/225) ([@jroblesx](https://github.com/jroblesx))
+- Release v2.6.0 [#224](https://github.com/JupiterOne/graph-okta/pull/224) ([@austinkelleher](https://github.com/austinkelleher))
+
+#### Authors: 2
+
+- Austin Kelleher ([@austinkelleher](https://github.com/austinkelleher))
+- Jean R. Robles G. ([@jroblesx](https://github.com/jroblesx))
+
+---
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
