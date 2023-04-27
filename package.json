@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@okta/okta-sdk-nodejs": "^6.4.0",
+    "auto": "^10.46.0",
     "lodash.startcase": "^4.4.0",
     "p-map": "^4",
     "promise-retry": "^1.1.1",
@@ -41,5 +42,21 @@
     "@jupiterone/integration-sdk-dev-tools": "^8.33.0",
     "@jupiterone/integration-sdk-testing": "^8.33.0",
     "@types/uuid": "^8.3.4"
+  },
+  "auto": {
+    "plugins": [
+      [
+        "npm",
+        {
+          "setRcToken": false,
+          "publishFolder": "."
+        }
+      ],
+      "released"
+    ],
+    "onlyPublishWithReleaseLabel": true,
+    "shipit": {
+      "prerelease": false
+    }
   }
 }
