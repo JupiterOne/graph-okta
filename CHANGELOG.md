@@ -1,3 +1,16 @@
+# v2.6.3 (Fri Apr 28 2023)
+
+#### 🐛 Bug Fix
+
+- INT-7418 Adding integration deployment workflow [#227](https://github.com/JupiterOne/graph-okta/pull/227) ([@jroblesx](https://github.com/jroblesx))
+- INT-7814 - Adding auto versioning [#225](https://github.com/JupiterOne/graph-okta/pull/225) ([@jroblesx](https://github.com/jroblesx))
+
+#### Authors: 1
+
+- Jean R. Robles G. ([@jroblesx](https://github.com/jroblesx))
+
+---
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
