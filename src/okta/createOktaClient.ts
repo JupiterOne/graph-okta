@@ -166,12 +166,13 @@ export function shouldThrottleNextRequest(params: {
   rateLimitLimit: number | undefined;
   rateLimitRemaining: number | undefined;
 }): boolean {
+  const RATE_LIMIT_THRESHOLD = 0.5;
   const { rateLimitLimit, rateLimitRemaining } = params;
   if (rateLimitLimit === undefined || rateLimitRemaining === undefined)
     return false;
 
   const rateLimitConsumed = rateLimitLimit - rateLimitRemaining;
-  return rateLimitConsumed / rateLimitLimit > 0.5;
+  return rateLimitConsumed / rateLimitLimit > RATE_LIMIT_THRESHOLD;
 }
 
 function sleep(ms: number) {
