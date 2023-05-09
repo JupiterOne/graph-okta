@@ -4,126 +4,87 @@ import { IntegrationLogger } from '@jupiterone/integration-sdk-core';
 import { OktaClient } from './types';
 import { OktaIntegrationConfig } from '../types';
 import { AttemptContext, retry } from '@lifeomic/attempt';
+import { Headers, Response } from 'node-fetch';
 
-const okta = require('@okta/okta-sdk-nodejs');
-
-const DEFAULT_MINIMUM_RATE_LIMIT_REMAINING = 5;
-
-interface RequestExecutorWithEarlyRateLimitingOptions {
-  minimumRateLimitRemaining?: number;
-}
+import {
+  DefaultRequestExecutor,
+  Client,
+} from '@okta/okta-sdk-nodejs';
+import { RequestOptions } from '@okta/okta-sdk-nodejs/src/types/request-options';
 
 /**
  * A custom Okta request executor that throttles requests when `x-rate-limit-remaining` response
  * headers fall below a provided threshold.
  */
-export class RequestExecutorWithEarlyRateLimiting extends okta.DefaultRequestExecutor {
+export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor {
   logger: IntegrationLogger;
   minimumRateLimitRemaining: number;
   requestAfter: number | undefined;
 
-  constructor(
-    logger: IntegrationLogger,
-    options?: RequestExecutorWithEarlyRateLimitingOptions,
-  ) {
+  constructor(logger: IntegrationLogger) {
     super();
     this.logger = logger;
-    this.minimumRateLimitRemaining =
-      options?.minimumRateLimitRemaining ||
-      DEFAULT_MINIMUM_RATE_LIMIT_REMAINING;
   }
 
-  async fetch(request: any) {
-    const { logger } = this;
-    if (this.getThrottleActivated() && this.requestAfter) {
-      const now = Date.now();
-      const delayMs = this.requestAfter - now;
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-    const attemptFunction = () =>
-      super.fetch(request).then((response: any) => {
-        this.requestAfter = this.getRequestAfter(response);
-        return response;
-      });
-    return await retry(attemptFunction, {
-      maxAttempts: 3,
-      delay: 30_000, // 30 seconds to start
-      timeout: 180_000, // 3 min timeout. We need this in case Node hangs with ETIMEDOUT
-      factor: 2, //exponential backoff factor. with 30 sec start and 3 attempts, longest wait is 2 min
-      handleError(err: any, attemptContext: AttemptContext) {
-        /* retry will keep trying to the limits of retryOptions
-         * but it lets you intervene in this function
-         */
-        // don't keep trying if it's not going to get better
-        if (
-          err.retryable === false ||
-          err.status === 401 ||
-          err.status === 403 ||
-          err.status === 404
-        ) {
-          logger.warn(
-            { attemptContext, err },
-            `Hit an unrecoverable error when attempting fetch. Aborting.`,
-          );
-          attemptContext.abort();
-        } else {
-          logger.warn(
-            { attemptContext, err },
-            `Hit a possibly recoverable error when attempting fetch. Retrying in a moment.`,
-          );
-        }
-      },
-    });
-  }
-
-  getRateLimitReset(response: any) {
-    return response.headers.get('x-rate-limit-reset');
-  }
-
-  getRateLimitRemaining(response: any) {
-    return response.headers.get('x-rate-limit-remaining');
-  }
-
-  getRequestAfter(response: any) {
-    const rateLimitRemaining = this.getRateLimitRemaining(response);
-    if (rateLimitRemaining <= this.minimumRateLimitRemaining) {
-      const requestAfter =
-        new Date(
-          parseInt(this.getRateLimitReset(response), 10) * 1000,
-        ).getTime() + 1000;
+  async withRateLimiting(fn: () => Promise<Response>) {
+    const response = await fn();
+    const { rateLimitLimit, rateLimitRemaining } = parseRateLimitHeaders(
+      response.headers,
+    );
+    if (shouldThrottleNextRequest({ rateLimitLimit, rateLimitRemaining })) {
+      const timeToSleepInMs = this.getRetryDelayMs(response);
       this.logger.info(
-        {
-          minimumRateLimitRemaining: this.minimumRateLimitRemaining,
-          requestAfter,
-          url: response.url,
-        },
-        'Minimum `x-rate-limit-remaining` header reached. Temporarily throttling requests',
+        { rateLimitLimit, rateLimitRemaining, timeToSleepInMs },
+        'Exceeded 50% of rate limit. Sleeping until x-rate-limit-reset',
       );
-      return requestAfter;
+      await sleep(timeToSleepInMs);
     }
-    return undefined;
+    return response;
   }
 
-  delayRequests(delayMs: number) {
-    //used to force delays even without header feedback, mainly in testing
-    const now = Date.now();
-    this.requestAfter = now + delayMs;
-  }
-
-  getThrottleActivated() {
-    const now = Date.now();
-    return this.requestAfter && this.requestAfter > now;
+  async fetch(request: RequestOptions) {
+    const { logger } = this;
+    return await retry(
+      () => this.withRateLimiting(() => super.fetch(request)),
+      {
+        maxAttempts: 3,
+        delay: 30_000, // 30 seconds to start
+        timeout: 180_000, // 3 min timeout. We need this in case Node hangs with ETIMEDOUT
+        factor: 2, //exponential backoff factor. with 30 sec start and 3 attempts, longest wait is 2 min
+        handleError(err: any, attemptContext: AttemptContext) {
+          /* retry will keep trying to the limits of retryOptions
+           * but it lets you intervene in this function
+           */
+          // don't keep trying if it's not going to get better
+          if (
+            err.retryable === false ||
+            err.status === 401 ||
+            err.status === 403 ||
+            err.status === 404
+          ) {
+            logger.warn(
+              { attemptContext, err },
+              `Hit an unrecoverable error when attempting fetch. Aborting.`,
+            );
+            attemptContext.abort();
+          } else {
+            logger.warn(
+              { attemptContext, err },
+              `Hit a possibly recoverable error when attempting fetch. Retrying in a moment.`,
+            );
+          }
+        },
+      },
+    );
   }
 }
 
 export default function createOktaClient(
   logger: IntegrationLogger,
   config: OktaIntegrationConfig,
-  options?: RequestExecutorWithEarlyRateLimitingOptions,
 ): OktaClient {
   const defaultRequestExecutor = new RequestExecutorWithEarlyRateLimiting(
     logger,
-    options,
   );
 
   defaultRequestExecutor.on(
@@ -163,7 +124,7 @@ export default function createOktaClient(
     logger.trace('Okta client received response');
   });
 
-  return new okta.Client({
+  return new Client({
     orgUrl: config.oktaOrgUrl,
     token: config.oktaApiKey,
     requestExecutor: defaultRequestExecutor,
@@ -171,5 +132,49 @@ export default function createOktaClient(
     //
     // See: https://github.com/okta/okta-sdk-nodejs#middleware
     cacheMiddleware: null,
-  }) as OktaClient;
+  }) as unknown as OktaClient;
+}
+
+function parseRateLimitHeaders(
+  headers: Headers,
+): {
+  rateLimitLimit: number | undefined;
+  rateLimitRemaining: number | undefined;
+} {
+  const strRateLimitLimit = headers.get('x-rate-limit-limit');
+  const strRateLimitRemaining = headers.get('x-rate-limit-remaining');
+  return {
+    rateLimitLimit: strRateLimitLimit
+      ? parseInt(strRateLimitLimit, 10)
+      : undefined,
+    rateLimitRemaining: strRateLimitRemaining
+      ? parseInt(strRateLimitRemaining, 10)
+      : undefined,
+  };
+}
+
+/**
+ * Returns `true` if more than 50% of the limit has been consumed.
+ *
+ * We choose 50% here because Okta's UI allows users to easily set
+ * "warning notifications" at thresholds of 60%, 70%, 80%,90%, and 100%.
+ *
+ * Okta actually allows for custom thresholds between 30% and 90%, so we may
+ * need to make this value configurable in the future.
+ */
+export function shouldThrottleNextRequest(params: {
+  rateLimitLimit: number | undefined;
+  rateLimitRemaining: number | undefined;
+}): boolean {
+  const RATE_LIMIT_THRESHOLD = 0.5;
+  const { rateLimitLimit, rateLimitRemaining } = params;
+  if (rateLimitLimit === undefined || rateLimitRemaining === undefined)
+    return false;
+
+  const rateLimitConsumed = rateLimitLimit - rateLimitRemaining;
+  return rateLimitConsumed / rateLimitLimit > RATE_LIMIT_THRESHOLD;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
