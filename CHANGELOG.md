@@ -1,3 +1,15 @@
+# v2.6.6 (Wed May 10 2023)
+
+#### 🐛 Bug Fix
+
+- Unpin create-integration-deployment@v1.2.0 workflow [#230](https://github.com/JupiterOne/graph-okta/pull/230) ([@ndowmon](https://github.com/ndowmon))
+
+#### Authors: 1
+
+- Nick Dowmon ([@ndowmon](https://github.com/ndowmon))
+
+---
+
 # v2.6.5 (Wed May 10 2023)
 
 #### 🐛 Bug Fix
