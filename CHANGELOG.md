@@ -1,3 +1,17 @@
+# v2.6.5 (Wed May 10 2023)
+
+#### 🐛 Bug Fix
+
+- Simplify and improve rate limiting [#228](https://github.com/JupiterOne/graph-okta/pull/228) ([@ndowmon](https://github.com/ndowmon))
+- INT-7418 Adding integration deployment workflow [#227](https://github.com/JupiterOne/graph-okta/pull/227) ([@jroblesx](https://github.com/jroblesx))
+
+#### Authors: 2
+
+- Jean R. Robles G. ([@jroblesx](https://github.com/jroblesx))
+- Nick Dowmon ([@ndowmon](https://github.com/ndowmon))
+
+---
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
