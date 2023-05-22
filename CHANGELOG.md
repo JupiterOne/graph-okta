@@ -1,3 +1,20 @@
+# v2.7.0 (Mon May 22 2023)
+
+#### 🚀 Enhancement
+
+- Int 8408 Add Ingestion Sources [#233](https://github.com/JupiterOne/graph-okta/pull/233) ([@VDubber](https://github.com/VDubber))
+
+#### 🐛 Bug Fix
+
+- Update integration-deployment.yml [#232](https://github.com/JupiterOne/graph-okta/pull/232) ([@Nick-NCSU](https://github.com/Nick-NCSU))
+
+#### Authors: 2
+
+- Nick Thompson ([@Nick-NCSU](https://github.com/Nick-NCSU))
+- Samuel Poulton ([@VDubber](https://github.com/VDubber))
+
+---
+
 # v2.6.7 (Wed May 17 2023)
 
 #### 🐛 Bug Fix
