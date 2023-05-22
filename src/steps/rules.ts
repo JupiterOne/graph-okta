@@ -12,6 +12,7 @@ import { IntegrationConfig } from '../config';
 import {
   DATA_ACCOUNT_ENTITY,
   Entities,
+  IngestionSources,
   Relationships,
   Steps,
 } from './constants';
@@ -82,6 +83,7 @@ export async function fetchRules({
 export const ruleSteps: IntegrationStep<IntegrationConfig>[] = [
   {
     id: Steps.RULES,
+    ingestionSourceId: IngestionSources.RULES,
     name: 'Fetch Rules',
     entities: [Entities.RULE],
     relationships: [

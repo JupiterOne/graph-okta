@@ -8,7 +8,7 @@ import { IntegrationConfig } from '../config';
 import { createUserMfaDeviceRelationship } from '../converters';
 import { createMFADeviceEntity } from '../converters/device';
 import { StandardizedOktaUser } from '../types';
-import { Entities, Relationships, Steps } from './constants';
+import { Entities, IngestionSources, Relationships, Steps } from './constants';
 
 export async function fetchDevices({
   instance,
@@ -44,6 +44,7 @@ export async function fetchDevices({
 export const deviceSteps: IntegrationStep<IntegrationConfig>[] = [
   {
     id: Steps.MFA_DEVICES,
+    ingestionSourceId: IngestionSources.MFA_DEVICES,
     name: 'Fetch Devices',
     entities: [Entities.MFA_DEVICE],
     relationships: [Relationships.USER_ASSIGNED_MFA_DEVICE],
