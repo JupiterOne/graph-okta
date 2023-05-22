@@ -13,6 +13,7 @@ import {
   DATA_ACCOUNT_ENTITY,
   DATA_USER_ENTITIES_MAP,
   Entities,
+  IngestionSources,
   Relationships,
   Steps,
 } from './constants';
@@ -49,6 +50,7 @@ export async function fetchUsers({
 export const userSteps: IntegrationStep<IntegrationConfig>[] = [
   {
     id: Steps.USERS,
+    ingestionSourceId: IngestionSources.USERS,
     name: 'Fetch Users',
     entities: [Entities.USER],
     relationships: [Relationships.ACCOUNT_HAS_USER],

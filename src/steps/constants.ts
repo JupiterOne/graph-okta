@@ -20,6 +20,15 @@ export const Steps = {
   USER_GROUP_USERS_RELATIONSHIP: 'build-user-group-users-relationships',
 };
 
+export const IngestionSources = {
+  GROUPS: 'groups',
+  USERS: 'users',
+  APPLICATIONS: 'applications',
+  MFA_DEVICES: 'devices',
+  RULES: 'rules',
+  ROLES: 'roles',
+};
+
 export const Entities: Record<
   | 'ACCOUNT'
   | 'SERVICE'

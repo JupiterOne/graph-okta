@@ -17,6 +17,7 @@ import { StandardizedOktaAccount, StandardizedOktaApplication } from '../types';
 import {
   DATA_ACCOUNT_ENTITY,
   Entities,
+  IngestionSources,
   Relationships,
   Steps,
 } from './constants';
@@ -144,6 +145,7 @@ function createOnInvalidRoleFormatFunction(
 export const applicationSteps: IntegrationStep<IntegrationConfig>[] = [
   {
     id: Steps.APPLICATIONS,
+    ingestionSourceId: IngestionSources.APPLICATIONS,
     name: 'Fetch Applications',
     entities: [Entities.APPLICATION],
     relationships: [

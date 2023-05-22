@@ -3,9 +3,11 @@ import {
   IntegrationValidationError,
   IntegrationInstanceConfigFieldMap,
   IntegrationInstanceConfig,
+  IntegrationIngestionConfigFieldMap,
 } from '@jupiterone/integration-sdk-core';
 import { createAPIClient } from './client';
 import isValidOktaOrgUrl from './util/isValidOktaOrgUrl';
+import { IngestionSources } from './steps/constants';
 
 /**
  * A type describing the configuration fields required to execute the
@@ -67,3 +69,30 @@ export async function validateInvocation(
   const apiClient = createAPIClient(config, context.logger);
   await apiClient.verifyAuthentication();
 }
+
+export const ingestionConfig: IntegrationIngestionConfigFieldMap = {
+  [IngestionSources.APPLICATIONS]: {
+    title: 'Okta Apps',
+    description: 'Applications added to an organization',
+  },
+  [IngestionSources.GROUPS]: {
+    title: 'Okta User Groups',
+    description: 'Users added to Okta groups',
+  },
+  [IngestionSources.MFA_DEVICES]: {
+    title: 'Okta MFA Devices',
+    description: 'Okta multi-factor authentication devices assigned to users',
+  },
+  [IngestionSources.ROLES]: {
+    title: 'Okta User Roles',
+    description: 'Okta roles used to manage and control user access',
+  },
+  [IngestionSources.RULES]: {
+    title: 'Okta Group Rules',
+    description: 'Rules used to automate the assignment of users to groups',
+  },
+  [IngestionSources.USERS]: {
+    title: 'Okta Users',
+    description: 'Users with unique identities within the Okta system',
+  },
+};

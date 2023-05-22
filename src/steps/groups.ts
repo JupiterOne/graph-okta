@@ -20,6 +20,7 @@ import {
   DATA_ACCOUNT_ENTITY,
   DATA_USER_ENTITIES_MAP,
   Entities,
+  IngestionSources,
   Relationships,
   Steps,
 } from './constants';
@@ -209,6 +210,7 @@ async function batchIterateEntities({
 export const groupSteps: IntegrationStep<IntegrationConfig>[] = [
   {
     id: Steps.GROUPS,
+    ingestionSourceId: IngestionSources.GROUPS,
     name: 'Fetch Groups',
     entities: [Entities.USER_GROUP, Entities.APP_USER_GROUP],
     relationships: [
@@ -220,6 +222,7 @@ export const groupSteps: IntegrationStep<IntegrationConfig>[] = [
   },
   {
     id: Steps.APP_USER_GROUP_USERS_RELATIONSHIP,
+    ingestionSourceId: IngestionSources.GROUPS,
     name: 'Create app user group to user relationships',
     entities: [],
     relationships: [Relationships.APP_USER_GROUP_HAS_USER],

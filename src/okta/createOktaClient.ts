@@ -6,10 +6,7 @@ import { OktaIntegrationConfig } from '../types';
 import { AttemptContext, retry } from '@lifeomic/attempt';
 import { Headers, Response } from 'node-fetch';
 
-import {
-  DefaultRequestExecutor,
-  Client,
-} from '@okta/okta-sdk-nodejs';
+import { DefaultRequestExecutor, Client } from '@okta/okta-sdk-nodejs';
 import { RequestOptions } from '@okta/okta-sdk-nodejs/src/types/request-options';
 
 /**
@@ -124,7 +121,7 @@ export default function createOktaClient(
     logger.trace('Okta client received response');
   });
 
-  return new Client({
+  return (new Client({
     orgUrl: config.oktaOrgUrl,
     token: config.oktaApiKey,
     requestExecutor: defaultRequestExecutor,
@@ -132,7 +129,7 @@ export default function createOktaClient(
     //
     // See: https://github.com/okta/okta-sdk-nodejs#middleware
     cacheMiddleware: null,
-  }) as unknown as OktaClient;
+  }) as unknown) as OktaClient;
 }
 
 function parseRateLimitHeaders(

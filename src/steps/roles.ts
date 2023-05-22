@@ -13,7 +13,7 @@ import {
   OktaRoleAssignmentType,
   OktaRoleStatus,
 } from '../okta/types';
-import { Entities, Relationships, Steps } from './constants';
+import { Entities, IngestionSources, Relationships, Steps } from './constants';
 
 function generateRoleKey(role: OktaRole) {
   // We don't have an easy to use key, so construct one of our own.  Finally, we
@@ -110,6 +110,7 @@ export async function fetchRoles({
 export const roleSteps: IntegrationStep<IntegrationConfig>[] = [
   {
     id: Steps.ROLES,
+    ingestionSourceId: IngestionSources.ROLES,
     name: 'Fetch Roles',
     entities: [Entities.ROLE],
     relationships: [
