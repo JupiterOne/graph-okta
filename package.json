@@ -35,12 +35,12 @@
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
-    "@jupiterone/integration-sdk-core": "^8.33.0"
+    "@jupiterone/integration-sdk-core": "^8.41.0"
   },
   "devDependencies": {
-    "@jupiterone/integration-sdk-core": "^8.33.0",
-    "@jupiterone/integration-sdk-dev-tools": "^8.33.0",
-    "@jupiterone/integration-sdk-testing": "^8.33.0",
+    "@jupiterone/integration-sdk-core": "^8.41.0",
+    "@jupiterone/integration-sdk-dev-tools": "^8.41.0",
+    "@jupiterone/integration-sdk-testing": "^8.41.0",
     "@types/node-fetch": "^2.6.3",
     "@types/uuid": "^8.3.4"
   },
