@@ -1,3 +1,15 @@
+# v2.7.1 (Fri May 26 2023)
+
+#### 🐛 Bug Fix
+
+- Remove okta users data source [#234](https://github.com/JupiterOne/graph-okta/pull/234) ([@VDubber](https://github.com/VDubber))
+
+#### Authors: 1
+
+- Samuel Poulton ([@VDubber](https://github.com/VDubber))
+
+---
+
 # v2.7.0 (Mon May 22 2023)
 
 #### 🚀 Enhancement
