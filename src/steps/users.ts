@@ -13,7 +13,6 @@ import {
   DATA_ACCOUNT_ENTITY,
   DATA_USER_ENTITIES_MAP,
   Entities,
-  IngestionSources,
   Relationships,
   Steps,
 } from './constants';
