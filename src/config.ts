@@ -91,8 +91,4 @@ export const ingestionConfig: IntegrationIngestionConfigFieldMap = {
     title: 'Okta Group Rules',
     description: 'Rules used to automate the assignment of users to groups',
   },
-  [IngestionSources.USERS]: {
-    title: 'Okta Users',
-    description: 'Users with unique identities within the Okta system',
-  },
 };

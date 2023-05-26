@@ -22,7 +22,6 @@ export const Steps = {
 
 export const IngestionSources = {
   GROUPS: 'groups',
-  USERS: 'users',
   APPLICATIONS: 'applications',
   MFA_DEVICES: 'devices',
   RULES: 'rules',
