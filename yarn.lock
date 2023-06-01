@@ -6622,6 +6622,20 @@ ts-jest@^27.1.0:
     semver "7.x"
     yargs-parser "20.x"
 
+ts-jest@^27.1.5:
+  version "27.1.5"
+  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-27.1.5.tgz#0ddf1b163fbaae3d5b7504a1e65c914a95cff297"
+  integrity sha512-Xv6jBQPoBEvBq/5i2TeSG9tt/nqkbpcurrEG1b+2yfBrcJelOZF9Ml6dmyMh7bcW9JyFbRYpR5rxROSlBLTZHA==
+  dependencies:
+    bs-logger "0.x"
+    fast-json-stable-stringify "2.x"
+    jest-util "^27.0.0"
+    json5 "2.x"
+    lodash.memoize "4.x"
+    make-error "1.x"
+    semver "7.x"
+    yargs-parser "20.x"
+
 ts-node@^10.9.1:
   version "10.9.1"
   resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.9.1.tgz#e73de9102958af9e1f0b168a6ff320e25adcff4b"
