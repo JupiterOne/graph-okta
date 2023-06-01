@@ -12,6 +12,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "engines": {
+    "node": ">=18.0.0 <19.x"
+  },
   "scripts": {
     "start": "j1-integration collect",
     "graph": "j1-integration visualize",
@@ -24,25 +27,31 @@
     "test:ci": "yarn lint && yarn type-check && yarn test",
     "build": "tsc -p tsconfig.dist.json --declaration",
     "prepush": "yarn lint && yarn type-check && jest --changedSince main",
-    "prepack": "yarn build"
+    "prepack": "yarn build",
+    "postversion": "cp package.json ./dist/package.json"
   },
   "dependencies": {
     "@okta/okta-sdk-nodejs": "^6.4.0",
-    "auto": "^10.46.0",
     "lodash.startcase": "^4.4.0",
     "p-map": "^4",
     "promise-retry": "^1.1.1",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "@types/node": "^18"
   },
   "peerDependencies": {
-    "@jupiterone/integration-sdk-core": "^8.41.0"
+    "@jupiterone/integration-sdk-core": "^9.4.0"
   },
   "devDependencies": {
-    "@jupiterone/integration-sdk-core": "^8.41.0",
-    "@jupiterone/integration-sdk-dev-tools": "^8.41.0",
-    "@jupiterone/integration-sdk-testing": "^8.41.0",
+    "auto": "^10.46.0",
+    "@jupiterone/integration-sdk-core": "^9.4.0",
+    "@jupiterone/integration-sdk-dev-tools": "^9.4.0",
+    "@jupiterone/integration-sdk-testing": "^9.4.0",
     "@types/node-fetch": "^2.6.3",
-    "@types/uuid": "^8.3.4"
+    "@types/uuid": "^8.3.4",
+    "typescript": "^4.3.5",
+    "@typescript-eslint/eslint-plugin":"^4.29.3",
+    "@typescript-eslint/parser": "^4.29.3",
+    "ts-jest":"^27.1.5"
   },
   "auto": {
     "plugins": [
@@ -50,7 +59,7 @@
         "npm",
         {
           "setRcToken": false,
-          "publishFolder": "."
+          "publishFolder": "./dist"
         }
       ],
       "released"
