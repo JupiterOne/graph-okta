@@ -27,7 +27,8 @@
     "test:ci": "yarn lint && yarn type-check && yarn test",
     "build": "tsc -p tsconfig.dist.json --declaration",
     "prepush": "yarn lint && yarn type-check && jest --changedSince main",
-    "prepack": "yarn build"
+    "prepack": "yarn build",
+    "postversion": "cp package.json ./dist/package.json"
   },
   "dependencies": {
     "@okta/okta-sdk-nodejs": "^6.4.0",
