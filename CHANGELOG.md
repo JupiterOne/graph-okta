@@ -1,3 +1,16 @@
+# v3.0.0 (Mon Jun 05 2023)
+
+#### 💥 Breaking Change
+
+- more closely replicate gsuite build setup [#236](https://github.com/JupiterOne/graph-okta/pull/236) ([@mdaum](https://github.com/mdaum))
+- Use latest sdk node18 [#235](https://github.com/JupiterOne/graph-okta/pull/235) ([@mdaum](https://github.com/mdaum))
+
+#### Authors: 1
+
+- Maxwell Daum ([@mdaum](https://github.com/mdaum))
+
+---
+
 # v2.7.1 (Fri May 26 2023)
 
 #### 🐛 Bug Fix
