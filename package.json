@@ -4,10 +4,10 @@
   "description": "A JupiterOne Integration for https://www.okta.com",
   "license": "MPL-2.0",
   "repository": "https://github.com/jupiterone/graph-okta",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
   "files": [
-    "dist"
+    "src"
   ],
   "publishConfig": {
     "access": "public"
@@ -25,9 +25,8 @@
     "test": "jest",
     "test:env": "LOAD_ENV=1 yarn test",
     "test:ci": "yarn lint && yarn type-check && yarn test",
-    "build": "tsc -p tsconfig.dist.json --declaration",
+    "build": "tsc -p tsconfig.dist.json --declaration && cp README.md dist/README.md",
     "prepush": "yarn lint && yarn type-check && jest --changedSince main",
-    "prepack": "yarn build",
     "postversion": "cp package.json ./dist/package.json"
   },
   "dependencies": {
