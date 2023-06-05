@@ -1,6 +1,6 @@
 {
   "name": "@jupiterone/graph-okta",
-  "version": "2.7.1",
+  "version": "3.0.0",
   "description": "A JupiterOne Integration for https://www.okta.com",
   "license": "MPL-2.0",
   "repository": "https://github.com/jupiterone/graph-okta",
@@ -48,9 +48,9 @@
     "@types/node-fetch": "^2.6.3",
     "@types/uuid": "^8.3.4",
     "typescript": "^4.3.5",
-    "@typescript-eslint/eslint-plugin":"^4.29.3",
+    "@typescript-eslint/eslint-plugin": "^4.29.3",
     "@typescript-eslint/parser": "^4.29.3",
-    "ts-jest":"^27.1.5"
+    "ts-jest": "^27.1.5"
   },
   "auto": {
     "plugins": [
