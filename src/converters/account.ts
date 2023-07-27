@@ -4,8 +4,9 @@ import {
   RelationshipClass,
   parseTimePropertyValue,
 } from '@jupiterone/integration-sdk-core';
+import { OrgOktaSupportSettingsObj } from '@okta/okta-sdk-nodejs';
 
-import { OktaAccountInfo, OrgOktaSupportSettingsObj } from '../okta/types';
+import { OktaAccountInfo } from '../okta/types';
 import { Entities, Relationships } from '../steps/constants';
 import {
   OktaIntegrationConfig,
