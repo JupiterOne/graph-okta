@@ -25,10 +25,69 @@ import {
   getVendorName,
   isMultiInstanceApp,
 } from '../util/knownVendors';
+
 interface IntegrationInstance {
   id: string;
   name: string;
   config: object;
+}
+
+export function getDisplayName(data: OktaApplication): string {
+  return data.label || data.name || data.id;
+}
+
+export function getName(data: OktaApplication): string {
+  return data.name || data.label;
+}
+
+export function isActive(data: OktaApplication): boolean {
+  return data.status === 'ACTIVE';
+}
+
+export function isSAMLApp(data: OktaApplication): boolean {
+  return !!data.signOnMode && data.signOnMode.startsWith('SAML');
+}
+
+export function getEnvSpecificProps(data: OktaApplication) {
+  const appSettings = data.settings && data.settings.app;
+  if (appSettings) {
+    if (appSettings.awsEnvironmentType === 'aws.amazon') {
+      const awsProps: any = {};
+
+      if (appSettings.identityProviderArn) {
+        const awsAccountIdMatch = /^arn:aws:iam::([0-9]+):/.exec(
+          appSettings.identityProviderArn,
+        );
+        if (awsAccountIdMatch) {
+          awsProps.awsAccountId = awsAccountIdMatch[1];
+          awsProps.appAccountId = awsAccountIdMatch[1];
+        }
+      }
+
+      return {
+        ...awsProps,
+        awsIdentityProviderArn: appSettings.identityProviderArn,
+        awsEnvironmentType: appSettings.awsEnvironmentType,
+        awsGroupFilter: appSettings.groupFilter,
+        awsRoleValuePattern: appSettings.roleValuePattern,
+        awsJoinAllRoles: appSettings.joinAllRoles,
+        awsSessionDuration: appSettings.sessionDuration,
+      };
+    } else if (appSettings.githubOrg) {
+      return {
+        githubOrg: appSettings.githubOrg,
+        appAccountId: appSettings.githubOrg,
+      };
+    } else if (appSettings.domain) {
+      // Google Cloud Platform and G Suite apps use `domain` as the account identifier
+      return {
+        appDomain: appSettings.domain,
+        appAccountId: appSettings.domain,
+      };
+    }
+  }
+
+  return {};
 }
 
 export function createApplicationEntity(
@@ -66,13 +125,13 @@ export function createApplicationEntity(
         _key: data.id,
         _type: Entities.APPLICATION._type,
         _class: Entities.APPLICATION._class,
-        displayName: data.label || data.name || data.id,
+        displayName: getDisplayName(data),
         id: data.id,
-        name: data.name || data.label,
+        name: getName(data),
         shortName: appShortName,
         label: data.label,
         status: data.status.toLowerCase(),
-        active: data.status === 'ACTIVE',
+        active: isActive(data),
         lastUpdated: data.lastUpdated,
         created: data.created,
         features: data.features,
@@ -80,7 +139,7 @@ export function createApplicationEntity(
         appVendorName: getVendorName(appShortName),
         appAccountType: getAccountName(appShortName),
         isMultiInstanceApp: isMultiInstanceApp(appShortName),
-        isSAMLApp: !!data.signOnMode && data.signOnMode.startsWith('SAML'),
+        isSAMLApp: isSAMLApp(data),
         webLink,
         imageUrl,
         loginUrl,
@@ -88,36 +147,19 @@ export function createApplicationEntity(
     },
   }) as StandardizedOktaApplication;
 
-  const appSettings = data.settings && data.settings.app;
-  if (appSettings) {
-    if (appSettings.awsEnvironmentType === 'aws.amazon') {
-      if (appSettings.identityProviderArn) {
-        const awsAccountIdMatch = /^arn:aws:iam::([0-9]+):/.exec(
-          appSettings.identityProviderArn,
-        );
-        if (awsAccountIdMatch) {
-          entity.awsAccountId = awsAccountIdMatch[1];
-          entity.appAccountId = awsAccountIdMatch[1];
-        }
-      }
+  const environmentSpecificProps = getEnvSpecificProps(data);
 
-      entity.awsIdentityProviderArn = appSettings.identityProviderArn;
-      entity.awsEnvironmentType = appSettings.awsEnvironmentType;
-      entity.awsGroupFilter = appSettings.groupFilter;
-      entity.awsRoleValuePattern = appSettings.roleValuePattern;
-      entity.awsJoinAllRoles = appSettings.joinAllRoles;
-      entity.awsSessionDuration = appSettings.sessionDuration;
-    } else if (appSettings.githubOrg) {
-      entity.githubOrg = appSettings.githubOrg;
-      entity.appAccountId = appSettings.githubOrg;
-    } else if (appSettings.domain) {
-      // Google Cloud Platform and G Suite apps use `domain` as the account identifier
-      entity.appDomain = appSettings.domain;
-      entity.appAccountId = appSettings.domain;
-    }
-  }
+  return { ...entity, ...environmentSpecificProps };
+}
 
-  return entity;
+export function getRoles(group: OktaApplicationGroup): string | undefined {
+  return group.profile && group.profile.samlRoles
+    ? JSON.stringify(group.profile.samlRoles)
+    : undefined;
+}
+
+export function getRole(group: OktaApplicationGroup): string | undefined {
+  return stringifyIfArray(group.profile ? group.profile.role : undefined);
 }
 
 export function createApplicationGroupRelationships(
@@ -144,11 +186,8 @@ export function createApplicationGroupRelationships(
       applicationId: application.id,
       groupId: group.id,
       // Array property not supported on the edge in Neptune
-      roles:
-        group.profile && group.profile.samlRoles
-          ? JSON.stringify(group.profile.samlRoles)
-          : undefined,
-      role: stringifyIfArray(group.profile ? group.profile.role : undefined),
+      roles: getRoles(group),
+      role: getRole(group),
     },
   });
 
@@ -186,9 +225,7 @@ export function createApplicationUserRelationships(
       userId: user.id,
       userEmail: user.profile.email,
       // Array property not supported on the edge in Neptune
-      roles: user.profile.samlRoles
-        ? JSON.stringify(user.profile.samlRoles)
-        : undefined,
+      roles: getRoles(user),
       role: stringifyIfArray(user.profile.role),
     },
   });
@@ -209,7 +246,7 @@ export function createApplicationUserRelationships(
   return relationships;
 }
 
-function convertAWSRolesToRelationships(
+export function convertAWSRolesToRelationships(
   application: StandardizedOktaApplication,
   oktaPrincipal: OktaApplicationUser | OktaApplicationGroup,
   relationshipType: string,
@@ -259,7 +296,7 @@ function convertAWSRolesToRelationships(
  * @param role the AWS IAM role identifier provided by Okta
  * @param awsAccountId the application `awsAccountId`
  */
-function mapAWSRoleAssignment({
+export function mapAWSRoleAssignment({
   sourceKey,
   role,
   relationshipType,
