@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { IntegrationLogger } from '@jupiterone/integration-sdk-core';
-import { OktaClient } from './types';
 import { OktaIntegrationConfig } from '../types';
 import { AttemptContext, retry } from '@lifeomic/attempt';
 import { Headers, Response } from 'node-fetch';
@@ -79,7 +78,7 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
 export default function createOktaClient(
   logger: IntegrationLogger,
   config: OktaIntegrationConfig,
-): OktaClient {
+): Client {
   const defaultRequestExecutor = new RequestExecutorWithEarlyRateLimiting(
     logger,
   );
@@ -121,7 +120,7 @@ export default function createOktaClient(
     logger.trace('Okta client received response');
   });
 
-  return (new Client({
+  return new Client({
     orgUrl: config.oktaOrgUrl,
     token: config.oktaApiKey,
     requestExecutor: defaultRequestExecutor,
@@ -129,12 +128,10 @@ export default function createOktaClient(
     //
     // See: https://github.com/okta/okta-sdk-nodejs#middleware
     cacheMiddleware: null,
-  }) as unknown) as OktaClient;
+  });
 }
 
-function parseRateLimitHeaders(
-  headers: Headers,
-): {
+function parseRateLimitHeaders(headers: Headers): {
   rateLimitLimit: number | undefined;
   rateLimitRemaining: number | undefined;
 } {

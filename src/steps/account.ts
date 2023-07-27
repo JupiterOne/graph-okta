@@ -1,10 +1,12 @@
 import {
   createDirectRelationship,
   createIntegrationEntity,
+  IntegrationInfoEventName,
   IntegrationStep,
   IntegrationStepExecutionContext,
   RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
+import { OrgOktaSupportSettingsObj } from '@okta/okta-sdk-nodejs';
 
 import { IntegrationConfig } from '../config';
 import { createAccountEntity } from '../converters/account';
@@ -20,7 +22,6 @@ import {
   Steps,
 } from './constants';
 import { createAPIClient } from '../client';
-import { OrgOktaSupportSettingsObj } from '../okta/types';
 
 export async function fetchAccountDetails({
   jobState,
@@ -39,8 +40,8 @@ export async function fetchAccountDetails({
     oktaSupportInfo = await apiClient.getSupportInfo();
   } catch (err) {
     logger.info(`Unable to query Okta Support Info due to ERROR:  `, err);
-    logger.publishEvent({
-      name: 'info',
+    logger.publishInfoEvent({
+      name: IntegrationInfoEventName.Info,
       description: `INFO:  Unable to query Okta Support Information. The okta_account.supportEnabled value cannot be set.`,
     });
   }
