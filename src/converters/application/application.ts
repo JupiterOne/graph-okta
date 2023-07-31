@@ -84,7 +84,7 @@ export function getEnvSpecificProps(data: OktaApplication) {
 
 export function createApplicationEntity(
   instance: IntegrationInstance,
-  data: OktaApplication & { credentials: any },
+  data: OktaApplication & { credentials?: any },
 ): StandardizedOktaApplication {
   const webLink = url.resolve(
     getOktaAccountAdminUrl(instance.config as OktaIntegrationConfig),

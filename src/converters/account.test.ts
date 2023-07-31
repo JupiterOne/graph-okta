@@ -14,7 +14,12 @@ describe('Converter: Account', () => {
             oktaOrgUrl: 'dummy-api-key',
           },
           { name: 'some-name', preview: false },
-          { expiration: new Date('12/12/2023'), support: 'DISABLED' },
+          {
+            expiration: new Date('12/12/2023').toISOString(),
+            support: 'DISABLED',
+            id: '1',
+            _links: [],
+          },
         );
 
         expect(result).toEqual({
@@ -39,7 +44,12 @@ describe('Converter: Account', () => {
             oktaOrgUrl: 'dummy-api-key',
           },
           { name: 'some-name', preview: true },
-          { expiration: new Date('12/12/2023'), support: 'DISABLED' },
+          {
+            expiration: new Date('12/12/2023').toISOString(),
+            support: 'DISABLED',
+            id: '1',
+            _links: [],
+          },
         );
 
         expect(result).toEqual({

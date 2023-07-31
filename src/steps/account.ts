@@ -6,7 +6,6 @@ import {
   IntegrationStepExecutionContext,
   RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
-import { OrgOktaSupportSettingsObj } from '@okta/okta-sdk-nodejs';
 
 import { IntegrationConfig } from '../config';
 import { createAccountEntity } from '../converters/account';
@@ -22,6 +21,7 @@ import {
   Steps,
 } from './constants';
 import { createAPIClient } from '../client';
+import { OrgOktaSupportSettingsObj } from '../okta/types';
 
 export async function fetchAccountDetails({
   jobState,
