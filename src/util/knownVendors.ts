@@ -158,9 +158,6 @@ export function isMultiInstanceApp(appName: string): boolean {
     'google',
     'office365',
   ];
-  if (multiInstanceApps.includes(appName)) {
-    return true;
-  } else {
-    return false;
-  }
+
+  return multiInstanceApps.includes(appName);
 }
