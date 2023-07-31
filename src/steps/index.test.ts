@@ -29,7 +29,7 @@ afterEach(async () => {
   await recording.stop();
 });
 
-test.skip('should collect data', async () => {
+test('should collect data', async () => {
   recording = setupOktaRecording({
     directory: __dirname,
     name: 'steps', //redaction of headers is in setupOktaRecording
@@ -109,8 +109,12 @@ test.skip('should collect data', async () => {
   const userGroups = context.jobState.collectedEntities.filter((e) =>
     e._class.includes('UserGroup'),
   );
-  expect(userGroups.length).toBeGreaterThan(0);
-  expect(userGroups).toMatchGraphObjectSchema({
+  const filteredUserGroups = userGroups.filter(
+    (user) => user._type === 'okta_user_group',
+  );
+
+  expect(filteredUserGroups.length).toBeGreaterThan(0);
+  expect(filteredUserGroups).toMatchGraphObjectSchema({
     _class: ['UserGroup'],
     schema: {
       properties: {
@@ -196,7 +200,7 @@ test.skip('should collect data', async () => {
   });
 });
 
-test.skip('call for devices on a fake user', async () => {
+test('call for devices on a fake user', async () => {
   recording = setupOktaRecording({
     directory: __dirname,
     name: 'callfakeuser',
@@ -216,7 +220,7 @@ test.skip('call for devices on a fake user', async () => {
   ).toReturn;
 });
 
-test.skip('mocked 403', async () => {
+test('mocked 403', async () => {
   recording = setupOktaRecording({
     directory: __dirname,
     name: 'mock403Response',
