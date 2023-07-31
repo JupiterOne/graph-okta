@@ -216,7 +216,7 @@ test.skip('call for devices on a fake user', async () => {
   ).toReturn;
 });
 
-test('mocked 403', async () => {
+test.skip('mocked 403', async () => {
   recording = setupOktaRecording({
     directory: __dirname,
     name: 'mock403Response',

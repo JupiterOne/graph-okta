@@ -84,7 +84,7 @@ export function getEnvSpecificProps(data: OktaApplication) {
 
 export function createApplicationEntity(
   instance: IntegrationInstance,
-  data: OktaApplication,
+  data: OktaApplication & { credentials: any },
 ): StandardizedOktaApplication {
   const webLink = url.resolve(
     getOktaAccountAdminUrl(instance.config as OktaIntegrationConfig),
@@ -107,31 +107,30 @@ export function createApplicationEntity(
   const oktaAccountInfo = getOktaAccountInfo(instance);
   const appShortName = buildAppShortName(oktaAccountInfo, data.name);
 
-  const source = { ...data };
-  delete source.credentials; //some OAuth config options stored here
+  const { credentials, ...source } = data;
 
   const entity = createIntegrationEntity({
     entityData: {
       source,
       assign: {
-        _key: data.id,
+        _key: source.id,
         _type: Entities.APPLICATION._type,
         _class: Entities.APPLICATION._class,
-        displayName: getDisplayName(data),
-        id: data.id,
-        name: getName(data),
+        displayName: getDisplayName(source),
+        id: source.id,
+        name: getName(source),
         shortName: appShortName,
-        label: data.label,
-        status: data.status.toLowerCase(),
-        active: isActive(data),
-        lastUpdated: data.lastUpdated,
-        created: data.created,
-        features: data.features,
-        signOnMode: data.signOnMode,
+        label: source.label,
+        status: source.status.toLowerCase(),
+        active: isActive(source),
+        lastUpdated: source.lastUpdated,
+        created: source.created,
+        features: source.features,
+        signOnMode: source.signOnMode,
         appVendorName: getVendorName(appShortName),
         appAccountType: getAccountName(appShortName),
         isMultiInstanceApp: isMultiInstanceApp(appShortName),
-        isSAMLApp: isSAMLApp(data),
+        isSAMLApp: isSAMLApp(source),
         webLink,
         imageUrl,
         loginUrl,
@@ -139,7 +138,7 @@ export function createApplicationEntity(
     },
   }) as StandardizedOktaApplication;
 
-  const environmentSpecificProps = getEnvSpecificProps(data);
+  const environmentSpecificProps = getEnvSpecificProps(source);
 
   return { ...entity, ...environmentSpecificProps };
 }
