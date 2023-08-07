@@ -12,6 +12,7 @@ for (const url of [
 }
 
 for (const url of [
+  'abc.mochiokta.com/',
   'https://abc.mochiokta.com/',
   'https://abc.sobaoktapreview.com/',
   'https://abc.cookieokta-emea.com',
