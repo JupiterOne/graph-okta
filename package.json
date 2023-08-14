@@ -31,26 +31,26 @@
   },
   "dependencies": {
     "@okta/okta-sdk-nodejs": "^6.4.0",
+    "@types/node": "^18",
     "lodash.startcase": "^4.4.0",
     "p-map": "^4",
     "promise-retry": "^1.1.1",
-    "uuid": "^9.0.0",
-    "@types/node": "^18"
+    "uuid": "^9.0.0"
   },
   "peerDependencies": {
-    "@jupiterone/integration-sdk-core": "^9.4.0"
+    "@jupiterone/integration-sdk-core": "^9.5.0"
   },
   "devDependencies": {
-    "auto": "^10.46.0",
-    "@jupiterone/integration-sdk-core": "^9.4.0",
-    "@jupiterone/integration-sdk-dev-tools": "^9.4.0",
-    "@jupiterone/integration-sdk-testing": "^9.4.0",
+    "@jupiterone/integration-sdk-core": "^9.5.0",
+    "@jupiterone/integration-sdk-dev-tools": "^9.5.0",
+    "@jupiterone/integration-sdk-testing": "^9.5.0",
     "@types/node-fetch": "^2.6.3",
     "@types/uuid": "^8.3.4",
-    "typescript": "^4.3.5",
     "@typescript-eslint/eslint-plugin": "^4.29.3",
     "@typescript-eslint/parser": "^4.29.3",
-    "ts-jest": "^27.1.5"
+    "auto": "^10.46.0",
+    "ts-jest": "^29.0.0-next.1",
+    "typescript": "^4.3.5"
   },
   "auto": {
     "plugins": [
