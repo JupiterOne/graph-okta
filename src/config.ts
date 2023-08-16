@@ -8,6 +8,7 @@ import {
 import { createAPIClient } from './client';
 import isValidOktaOrgUrl from './util/isValidOktaOrgUrl';
 import { IngestionSources } from './steps/constants';
+import mutateIntegrationConfig from './util/mutateIntegrationConfig';
 
 /**
  * A type describing the configuration fields required to execute the
@@ -60,9 +61,11 @@ export async function validateInvocation(
     );
   }
 
+  context.instance.config = mutateIntegrationConfig(config);
+
   if (!config.oktaOrgUrl || !isValidOktaOrgUrl(config.oktaOrgUrl)) {
     throw new IntegrationValidationError(
-      `Invalid Okta org URL provided (oktaOrgUrl=${config.oktaOrgUrl}, accountId=${config.accountId})`,
+      `Invalid Okta org URL provided (oktaOrgUrl=${config.oktaOrgUrl})`,
     );
   }
 
