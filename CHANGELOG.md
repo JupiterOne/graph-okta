@@ -1,3 +1,17 @@
+# v3.0.1 (Wed Aug 16 2023)
+
+#### 🐛 Bug Fix
+
+- Mutate integration config is missing protocol [#239](https://github.com/JupiterOne/graph-okta/pull/239) ([@gastonyelmini](https://github.com/gastonyelmini))
+- INT-8956: credential verification [#238](https://github.com/JupiterOne/graph-okta/pull/238) ([@mishelashala](https://github.com/mishelashala))
+
+#### Authors: 2
+
+- Gaston Yelmini ([@gastonyelmini](https://github.com/gastonyelmini))
+- Michell Ayala ([@mishelashala](https://github.com/mishelashala))
+
+---
+
 # v3.0.0 (Mon Jun 05 2023)
 
 #### 💥 Breaking Change
