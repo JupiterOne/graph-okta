@@ -8,10 +8,8 @@ const OKTA_DOMAINS = [
   'okta-gov.com',
 ];
 
-export default function isValidOktaOrgUrl(orgUrl: string) {
-  if (!orgUrl) {
-    return false;
-  }
+export default function isValidOktaOrgUrl(orgUrl: string): boolean {
+  if (!orgUrl) return false;
 
   const orgUrlWithHttp = !orgUrl.startsWith('https://')
     ? `https://${orgUrl}`
