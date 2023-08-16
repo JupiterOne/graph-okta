@@ -65,7 +65,7 @@ export async function validateInvocation(
 
   if (!config.oktaOrgUrl || !isValidOktaOrgUrl(config.oktaOrgUrl)) {
     throw new IntegrationValidationError(
-      `Invalid Okta org URL provided (oktaOrgUrl=${config.oktaOrgUrl}, accountId=${config.accountId})`,
+      `Invalid Okta org URL provided (oktaOrgUrl=${config.oktaOrgUrl})`,
     );
   }
 
