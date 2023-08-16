@@ -15,11 +15,11 @@ test('URL missing protocol', () => {
 test('URL with protocol', () => {
   expect(
     mutateIntegrationConfig({
-      oktaOrgUrl: 'abc.mochiokta.com',
+      oktaOrgUrl: 'https://abc.mochiokta.com',
       oktaApiKey: 'api-key',
     }),
   ).toEqual({
-    oktaOrgUrl: 'abc.mochiokta.com',
+    oktaOrgUrl: 'https://abc.mochiokta.com',
     oktaApiKey: 'api-key',
   });
 });
