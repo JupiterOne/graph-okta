@@ -2,8 +2,11 @@
   "name": "@jupiterone/graph-okta",
   "version": "3.0.1",
   "description": "A JupiterOne Integration for https://www.okta.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JupiterOne/graph-okta"
+  },
   "license": "MPL-2.0",
-  "repository": "https://github.com/jupiterone/graph-okta",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "files": [
