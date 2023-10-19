@@ -1,4 +1,4 @@
-import { OktaUserGroup } from '../okta/types';
+import { Group } from '@okta/okta-sdk-nodejs';
 import {
   OktaIntegrationConfig,
   StandardizedOktaUser,
@@ -13,17 +13,16 @@ const config: OktaIntegrationConfig = {
 
 describe('creating group entity', () => {
   test('with APP_GROUP type', () => {
-    const group: OktaUserGroup = {
+    const group: Group = {
       id: 'id',
-      created: '2019-04-22T21:43:53.000Z',
-      lastUpdated: '2019-04-22T21:43:53.000Z',
-      lastMembershipUpdated: '2019-04-22T21:43:53.000Z',
+      created: new Date('2019-04-22T21:43:53.000Z'),
+      lastUpdated: new Date('2019-04-22T21:43:53.000Z'),
+      lastMembershipUpdated: new Date('2019-04-22T21:43:53.000Z'),
       type: 'APP_GROUP',
       profile: {
         name: 'name',
         description: 'description',
       },
-      _links: '_links',
     };
     expect(createUserGroupEntity(config, group)).toEqual({
       _class: ['UserGroup'],
@@ -32,11 +31,10 @@ describe('creating group entity', () => {
         {
           name: 'default',
           rawData: {
-            _links: '_links',
-            created: '2019-04-22T21:43:53.000Z',
+            created: new Date('2019-04-22T21:43:53.000Z'),
             id: 'id',
-            lastMembershipUpdated: '2019-04-22T21:43:53.000Z',
-            lastUpdated: '2019-04-22T21:43:53.000Z',
+            lastMembershipUpdated: new Date('2019-04-22T21:43:53.000Z'),
+            lastUpdated: new Date('2019-04-22T21:43:53.000Z'),
             profile: {
               description: 'description',
               name: 'name',
@@ -62,17 +60,16 @@ describe('creating group entity', () => {
   });
 
   test('without APP_GROUP type', () => {
-    const group: OktaUserGroup = {
+    const group: Group = {
       id: 'id',
-      created: '2019-04-22T21:43:53.000Z',
-      lastUpdated: '2019-04-22T21:43:53.000Z',
-      lastMembershipUpdated: '2019-04-22T21:43:53.000Z',
-      type: 'just_type',
+      created: new Date('2019-04-22T21:43:53.000Z'),
+      lastUpdated: new Date('2019-04-22T21:43:53.000Z'),
+      lastMembershipUpdated: new Date('2019-04-22T21:43:53.000Z'),
+      type: 'OKTA_GROUP',
       profile: {
         name: 'name',
         description: 'description',
       },
-      _links: '_links',
     };
     expect(createUserGroupEntity(config, group)).toEqual({
       _class: ['UserGroup'],
@@ -81,16 +78,15 @@ describe('creating group entity', () => {
         {
           name: 'default',
           rawData: {
-            _links: '_links',
-            created: '2019-04-22T21:43:53.000Z',
+            created: new Date('2019-04-22T21:43:53.000Z'),
             id: 'id',
-            lastMembershipUpdated: '2019-04-22T21:43:53.000Z',
-            lastUpdated: '2019-04-22T21:43:53.000Z',
+            lastMembershipUpdated: new Date('2019-04-22T21:43:53.000Z'),
+            lastUpdated: new Date('2019-04-22T21:43:53.000Z'),
             profile: {
               description: 'description',
               name: 'name',
             },
-            type: 'just_type',
+            type: 'OKTA_GROUP',
           },
         },
       ],
@@ -105,7 +101,7 @@ describe('creating group entity', () => {
       lastUpdatedOn: 1555969433000,
       description: 'description',
       name: 'name',
-      type: 'just_type',
+      type: 'OKTA_GROUP',
       webLink: '/admin/group/id',
     });
   });
@@ -120,7 +116,6 @@ describe('creating group entity differently', () => {
         {
           name: 'default',
           rawData: {
-            _links: '_links',
             created: '2019-04-22T21:43:53.000Z',
             id: 'id',
             lastMembershipUpdated: '2019-04-22T21:43:53.000Z',
@@ -154,7 +149,6 @@ describe('creating group entity differently', () => {
         {
           name: 'default',
           rawData: {
-            _links: {},
             activated: '2019-04-22T21:43:53.000Z',
             created: '2019-04-22T21:43:53.000Z',
             credentials: {

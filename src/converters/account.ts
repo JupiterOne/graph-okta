@@ -5,7 +5,7 @@ import {
   parseTimePropertyValue,
 } from '@jupiterone/integration-sdk-core';
 
-import { OktaAccountInfo, OrgOktaSupportSettingsObj } from '../okta/types';
+import { OktaAccountInfo } from '../okta/types';
 import { Entities, Relationships } from '../steps/constants';
 import {
   OktaIntegrationConfig,
@@ -13,6 +13,7 @@ import {
   StandardizedOktaApplication,
   StandardizedOktaUserGroup,
 } from '../types';
+import { OrgOktaSupportSettingsObj } from '@okta/okta-sdk-nodejs';
 
 export function createAccountEntity(
   config: OktaIntegrationConfig,

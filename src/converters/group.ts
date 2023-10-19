@@ -15,15 +15,19 @@ import {
  *
  * See https://developer.okta.com/docs/api/resources/groups#group-type
  */
-import { OktaUserGroup } from '../okta/types';
 import { Entities, Relationships } from '../steps/constants';
 import { OktaIntegrationConfig, StandardizedOktaUserGroup } from '../types';
 import getOktaAccountAdminUrl from '../util/getOktaAccountAdminUrl';
+import { Group } from '@okta/okta-sdk-nodejs';
 
 export function createUserGroupEntity(
   config: OktaIntegrationConfig,
-  data: OktaUserGroup,
-): StandardizedOktaUserGroup {
+  data: Group,
+): StandardizedOktaUserGroup | null {
+  if (!data.id) {
+    return null;
+  }
+
   const {
     id,
     created,
@@ -31,7 +35,7 @@ export function createUserGroupEntity(
     lastMembershipUpdated,
     objectClass,
     type,
-    profile: { name: profileName, description: profileDescription },
+    profile,
   } = data;
 
   const webLink = url.resolve(
@@ -48,12 +52,12 @@ export function createUserGroupEntity(
     entityData: {
       source: data,
       assign: {
-        _key: data.id,
+        _key: id,
         _type: entityType,
         _class: 'UserGroup',
         id,
         webLink,
-        displayName: profileName,
+        displayName: profile?.name ?? id,
         created: parseTimePropertyValue(created)!,
         createdOn: parseTimePropertyValue(created)!,
         lastUpdated: parseTimePropertyValue(lastUpdated)!,
@@ -62,8 +66,8 @@ export function createUserGroupEntity(
         lastMembershipUpdatedOn: parseTimePropertyValue(lastMembershipUpdated)!,
         objectClass,
         type,
-        name: profileName,
-        description: profileDescription ? profileDescription : undefined,
+        name: profile?.name,
+        description: profile?.description ? profile.description : undefined,
       },
     },
   }) as StandardizedOktaUserGroup;

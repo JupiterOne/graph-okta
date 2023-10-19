@@ -1,4 +1,4 @@
-import { OktaResource } from '.';
+import { AppUser, Application, ApplicationLinks } from '@okta/okta-sdk-nodejs';
 
 export interface AppSettings {
   [key: string]: any;
@@ -16,50 +16,20 @@ export interface OktaApplicationLink {
   name?: string;
 }
 
-export interface OktaApplicationLinks {
+export interface OktaApplicationLinks extends ApplicationLinks {
   help?: OktaApplicationLink | OktaApplicationLink[];
-  metadata?: OktaApplicationLink | OktaApplicationLink[];
   appLinks?: OktaApplicationLink | OktaApplicationLink[];
-  groups?: OktaApplicationLink | OktaApplicationLink[];
-  logo?: OktaApplicationLink | OktaApplicationLink[];
-  users?: OktaApplicationLink | OktaApplicationLink[];
-  deactivate?: OktaApplicationLink | OktaApplicationLink[];
 }
 
-export interface OktaApplication extends OktaResource {
-  name: string;
-  label: string;
-  status: string;
-  lastUpdated: string;
-  created: string;
-  signOnMode: string;
+export interface OktaApplication extends Application {
+  name?: string;
   credentials?: any;
-  accessibility?: any;
-  visibility?: any;
-  features?: string[];
   settings?: OktaApplicationSettings;
   _links?: OktaApplicationLinks;
 }
 
-export interface OktaApplicationUser extends OktaResource {
-  externalId?: string;
-  created: string;
-  lastUpdated: string;
-  scope: string;
-  status: string;
-  statusChanged?: string;
-  passwordChanged?: string;
-  syncState: string;
-  lastSync?: string;
-  credentials?: OktaApplicationUserCredentials;
-  profile: OktaApplicationUserProfile;
-  _embedded?: any;
-  _links?: any;
-}
-
-export interface OktaApplicationUserCredentials {
-  userName?: string;
-  password?: { value?: string };
+export interface OktaApplicationUser extends AppUser {
+  profile?: OktaApplicationUserProfile;
 }
 
 /**
@@ -81,12 +51,4 @@ export interface OktaApplicationUserProfile {
   email?: string;
   role?: string;
   samlRoles?: string[];
-}
-
-export interface OktaApplicationGroup extends OktaResource {
-  lastUpdated: string;
-  priority?: number;
-  profile?: any;
-  _links?: any;
-  _embedded?: any;
 }

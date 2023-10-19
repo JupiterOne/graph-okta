@@ -18,24 +18,24 @@ export async function fetchDevices({
   const apiClient = createAPIClient(instance.config, logger);
   await jobState.iterateEntities(
     {
-      _type: 'okta_user',
+      _type: Entities.USER._type,
     },
     async (userEntity: StandardizedOktaUser) => {
       if (userEntity.status !== 'deprovisioned') {
         //asking for factors for DEPROV users throws error
-        await apiClient.iterateDevicesForUser(
-          userEntity._key,
-          async (device) => {
-            const deviceEntity = createMFADeviceEntity(device);
-            await jobState.addEntity(deviceEntity);
-            if (device.status === 'ACTIVE') {
-              userEntity.mfaEnabled = true;
-            }
-            await jobState.addRelationship(
-              createUserMfaDeviceRelationship(userEntity, deviceEntity),
-            );
-          },
-        );
+        await apiClient.iterateDevicesForUser(userEntity.id, async (device) => {
+          const deviceEntity = createMFADeviceEntity(device);
+          if (!deviceEntity) {
+            return;
+          }
+          await jobState.addEntity(deviceEntity);
+          if (device.status === 'ACTIVE') {
+            userEntity.mfaEnabled = true;
+          }
+          await jobState.addRelationship(
+            createUserMfaDeviceRelationship(userEntity, deviceEntity),
+          );
+        });
       }
     },
   );

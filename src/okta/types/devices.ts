@@ -1,14 +1,9 @@
-import { OktaResource } from '.';
+import { UserFactor } from '@okta/okta-sdk-nodejs';
 
-export interface OktaFactor extends OktaResource {
-  factorType: string;
-  provider: string;
+export interface OktaFactor extends UserFactor {
   vendorName?: string;
   device?: string;
-  status: string;
-  created: string;
-  lastUpdated: string;
-  lastVerified: string;
+  lastVerified?: string;
   profile?: OktaFactorProfile;
 }
 

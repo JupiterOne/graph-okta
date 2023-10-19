@@ -15,13 +15,13 @@ describe('creating user entity', () => {
   test('with received all optional data', () => {
     const user: OktaUser = {
       id: 'id',
-      status: 'status',
-      created: '2019-04-22T21:43:53.000Z',
-      activated: '2019-04-22T21:43:53.000Z',
-      statusChanged: '2019-04-22T21:43:53.000Z',
-      lastLogin: '2019-04-22T21:43:53.000Z',
-      lastUpdated: '2019-04-22T21:43:53.000Z',
-      passwordChanged: '2019-04-22T21:43:53.000Z',
+      status: 'SUSPENDED',
+      created: new Date('2019-04-22T21:43:53.000Z'),
+      activated: new Date('2019-04-22T21:43:53.000Z'),
+      statusChanged: new Date('2019-04-22T21:43:53.000Z'),
+      lastLogin: new Date('2019-04-22T21:43:53.000Z'),
+      lastUpdated: new Date('2019-04-22T21:43:53.000Z'),
+      passwordChanged: new Date('2019-04-22T21:43:53.000Z'),
       _links: {},
       profile: {
         firstName: 'firstName',
@@ -42,13 +42,9 @@ describe('creating user entity', () => {
         githubUsername: 'githubUsername',
       },
       credentials: {
-        password: 'password',
+        password: {},
         recovery_question: {
           question: 'question',
-        },
-        integration: {
-          name: 'name',
-          type: 'type',
         },
         emails: [
           {
@@ -96,7 +92,7 @@ describe('creating user entity', () => {
       passwordChanged: 1555969433000,
       passwordChangedOn: 1555969433000,
       secondEmail: 'secondEmail',
-      status: 'status',
+      status: 'suspended',
       statusChanged: 1555969433000,
       statusChangedOn: 1555969433000,
       tenant: ['tenant'],
@@ -111,10 +107,10 @@ describe('creating user entity', () => {
   test('with not received all optional data', () => {
     const user: OktaUser = {
       id: 'id',
-      status: 'status',
-      created: '2019-04-22T21:43:53.000Z',
-      activated: '2019-04-22T21:43:53.000Z',
-      lastUpdated: '2019-04-22T21:43:53.000Z',
+      status: 'SUSPENDED',
+      created: new Date('2019-04-22T21:43:53.000Z'),
+      activated: new Date('2019-04-22T21:43:53.000Z'),
+      lastUpdated: new Date('2019-04-22T21:43:53.000Z'),
       profile: {
         firstName: 'firstName',
         lastName: 'lastName',
@@ -162,7 +158,7 @@ describe('creating user entity', () => {
       mobilePhone: 'mobilePhone',
       name: 'firstName lastName',
       secondEmail: 'secondEmail',
-      status: 'status',
+      status: 'suspended',
       tenant: ['tenant'],
       userType: 'userType',
       username: 'login',
@@ -203,7 +199,7 @@ describe('creating user entity', () => {
         passwordChanged: 1555969433000,
         passwordChangedOn: 1555969433000,
         secondEmail: 'secondEmail',
-        status: 'status',
+        status: 'ACTIVE',
         statusChanged: 1555969433000,
         statusChangedOn: 1555969433000,
         tenant: ['tenant'],
@@ -224,7 +220,7 @@ describe('creating user entity', () => {
         vendorName: 'vendorName',
         device: 'device',
         deviceType: 'deviceType',
-        status: 'status',
+        status: 'active',
         created: 'created',
         lastUpdated: 'lastUpdated',
       };

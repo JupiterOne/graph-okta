@@ -34,21 +34,28 @@ export async function fetchApplications({
   )) as StandardizedOktaAccount;
 
   await apiClient.iterateApplications(async (app) => {
-    const appEntity = (await jobState.addEntity(
-      createApplicationEntity(instance, app),
-    )) as StandardizedOktaApplication;
+    const appEntity = createApplicationEntity(
+      instance,
+      app,
+    ) as StandardizedOktaApplication;
+    if (!appEntity) {
+      return;
+    }
 
+    await jobState.addEntity(appEntity);
     await jobState.addRelationship(
       createAccountApplicationRelationship(accountEntity, appEntity),
     );
 
-    const appId = app.id;
+    const appId = app.id as string;
 
     //get the groups that are assigned to this app
     await apiClient.iterateGroupsForApp(appId, async (group) => {
-      const groupEntity = await jobState.findEntity(group.id);
+      if (!group.id) {
+        return;
+      }
 
-      if (groupEntity) {
+      if (jobState.hasKey(group.id)) {
         const relationships = createApplicationGroupRelationships(
           appEntity,
           group,
@@ -94,17 +101,20 @@ export async function fetchApplications({
 
     //get the individual users that are assigned to this app (ie. not assigned as part of group)
     await apiClient.iterateUsersForApp(appId, async (user) => {
-      const userEntity = await jobState.findEntity(user.id);
+      if (!user.id) {
+        return;
+      }
 
-      if (userEntity) {
-        const relationships: Relationship[] = createApplicationUserRelationships(
-          appEntity,
-          user,
-          createOnInvalidRoleFormatFunction(logger, {
-            appId,
-            userId: user.id,
-          }),
-        );
+      if (jobState.hasKey(user.id)) {
+        const relationships: Relationship[] =
+          createApplicationUserRelationships(
+            appEntity,
+            user,
+            createOnInvalidRoleFormatFunction(logger, {
+              appId,
+              userId: user.id,
+            }),
+          );
         //these relationships include both USER_ASSIGNED_APPLICATION and USER_ASSIGNED_AWS_IAM_ROLE
         //USER_ASSIGNED_APPLICATION will be unique to this user and app pair
         //however, multiple apps for that user can use AWS and have the same IAM Role assigned

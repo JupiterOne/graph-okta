@@ -7,7 +7,7 @@ import {
 
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import { Relationships, Steps } from './constants';
+import { Entities, Relationships, Steps } from './constants';
 
 export async function buildUserCreatedApplication({
   instance,
@@ -17,23 +17,29 @@ export async function buildUserCreatedApplication({
   const apiClient = createAPIClient(instance.config, logger);
 
   await apiClient.iterateAppCreatedLogs(async (log) => {
-    const createdBy = await jobState.findEntity(log.actor.id);
-    const createdApp = await jobState.findEntity(log.target[0].id);
+    if (!log.actor?.id || !(log.target?.length && log.target[0].id)) {
+      return;
+    }
+
+    const createdBy = log.actor.id;
+    const createdApp = log.target[0].id;
 
     // Logs will contain all apps in the last 90 days, even if we've deleted them, so check before
     // trying to create the relationship.
-    if (createdBy && createdApp) {
+    if (jobState.hasKey(createdBy) && jobState.hasKey(createdApp)) {
       const createdByRelationship = createDirectRelationship({
         _class: RelationshipClass.CREATED,
-        from: createdBy,
-        to: createdApp,
+        fromType: Entities.USER._type,
+        fromKey: createdBy,
+        toType: Entities.APPLICATION._type,
+        toKey: createdApp,
       });
       if (!jobState.hasKey(createdByRelationship._key)) {
         await jobState.addRelationship(createdByRelationship);
       } else {
         logger.info(
           { createdByRelationship },
-          'Skipping relationship creation.  Relationship already exists.',
+          'Skipping relationship creation. Relationship already exists.',
         );
       }
     }

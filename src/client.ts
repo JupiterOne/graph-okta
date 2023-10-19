@@ -9,17 +9,19 @@ import { IntegrationConfig } from './config';
 export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
 import createOktaClient from './okta/createOktaClient';
 import {
-  OktaClient,
-  OktaFactor,
-  OktaUser,
-  OktaUserGroup,
-  OktaApplication,
-  OktaApplicationGroup,
-  OktaApplicationUser,
-  OktaRule,
+  ApplicationGroupAssignment,
+  Group,
+  GroupRule,
+  LogEvent,
+  Client as OktaClient,
   OrgOktaSupportSettingsObj,
-  OktaRole,
-  OktaLogEvent,
+  Role,
+} from '@okta/okta-sdk-nodejs';
+import {
+  OktaFactor,
+  OktaApplication,
+  OktaApplicationUser,
+  OktaUser,
 } from './okta/types';
 
 const NINETY_DAYS_AGO = 90 * 24 * 60 * 60 * 1000;
@@ -45,9 +47,8 @@ export class APIClient {
 
     try {
       //note that if you don't hit the .each, it doesn't actually attempt it
-      await this.oktaClient.listUsers({ limit: '1' }).each((e) => {
-        return false;
-      });
+      const collection = await this.oktaClient.userApi.listUsers({ limit: 1 });
+      await collection.each(() => false);
     } catch (err) {
       throw new IntegrationProviderAuthenticationError({
         cause: err,
@@ -67,12 +68,13 @@ export class APIClient {
     iteratee: ResourceIteratee<OktaUser>,
   ): Promise<void> {
     try {
-      await this.oktaClient.listUsers().each(iteratee);
-      await this.oktaClient
-        .listUsers({
+      const usersCollection = await this.oktaClient.userApi.listUsers();
+      await usersCollection.each(iteratee);
+      const deprovisionedUsersCollection =
+        await this.oktaClient.userApi.listUsers({
           filter: 'status eq "DEPROVISIONED"',
-        })
-        .each(iteratee);
+        });
+      await deprovisionedUsersCollection.each(iteratee);
     } catch (err) {
       if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({
@@ -90,11 +92,10 @@ export class APIClient {
    *
    * @param iteratee receives each resource to produce entities/relationships
    */
-  public async iterateGroups(
-    iteratee: ResourceIteratee<OktaUserGroup>,
-  ): Promise<void> {
+  public async iterateGroups(iteratee: ResourceIteratee<Group>): Promise<void> {
     try {
-      await this.oktaClient.listGroups().each(iteratee);
+      const groupsCollection = await this.oktaClient.groupApi.listGroups();
+      await groupsCollection.each(iteratee);
     } catch (err) {
       if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({
@@ -117,15 +118,16 @@ export class APIClient {
     iteratee: ResourceIteratee<OktaUser>,
   ): Promise<void> {
     try {
-      await this.oktaClient
-        .listGroupUsers(groupId, {
+      const groupUsersCollection =
+        await this.oktaClient.groupApi.listGroupUsers({
+          groupId,
           // The number of users returned for the given group defaults to 1000
           // according to the Okta API docs:
           //
           // https://developer.okta.com/docs/reference/api/groups/#list-group-members
-          limit: '10000',
-        })
-        .each(iteratee);
+          limit: 10000,
+        });
+      await groupUsersCollection.each(iteratee);
     } catch (err) {
       if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({
@@ -156,7 +158,9 @@ export class APIClient {
       // factors API.
       //
       // See: https://developer.okta.com/docs/reference/api/factors/#list-enrolled-factors
-      await this.oktaClient.listFactors(userId).each(iteratee);
+      const userFactorsCollection =
+        await this.oktaClient.userFactorApi.listFactors({ userId });
+      await userFactorsCollection.each(iteratee);
     } catch (err) {
       if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({
@@ -182,14 +186,14 @@ export class APIClient {
     iteratee: ResourceIteratee<OktaApplication>,
   ): Promise<void> {
     try {
-      await this.oktaClient
-        .listApplications({
+      const applicationsCollection =
+        await this.oktaClient.applicationApi.listApplications({
           // Maximum is 200, default is 20 if not specified:
           //
           // See: https://developer.okta.com/docs/reference/api/apps/#list-applications
-          limit: '200',
-        })
-        .each(iteratee);
+          limit: 200,
+        });
+      await applicationsCollection.each(iteratee);
     } catch (err) {
       if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({
@@ -211,17 +215,18 @@ export class APIClient {
    */
   public async iterateGroupsForApp(
     appId: string,
-    iteratee: ResourceIteratee<OktaApplicationGroup>,
+    iteratee: ResourceIteratee<ApplicationGroupAssignment>,
   ): Promise<void> {
     try {
-      await this.oktaClient
-        .listApplicationGroupAssignments(appId, {
+      const appGroupAssignmentsCollection =
+        await this.oktaClient.applicationApi.listApplicationGroupAssignments({
+          appId,
           // Maximum is 200, default is 20 if not specified:
           //
           // See: https://developer.okta.com/docs/reference/api/apps/#list-groups-assigned-to-application
-          limit: '200',
-        })
-        .each(iteratee);
+          limit: 200,
+        });
+      await appGroupAssignmentsCollection.each(iteratee);
     } catch (err) {
       if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({
@@ -248,14 +253,15 @@ export class APIClient {
     iteratee: ResourceIteratee<OktaApplicationUser>,
   ): Promise<void> {
     try {
-      await this.oktaClient
-        .listApplicationUsers(appId, {
+      const appUsersCollection =
+        await this.oktaClient.applicationApi.listApplicationUsers({
+          appId,
           // Maximum is 500, default is 50 if not specified:
           //
           // See: https://developer.okta.com/docs/reference/api/apps/#list-users-assigned-to-application
-          limit: '500',
-        })
-        .each(iteratee);
+          limit: 500,
+        });
+      await appUsersCollection.each(iteratee);
     } catch (err) {
       if (err.status === 403) {
         throw new IntegrationProviderAuthorizationError({
@@ -278,10 +284,12 @@ export class APIClient {
    * @param iteratee receives each resource to produce entities/relationships
    */
   public async iterateRules(
-    iteratee: ResourceIteratee<OktaRule>,
+    iteratee: ResourceIteratee<GroupRule>,
   ): Promise<void> {
     try {
-      await this.oktaClient.listGroupRules().each(iteratee);
+      const groupRulesCollection =
+        await this.oktaClient.groupApi.listGroupRules();
+      await groupRulesCollection.each(iteratee);
     } catch (err) {
       //per https://developer.okta.com/docs/reference/error-codes/
       if (/\/api\/v1\/groups\/rules/.test(err.url) && err.status === 400) {
@@ -302,15 +310,19 @@ export class APIClient {
   }
 
   public async getSupportInfo(): Promise<OrgOktaSupportSettingsObj> {
-    return await this.oktaClient.getOrgOktaSupportSettings();
+    return this.oktaClient.orgSettingApi.getOrgOktaSupportSettings();
   }
 
   public async iterateRolesByUser(
     userId: string,
-    iteratee: ResourceIteratee<OktaRole>,
+    iteratee: ResourceIteratee<Role>,
   ): Promise<void> {
     try {
-      await this.oktaClient.listAssignedRolesForUser(userId).each(iteratee);
+      const rolesCollection =
+        await this.oktaClient.roleAssignmentApi.listAssignedRolesForUser({
+          userId,
+        });
+      await rolesCollection.each(iteratee);
     } catch (err) {
       //per https://developer.okta.com/docs/reference/error-codes/
       if (err.status === 403) {
@@ -328,10 +340,14 @@ export class APIClient {
 
   public async iterateRolesByGroup(
     groupId: string,
-    iteratee: ResourceIteratee<OktaRole>,
+    iteratee: ResourceIteratee<Role>,
   ): Promise<void> {
     try {
-      await this.oktaClient.listGroupAssignedRoles(groupId).each(iteratee);
+      const rolesCollection =
+        await this.oktaClient.roleAssignmentApi.listGroupAssignedRoles({
+          groupId,
+        });
+      await rolesCollection.each(iteratee);
     } catch (err) {
       //per https://developer.okta.com/docs/reference/error-codes/
       if (err.status === 403) {
@@ -348,7 +364,7 @@ export class APIClient {
   }
 
   public async iterateAppCreatedLogs(
-    iteratee: ResourceIteratee<OktaLogEvent>,
+    iteratee: ResourceIteratee<LogEvent>,
   ): Promise<void> {
     try {
       // Use filter to only find instances of a newly created application.
@@ -356,14 +372,14 @@ export class APIClient {
       // will only get the last 7 days of data.  Okta only saves the last
       // 90 days, so this is not us limiting what we're able to get.
       const daysAgo = Date.now() - NINETY_DAYS_AGO;
-      const startDate = new Date(daysAgo).toISOString();
-      await this.oktaClient
-        .getLogs({
+      const startDate = new Date(daysAgo);
+      const logEventsCollection =
+        await this.oktaClient.systemLogApi.listLogEvents({
           filter:
             'eventType eq "application.lifecycle.update" and debugContext.debugData.requestUri ew "_new_"',
           since: startDate,
-        })
-        .each(iteratee);
+        });
+      await logEventsCollection.each(iteratee);
     } catch (err) {
       //per https://developer.okta.com/docs/reference/error-codes/
       if (err.status === 403) {
