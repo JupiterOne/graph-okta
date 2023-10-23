@@ -113,3 +113,20 @@ export interface StandardizedOktaFactor extends Entity {
   lastVerifiedOn?: number;
   authenticatorName?: string;
 }
+
+export interface StandardizedOktaDevice extends Entity {
+  id: string;
+  deviceId: string;
+  deviceStatus?: string;
+  createdOn?: number;
+  updatedOn?: number;
+  lastSeenOn?: number;
+  category?: string;
+  model?: string;
+  make?: string;
+  platform?: string;
+  osName?: string;
+  osVersion?: string;
+  serial?: string;
+  registered?: string;
+}

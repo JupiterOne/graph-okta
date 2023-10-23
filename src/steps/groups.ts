@@ -48,7 +48,7 @@ export async function fetchGroups({
       return;
     }
 
-    logger.info({ groupId: group.id }, 'Creating group entity');
+    logger.debug({ groupId: group.id }, 'Creating group entity');
     await jobState.addEntity(groupEntity);
 
     totalGroupsCollected++;
@@ -122,7 +122,7 @@ async function buildGroupEntityToUserRelationships(
         createGroupUserRelationship(groupEntity, userEntity),
       );
 
-      logger.info(
+      logger.debug(
         {
           groupId,
           userId: user.id,

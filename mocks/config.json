@@ -1,0 +1,17 @@
+{
+  "requests": {
+    "/api/v1/devices?limit=200&expand=user": {
+      "method": "GET",
+      "status": 200,
+      "content": "responses/devices.json",
+      "headers": {
+        "content-type": "application/json",
+        "date": "Wed, 14 Apr 2021 16:34:52 GMT",
+        "link": "<https://dev-857255.okta.com/api/v1/devices?limit=200&expand=user>; rel=\"self\"",
+        "x-rate-limit-limit": "500",
+        "x-rate-limit-remaining": "499",
+        "x-rate-limit-reset": "1618418152"
+      }
+    }
+  }
+}

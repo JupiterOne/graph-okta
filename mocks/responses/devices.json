@@ -1,0 +1,170 @@
+[
+  {
+    "id": "guo4a5u7YAHhjXrMK0g4",
+    "status": "CREATED",
+    "created": "2019-10-02T18:03:07.000Z",
+    "lastUpdated": "2019-10-02T18:03:07.000Z",
+    "profile": {
+      "displayName": "Example Device name 1",
+      "platform": "WINDOWS",
+      "manufacturer": "Acer",
+      "model": "NX.VZ0AA.005",
+      "serialNumber": "XXDDRFCFRGF3M8MD6D",
+      "sid": "S-1-11-111",
+      "registered": true,
+      "secureHardwarePresent": false,
+      "diskEncryptionType": "ALL_INTERNAL_VOLUMES"
+    },
+    "resourceType": "UDDevice",
+    "resourceDisplayName": {
+      "value": "Example Device name 1",
+      "sensitive": false
+    },
+    "resourceAlternateId": null,
+    "resourceId": "guo4a5u7YAHhjXrMK0g4",
+    "_links": {
+      "activate": {
+        "href": "https://dev-857255-admin.okta.com/api/v1/devices/guo4a5u7YAHhjXrMK0g4/lifecycle/activate",
+        "hints": {
+          "allow": ["POST"]
+        }
+      },
+      "self": {
+        "href": "https://dev-857255-admin.okta.com/api/v1/devices/guo4a5u7YAHhjXrMK0g4",
+        "hints": {
+          "allow": ["GET", "PATCH", "PUT"]
+        }
+      },
+      "users": {
+        "href": "https://dev-857255-admin.okta.com/api/v1/devices/guo4a5u7YAHhjXrMK0g4/users",
+        "hints": {
+          "allow": ["GET"]
+        }
+      }
+    },
+    "_embedded": {
+      "users": []
+    }
+  },
+  {
+    "id": "guo4a5u7YAHhjXrMK0g5",
+    "status": "ACTIVE",
+    "created": "2023-06-21T23:24:02.000Z",
+    "lastUpdated": "2023-06-21T23:24:02.000Z",
+    "profile": {
+      "displayName": "Example Device name 2",
+      "platform": "ANDROID",
+      "manufacturer": "Google",
+      "model": "Pixel 6",
+      "serialNumber": "XXDDRFCFRGF3M8MD6F",
+      "osVersion": "13:2023-05-05",
+      "registered": true,
+      "secureHardwarePresent": true,
+      "diskEncryptionType": "USER"
+    },
+    "resourceType": "UDDevice",
+    "resourceDisplayName": {
+      "value": "Example Device name 2",
+      "sensitive": false
+    },
+    "resourceAlternateId": null,
+    "resourceId": "guo4a5u7YAHhjXrMK0g5",
+    "_links": {
+      "activate": {
+        "href": "https://dev-857255-admin.okta.com/api/v1/devices/guo4a5u7YAHhjXrMK0g5/lifecycle/activate",
+        "hints": {
+          "allow": ["POST"]
+        }
+      },
+      "self": {
+        "href": "https://dev-857255-admin.okta.com/api/v1/devices/guo4a5u7YAHhjXrMK0g5",
+        "hints": {
+          "allow": ["GET", "PATCH", "PUT"]
+        }
+      },
+      "users": {
+        "href": "https://dev-857255-admin.okta.com/api/v1/devices/guo4a5u7YAHhjXrMK0g5/users",
+        "hints": {
+          "allow": ["GET"]
+        }
+      }
+    },
+    "_embedded": {
+      "users": [
+        {
+          "managementStatus": "MANAGED",
+          "created": "2023-10-01T16:52:41.000Z",
+          "screenLockType": "BIOMETRIC",
+          "user": {
+            "id": "00u6b1uy23BmWEf6B4x7",
+            "status": "ACTIVE",
+            "created": "2022-08-12T06:46:50.000Z",
+            "activated": "2022-08-12T06:46:50.000Z",
+            "statusChanged": "2023-01-27T21:05:32.000Z",
+            "lastLogin": "2023-10-14T09:04:48.000Z",
+            "lastUpdated": "2023-01-27T21:05:32.000Z",
+            "passwordChanged": "2022-08-12T06:46:50.000Z",
+            "type": {
+              "id": "oty7ut9Uu76oHVUZc0w4"
+            },
+            "profile": {
+              "firstName": "Adam",
+              "lastName": "Pierson",
+              "mobilePhone": null,
+              "secondEmail": null,
+              "login": "adam.pierson@jupiterone.com",
+              "email": "adam.pierson@jupiterone.com"
+            },
+            "credentials": {
+              "password": {},
+              "recovery_question": {
+                "question": "What is the food you least liked as a child?"
+              },
+              "provider": {
+                "type": "OKTA",
+                "name": "OKTA"
+              }
+            },
+            "_links": {
+              "suspend": {
+                "href": "https://dev-857255-admin.okta.com/api/v1/users/00u6b1uy23BmWEf6B4x7/lifecycle/suspend",
+                "method": "POST"
+              },
+              "schema": {
+                "href": "https://dev-857255-admin.okta.com/api/v1/meta/schemas/user/osc7ut9Uu76oHVUZc0w4"
+              },
+              "resetPassword": {
+                "href": "https://dev-857255-admin.okta.com/api/v1/users/00u6b1uy23BmWEf6B4x7/lifecycle/reset_password",
+                "method": "POST"
+              },
+              "forgotPassword": {
+                "href": "https://dev-857255-admin.okta.com/api/v1/users/00u6b1uy23BmWEf6B4x7/credentials/forgot_password",
+                "method": "POST"
+              },
+              "expirePassword": {
+                "href": "https://dev-857255-admin.okta.com/api/v1/users/00u6b1uy23BmWEf6B4x7/lifecycle/expire_password",
+                "method": "POST"
+              },
+              "changeRecoveryQuestion": {
+                "href": "https://dev-857255-admin.okta.com/api/v1/users/00u6b1uy23BmWEf6B4x7/credentials/change_recovery_question",
+                "method": "POST"
+              },
+              "self": {
+                "href": "https://dev-857255-admin.okta.com/api/v1/users/00u6b1uy23BmWEf6B4x7"
+              },
+              "type": {
+                "href": "https://dev-857255-admin.okta.com/api/v1/meta/types/user/oty7ut9Uu76oHVUZc0w4"
+              },
+              "changePassword": {
+                "href": "https://dev-857255-admin.okta.com/api/v1/users/00u6b1uy23BmWEf6B4x7/credentials/change_password"
+              },
+              "deactivate": {
+                "href": "https://dev-857255-admin.okta.com/api/v1/users/00u6b1uy23BmWEf6B4x7/lifecycle/deactivate"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+]

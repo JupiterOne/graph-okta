@@ -94,4 +94,10 @@ export const ingestionConfig: IntegrationIngestionConfigFieldMap = {
     title: 'Okta Group Rules',
     description: 'Rules used to automate the assignment of users to groups',
   },
+  [IngestionSources.DEVICES]: {
+    title: 'Okta Devices',
+    description:
+      'Fetch Devices and relate them to the assigned users (Upgrade of the org to Okta Identity Engine is required)',
+    defaultsToDisabled: true,
+  },
 };

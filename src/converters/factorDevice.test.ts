@@ -1,5 +1,5 @@
 import { OktaFactor } from '../okta/types';
-import { createMFADeviceEntity } from './device';
+import { createMFADeviceEntity } from './factorDevice';
 
 describe('creating device entity', () => {
   test('with profile info', () => {

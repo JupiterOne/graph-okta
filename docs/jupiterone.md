@@ -165,6 +165,7 @@ The following entities are created:
 | Okta Account       | `okta_account`        | `Account`            |
 | Okta App UserGroup | `okta_app_user_group` | `UserGroup`          |
 | Okta Application   | `okta_application`    | `Application`        |
+| Okta Device        | `okta_device`         | `Device`             |
 | Okta Factor Device | `mfa_device`          | `Key`, `AccessKey`   |
 | Okta Role          | `okta_role`           | `AccessRole`         |
 | Okta Rule          | `okta_rule`           | `Configuration`      |
@@ -179,6 +180,7 @@ The following relationships are created:
 | Source Entity `_type`                  | Relationship `_class` | Target Entity `_type` |
 | -------------------------------------- | --------------------- | --------------------- |
 | `okta_account`                         | **HAS**               | `okta_application`    |
+| `okta_account`                         | **HAS**               | `okta_device`         |
 | `okta_account`                         | **HAS**               | `okta_user_group`     |
 | `okta_account`                         | **HAS**               | `okta_app_user_group` |
 | `okta_account`                         | **HAS**               | `okta_rule`           |
@@ -195,6 +197,7 @@ The following relationships are created:
 | `okta_user`                            | **CREATED**           | `okta_application`    |
 | `okta_user_group`                      | **ASSIGNED**          | `aws_iam_role`        |
 | `okta_user_group`                      | **ASSIGNED**          | `okta_role`           |
+| `okta_user`                            | **HAS**               | `okta_device`         |
 
 <!--
 ********************************************************************************

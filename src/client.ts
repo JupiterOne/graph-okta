@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
-/* eslint-disable @typescript-eslint/no-empty-function */
 import {
   IntegrationLogger,
   IntegrationProviderAuthenticationError,
@@ -13,16 +11,18 @@ import {
   Group,
   GroupRule,
   LogEvent,
-  Client as OktaClient,
   OrgOktaSupportSettingsObj,
   Role,
 } from '@okta/okta-sdk-nodejs';
 import {
-  OktaFactor,
   OktaApplication,
   OktaApplicationUser,
+  OktaClient,
+  OktaDevice,
+  OktaFactor,
   OktaUser,
 } from './okta/types';
+import { expandUsersMiddleware } from './okta/middlewares';
 
 const NINETY_DAYS_AGO = 90 * 24 * 60 * 60 * 1000;
 
@@ -149,7 +149,7 @@ export class APIClient {
    *
    * @param iteratee receives each resource to produce relationships
    */
-  public async iterateDevicesForUser(
+  public async iterateFactorDevicesForUser(
     userId: string,
     iteratee: ResourceIteratee<OktaFactor>,
   ): Promise<void> {
@@ -171,6 +171,41 @@ export class APIClient {
         });
       } else if (err.status === 404) {
         //ignore it. It's probably a user that got deleted between steps
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  /**
+   * Iterates each device resource in the provider.
+   *
+   * @param iteratee receives each resource to produce entities/relationships
+   */
+  public async iterateDevices(
+    iteratee: ResourceIteratee<OktaDevice>,
+  ): Promise<void> {
+    try {
+      const devicesCollection = await this.oktaClient.deviceApi.listDevices(
+        undefined,
+        {
+          ...this.oktaClient.configuration,
+          middleware: [
+            ...this.oktaClient.configuration.middleware,
+            // adds `expand=user` query param to requests, okta-sdk-nodejs@7.0.1 doesn't support it.
+            expandUsersMiddleware,
+          ],
+        },
+      );
+      await devicesCollection.each(iteratee);
+    } catch (err) {
+      if (err.status === 403) {
+        throw new IntegrationProviderAuthorizationError({
+          cause: err,
+          endpoint: err.url,
+          status: err.status,
+          statusText: err.errorSummary,
+        });
       } else {
         throw err;
       }

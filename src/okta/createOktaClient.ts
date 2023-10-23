@@ -5,8 +5,9 @@ import { OktaIntegrationConfig } from '../types';
 import { AttemptContext, retry } from '@lifeomic/attempt';
 import { Headers, Response } from 'node-fetch';
 
-import { DefaultRequestExecutor, Client } from '@okta/okta-sdk-nodejs';
+import { DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
 import { RequestOptions } from '@okta/okta-sdk-nodejs/src/types/request-options';
+import { OktaClient } from './types';
 
 /**
  * A custom Okta request executor that throttles requests when `x-rate-limit-remaining` response
@@ -120,7 +121,7 @@ export default function createOktaClient(
     logger.trace('Okta client received response');
   });
 
-  return new Client({
+  return new OktaClient({
     orgUrl: config.oktaOrgUrl,
     token: config.oktaApiKey,
     requestExecutor: defaultRequestExecutor,
