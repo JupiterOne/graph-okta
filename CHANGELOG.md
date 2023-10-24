@@ -1,3 +1,20 @@
+# v3.1.0 (Tue Oct 24 2023)
+
+#### 🚀 Enhancement
+
+- INT-8666 - Add devices ingestion [#240](https://github.com/JupiterOne/graph-okta/pull/240) (ronald.arias@contractor.jupiterone.com)
+
+#### ⚠️ Pushed to `main`
+
+- Populate CODEOWENRS, baseline package.json and baseline cortex.yaml ([@jablonnc](https://github.com/jablonnc))
+
+#### Authors: 2
+
+- Noah Jablonski ([@jablonnc](https://github.com/jablonnc))
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.0.1 (Wed Aug 16 2023)
 
 #### 🐛 Bug Fix
