@@ -210,7 +210,7 @@ test.skip('call for devices on a fake user', async () => {
   //call a fake user to test failure
   //the 404 error should be suppressed
   expect(
-    await apiClient.iterateDevicesForUser('thisisafakekey', () => {
+    await apiClient.iterateFactorDevicesForUser('thisisafakekey', () => {
       jest.fn;
     }),
   ).toReturn;
@@ -246,7 +246,7 @@ test('mocked 403', async () => {
   });
 
   await expect(
-    apiClient.iterateDevicesForUser('thisisafakekey', () => {
+    apiClient.iterateFactorDevicesForUser('thisisafakekey', () => {
       jest.fn;
     }),
   ).rejects.toThrowError(IntegrationProviderAuthorizationError);

@@ -40,11 +40,16 @@ export async function fetchGroups({
   let totalGroupsCollected = 0;
 
   await apiClient.iterateGroups(async (group) => {
-    logger.info({ groupId: group.id }, 'Creating group entity');
+    const groupEntity = createUserGroupEntity(
+      instance.config,
+      group,
+    ) as StandardizedOktaUserGroup;
+    if (!groupEntity) {
+      return;
+    }
 
-    const groupEntity = (await jobState.addEntity(
-      createUserGroupEntity(instance.config, group),
-    )) as StandardizedOktaUserGroup;
+    logger.debug({ groupId: group.id }, 'Creating group entity');
+    await jobState.addEntity(groupEntity);
 
     totalGroupsCollected++;
 
@@ -105,6 +110,10 @@ async function buildGroupEntityToUserRelationships(
     groupEntity: Entity,
     user: OktaUser,
   ) {
+    if (!user.id) {
+      return;
+    }
+
     const groupId = groupEntity.id as string;
     const userEntity = userIdToUserEntityMap.get(user.id);
 
@@ -113,7 +122,7 @@ async function buildGroupEntityToUserRelationships(
         createGroupUserRelationship(groupEntity, userEntity),
       );
 
-      logger.info(
+      logger.debug(
         {
           groupId,
           userId: user.id,

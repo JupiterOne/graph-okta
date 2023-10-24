@@ -12,12 +12,13 @@ export const Steps = {
   GROUPS: 'fetch-groups',
   USERS: 'fetch-users',
   APPLICATIONS: 'fetch-applications',
-  MFA_DEVICES: 'fetch-devices',
+  MFA_DEVICES: 'fetch-mfa-devices',
   RULES: 'fetch-rules',
   ROLES: 'fetch-roles',
   APPLICATION_CREATION: 'build-application-creation-relationship',
   APP_USER_GROUP_USERS_RELATIONSHIP: 'build-app-user-group-users-relationships',
   USER_GROUP_USERS_RELATIONSHIP: 'build-user-group-users-relationships',
+  DEVICES: 'fetch-devices',
 };
 
 export const IngestionSources = {
@@ -26,6 +27,7 @@ export const IngestionSources = {
   MFA_DEVICES: 'devices',
   RULES: 'rules',
   ROLES: 'roles',
+  DEVICES: 'machine-devices',
 };
 
 export const Entities: Record<
@@ -37,7 +39,8 @@ export const Entities: Record<
   | 'APPLICATION'
   | 'MFA_DEVICE'
   | 'RULE'
-  | 'ROLE',
+  | 'ROLE'
+  | 'DEVICE',
   StepEntityMetadata
 > = {
   ACCOUNT: {
@@ -85,6 +88,11 @@ export const Entities: Record<
     _type: 'okta_role',
     _class: ['AccessRole'],
   },
+  DEVICE: {
+    resourceName: 'Okta Device',
+    _type: 'okta_device',
+    _class: ['Device'],
+  },
 };
 
 export const Relationships: Record<
@@ -104,7 +112,9 @@ export const Relationships: Record<
   | 'USER_GROUP_ASSIGNED_AWS_IAM_ROLE'
   | 'USER_ASSIGNED_MFA_DEVICE'
   | 'RULE_MANAGES_USER_GROUP'
-  | 'USER_CREATED_APPLICATION',
+  | 'USER_CREATED_APPLICATION'
+  | 'USER_HAS_DEVICE'
+  | 'ACCOUNT_HAS_DEVICE',
   StepRelationshipMetadata
 > = {
   ACCOUNT_HAS_SERVICE: {
@@ -215,5 +225,17 @@ export const Relationships: Record<
     sourceType: Entities.USER._type,
     targetType: Entities.APPLICATION._type,
     partial: true,
+  },
+  ACCOUNT_HAS_DEVICE: {
+    _type: 'okta_account_has_device',
+    _class: RelationshipClass.HAS,
+    sourceType: Entities.ACCOUNT._type,
+    targetType: Entities.DEVICE._type,
+  },
+  USER_HAS_DEVICE: {
+    _type: 'okta_user_has_device',
+    _class: RelationshipClass.HAS,
+    sourceType: Entities.USER._type,
+    targetType: Entities.DEVICE._type,
   },
 };

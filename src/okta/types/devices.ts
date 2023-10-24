@@ -1,22 +1,42 @@
-import { OktaResource } from '.';
+import { Device, UserCredentials, UserProfile } from '@okta/okta-sdk-nodejs';
 
-export interface OktaFactor extends OktaResource {
-  factorType: string;
-  provider: string;
-  vendorName?: string;
-  device?: string;
-  status: string;
-  created: string;
-  lastUpdated: string;
-  lastVerified: string;
-  profile?: OktaFactorProfile;
+export interface OktaDevice extends Device {
+  _embedded?: {
+    users?: EmbeddedUser[];
+  };
 }
-
-interface OktaFactorProfile {
-  authenticatorName?: string; // // e.g. MacBook Touch ID, YubiKey 5 FIPS, etc.
-  platform?: string;
-  name?: string;
-  credentialId?: string;
-  version?: string;
-  deviceType: string;
+interface EmbeddedUser {
+  created?: string;
+  managementStatus?: 'MANAGED' | 'NOT_MANAGED';
+  screenLockType?: 'NONE' | 'PASSCODE' | 'BIOMETRIC';
+  user?: {
+    activated?: string;
+    created?: string;
+    credentials?: UserCredentials;
+    id?: string;
+    lastLogin?: string;
+    lastUpdated?: string;
+    passwordChanged?: string;
+    profile?: UserProfile;
+    status?:
+      | 'ACTIVE'
+      | 'DEPROVISIONED'
+      | 'LOCKED_OUT'
+      | 'PASSWORD_EXPIRED'
+      | 'PROVISIONED'
+      | 'RECOVERY'
+      | 'STAGED'
+      | 'SUSPENDED';
+    statusChanged?: string;
+    transitioningToStatus?: 'ACTIVE' | 'DEPROVISIONED' | 'PROVISIONED';
+    type?: {
+      id?: string;
+    };
+    _embedded?: {
+      [key: string]: any;
+    };
+    _links?: {
+      [key: string]: any;
+    };
+  };
 }

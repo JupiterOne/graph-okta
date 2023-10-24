@@ -33,8 +33,9 @@
     "postversion": "cp package.json ./dist/package.json"
   },
   "dependencies": {
-    "@okta/okta-sdk-nodejs": "^6.4.0",
-    "@types/node": "^18",
+    "@okta/okta-sdk-nodejs": "7.0.1",
+    "@types/node": "^20.8.7",
+    "lodash": "^4.17.21",
     "lodash.startcase": "^4.4.0",
     "p-map": "^4",
     "promise-retry": "^1.1.1",
@@ -47,6 +48,7 @@
     "@jupiterone/integration-sdk-core": "^9.5.0",
     "@jupiterone/integration-sdk-dev-tools": "^9.5.0",
     "@jupiterone/integration-sdk-testing": "^9.5.0",
+    "@types/lodash": "^4.14.200",
     "@types/node-fetch": "^2.6.3",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^4.29.3",

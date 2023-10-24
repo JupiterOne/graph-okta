@@ -28,11 +28,13 @@ export async function fetchUsers({
   const userIdToUserEntityMap = new Map<string, Entity>();
 
   await apiClient.iterateUsers(async (user) => {
-    const userEntity = await jobState.addEntity(
-      createUserEntity(instance.config, user),
-    );
+    const userEntity = createUserEntity(instance.config, user);
+    if (!userEntity) {
+      return;
+    }
 
-    userIdToUserEntityMap.set(user.id, userEntity);
+    await jobState.addEntity(userEntity);
+    userIdToUserEntityMap.set(user.id as string, userEntity);
 
     await jobState.addRelationship(
       createDirectRelationship({

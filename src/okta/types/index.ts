@@ -1,12 +1,8 @@
 export * from './applications';
-export * from './client';
 export * from './devices';
-export * from './groups';
-export * from './logs';
-export * from './roles';
-export * from './rules';
-export * from './support';
+export * from './factorDevices';
 export * from './users';
+export * from './client';
 
 /**
  * Account information derived from the domain/url.
@@ -14,8 +10,4 @@ export * from './users';
 export interface OktaAccountInfo {
   name: string;
   preview: boolean;
-}
-
-export interface OktaResource {
-  id: string;
 }

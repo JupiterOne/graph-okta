@@ -1,14 +1,21 @@
 import {
+  Entity,
   IntegrationStep,
   IntegrationStepExecutionContext,
+  RelationshipClass,
+  createDirectRelationship,
 } from '@jupiterone/integration-sdk-core';
 
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import { createUserMfaDeviceRelationship } from '../converters';
-import { createMFADeviceEntity } from '../converters/device';
-import { StandardizedOktaUser } from '../types';
-import { Entities, IngestionSources, Relationships, Steps } from './constants';
+import { createDeviceEntity } from '../converters/device';
+import {
+  DATA_ACCOUNT_ENTITY,
+  Entities,
+  IngestionSources,
+  Relationships,
+  Steps,
+} from './constants';
 
 export async function fetchDevices({
   instance,
@@ -16,39 +23,50 @@ export async function fetchDevices({
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   const apiClient = createAPIClient(instance.config, logger);
-  await jobState.iterateEntities(
-    {
-      _type: 'okta_user',
-    },
-    async (userEntity: StandardizedOktaUser) => {
-      if (userEntity.status !== 'deprovisioned') {
-        //asking for factors for DEPROV users throws error
-        await apiClient.iterateDevicesForUser(
-          userEntity._key,
-          async (device) => {
-            const deviceEntity = createMFADeviceEntity(device);
-            await jobState.addEntity(deviceEntity);
-            if (device.status === 'ACTIVE') {
-              userEntity.mfaEnabled = true;
-            }
-            await jobState.addRelationship(
-              createUserMfaDeviceRelationship(userEntity, deviceEntity),
-            );
-          },
+  const accountEntity = (await jobState.getData(DATA_ACCOUNT_ENTITY)) as Entity;
+
+  await apiClient.iterateDevices(async (device) => {
+    const deviceEntity = createDeviceEntity(device);
+    if (!deviceEntity) {
+      return;
+    }
+    await jobState.addEntity(deviceEntity);
+    for (const user of device._embedded?.users ?? []) {
+      const userKey = user.user?.id;
+      if (userKey && jobState.hasKey(userKey)) {
+        await jobState.addRelationship(
+          createDirectRelationship({
+            _class: RelationshipClass.HAS,
+            fromType: Entities.USER._type,
+            fromKey: userKey,
+            toType: Entities.DEVICE._type,
+            toKey: deviceEntity._key,
+          }),
         );
       }
-    },
-  );
+    }
+
+    await jobState.addRelationship(
+      createDirectRelationship({
+        _class: RelationshipClass.HAS,
+        from: accountEntity,
+        to: deviceEntity,
+      }),
+    );
+  });
 }
 
 export const deviceSteps: IntegrationStep<IntegrationConfig>[] = [
   {
-    id: Steps.MFA_DEVICES,
-    ingestionSourceId: IngestionSources.MFA_DEVICES,
+    id: Steps.DEVICES,
     name: 'Fetch Devices',
-    entities: [Entities.MFA_DEVICE],
-    relationships: [Relationships.USER_ASSIGNED_MFA_DEVICE],
+    entities: [Entities.DEVICE],
+    relationships: [
+      Relationships.ACCOUNT_HAS_DEVICE,
+      Relationships.USER_HAS_DEVICE,
+    ],
     dependsOn: [Steps.USERS],
+    ingestionSourceId: IngestionSources.DEVICES,
     executionHandler: fetchDevices,
   },
 ];

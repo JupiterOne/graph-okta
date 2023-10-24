@@ -3,40 +3,44 @@ import {
   parseTimePropertyValue,
 } from '@jupiterone/integration-sdk-core';
 
-import { OktaFactor } from '../okta/types';
 import { Entities } from '../steps/constants';
-import { StandardizedOktaFactor } from '../types';
+import { StandardizedOktaDevice } from '../types';
+import { OktaDevice } from '../okta/types';
 
-export function createMFADeviceEntity(
-  data: OktaFactor,
-): StandardizedOktaFactor {
-  const entityProperties: StandardizedOktaFactor = {
-    _key: data.id,
-    _type: Entities.MFA_DEVICE._type,
-    _class: Entities.MFA_DEVICE._class,
-    displayName: `${data.provider} ${data.factorType}`,
-    name: `${data.provider} ${data.factorType}`,
-    id: data.id,
-    factorType: data.factorType,
-    provider: data.provider,
-    vendorName: data.vendorName,
-    device: data.device,
-    status: data.status.toLowerCase(),
-    created: data.created,
-    lastUpdated: data.lastUpdated,
-    lastVerifiedOn: parseTimePropertyValue(data.lastVerified),
-    active: data.status === 'ACTIVE',
-    authenticatorName: data.profile?.authenticatorName,
-    platform: data.profile?.platform,
-    deviceType: data.profile?.deviceType,
-    credentialId: data.profile?.credentialId,
-    profileName: data.profile?.name,
-  };
+export function createDeviceEntity(
+  data: OktaDevice,
+): StandardizedOktaDevice | null {
+  if (!data.id || !data.resourceId) {
+    return null;
+  }
 
+  const id = data.id ?? data.resourceId;
   return createIntegrationEntity({
     entityData: {
       source: data,
-      assign: entityProperties,
+      assign: {
+        _key: id,
+        _type: Entities.DEVICE._type,
+        _class: Entities.DEVICE._class,
+        displayName:
+          data.resourceDisplayName?.value ?? data.profile?.displayName,
+        name: data.resourceDisplayName?.value ?? data.profile?.displayName,
+        id,
+        deviceId: id,
+        deviceStatus: data.status?.toLowerCase(),
+        createdOn: parseTimePropertyValue(data.created),
+        updatedOn: parseTimePropertyValue(data.lastUpdated),
+        lastSeenOn: parseTimePropertyValue(data.lastUpdated),
+        category: data.resourceType,
+        model: data.profile?.model,
+        make: data.profile?.manufacturer,
+        platform: data.profile?.platform?.toLowerCase(),
+        osName: data.profile?.platform?.toLowerCase(),
+        osVersion: data.profile?.osVersion,
+        serial: data.profile?.serialNumber,
+        registered: data.profile?.registered,
+        status: undefined,
+      },
     },
-  }) as StandardizedOktaFactor;
+  }) as StandardizedOktaDevice;
 }

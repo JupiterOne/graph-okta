@@ -27,6 +27,9 @@ export async function fetchRules({
   const accountEntity = (await jobState.getData(DATA_ACCOUNT_ENTITY)) as Entity;
 
   await apiClient.iterateRules(async (rule) => {
+    if (!rule.id) {
+      return;
+    }
     const ruleEntity = await jobState.addEntity(
       createIntegrationEntity({
         entityData: {
@@ -38,7 +41,7 @@ export async function fetchRules({
             id: rule.id,
             name: rule.name,
             ruleType: rule.type, //example: 'group_rule', 'policy_rule'
-            status: rule.status.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
+            status: rule.status?.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
             created: parseTimePropertyValue(rule.created)!,
             createdOn: parseTimePropertyValue(rule.created)!,
             lastUpdated: parseTimePropertyValue(rule.lastUpdated)!,
@@ -58,23 +61,21 @@ export async function fetchRules({
       }),
     );
 
-    if (rule.actions && rule.actions.assignUserToGroups) {
-      for (const groupId of rule.actions.assignUserToGroups.groupIds) {
-        const groupEntity = await jobState.findEntity(groupId);
-
-        if (!groupEntity) {
-          logger.warn(
-            `Rule points to non-existent group. Expected group with key to exist (key=${groupId})`,
-          );
-        } else {
-          await jobState.addRelationship(
-            createDirectRelationship({
-              _class: RelationshipClass.MANAGES,
-              from: ruleEntity,
-              to: groupEntity,
-            }),
-          );
-        }
+    for (const groupId of rule.actions?.assignUserToGroups?.groupIds || []) {
+      if (jobState.hasKey(groupId)) {
+        await jobState.addRelationship(
+          createDirectRelationship({
+            _class: RelationshipClass.MANAGES,
+            fromType: Entities.RULE._type,
+            fromKey: ruleEntity._key,
+            toType: Entities.USER_GROUP._type,
+            toKey: groupId,
+          }),
+        );
+      } else {
+        logger.warn(
+          `Rule points to non-existent group. Expected group with key to exist (key=${groupId})`,
+        );
       }
     }
   });

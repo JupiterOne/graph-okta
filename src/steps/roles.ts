@@ -8,20 +8,20 @@ import {
 } from '@jupiterone/integration-sdk-core';
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import {
-  OktaRole,
-  OktaRoleAssignmentType,
-  OktaRoleStatus,
-} from '../okta/types';
 import { Entities, IngestionSources, Relationships, Steps } from './constants';
+import { Role } from '@okta/okta-sdk-nodejs';
 
-function generateRoleKey(role: OktaRole) {
+function generateRoleKey(role: Role) {
   // We don't have an easy to use key, so construct one of our own.  Finally, we
   // perform a replace to get rid of any spaces that came in on the label or type.
   return (Entities.ROLE._type + ':' + role.label).replace(/ /g, '');
 }
 
-function createRoleEntity(role: OktaRole) {
+function createRoleEntity(role: Role) {
+  if (!role.label) {
+    return;
+  }
+
   return createIntegrationEntity({
     entityData: {
       source: role,
@@ -34,11 +34,11 @@ function createRoleEntity(role: OktaRole) {
         name: role.label,
         displayName: role.label,
         roleType: role.type,
-        status: role.status.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
-        active: role.status === OktaRoleStatus.ACTIVE,
+        status: role.status?.toLowerCase(), //example: 'ACTIVE' or 'INACTIVE'
+        active: role.status === 'ACTIVE',
         superAdmin: role.type === 'SUPER_ADMIN',
-        createdOn: parseTimePropertyValue(role.created)!,
-        lastUpdatedOn: parseTimePropertyValue(role.lastUpdated)!,
+        createdOn: parseTimePropertyValue(role.created),
+        lastUpdatedOn: parseTimePropertyValue(role.lastUpdated),
       },
     },
   });
@@ -57,13 +57,17 @@ export async function fetchRoles({
     },
     async (user) => {
       await apiClient.iterateRolesByUser(user._key, async (role) => {
-        let roleEntity = await jobState.findEntity(generateRoleKey(role));
+        const roleEntity = createRoleEntity(role);
         if (!roleEntity) {
-          roleEntity = await jobState.addEntity(createRoleEntity(role));
+          return;
+        }
+
+        if (!jobState.hasKey(roleEntity._key)) {
+          await jobState.addEntity(roleEntity);
         }
 
         // Only create relationships if this is a direct USER assignment
-        if (role.assignmentType == OktaRoleAssignmentType.USER) {
+        if (role.assignmentType == 'USER') {
           // Users may have already been granted access to the same role via multiple different groups.
           // We need to catch these duplicates to prevent key collisions.
           const userToRoleRelationship = createDirectRelationship({
@@ -90,9 +94,12 @@ export async function fetchRoles({
     },
     async (group) => {
       await apiClient.iterateRolesByGroup(group._key, async (role) => {
-        let roleEntity = await jobState.findEntity(generateRoleKey(role));
+        const roleEntity = createRoleEntity(role);
         if (!roleEntity) {
-          roleEntity = await jobState.addEntity(createRoleEntity(role));
+          return;
+        }
+        if (!jobState.hasKey(roleEntity._key)) {
+          await jobState.addEntity(roleEntity);
         }
 
         await jobState.addRelationship(
