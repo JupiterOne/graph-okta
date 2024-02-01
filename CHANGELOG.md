@@ -1,3 +1,22 @@
+# v3.1.1 (Thu Feb 01 2024)
+
+#### 🐛 Bug Fix
+
+- INT-10103: fix duplicated key [#241](https://github.com/JupiterOne/graph-okta/pull/241) ([@gastonyelmini](https://github.com/gastonyelmini))
+
+#### ⚠️ Pushed to `main`
+
+- Apply remove-codeql with multi-gitter [ci skip] ([@electricgull](https://github.com/electricgull))
+- Fix x-cortex-service-groups where tier-4 was set incorrectly ([@jablonnc](https://github.com/jablonnc))
+
+#### Authors: 3
+
+- Cameron Griffin ([@electricgull](https://github.com/electricgull))
+- Gaston Yelmini ([@gastonyelmini](https://github.com/gastonyelmini))
+- Noah Jablonski ([@jablonnc](https://github.com/jablonnc))
+
+---
+
 # v3.1.0 (Tue Oct 24 2023)
 
 #### 🚀 Enhancement
