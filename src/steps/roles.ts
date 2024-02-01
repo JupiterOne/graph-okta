@@ -102,13 +102,15 @@ export async function fetchRoles({
           await jobState.addEntity(roleEntity);
         }
 
-        await jobState.addRelationship(
-          createDirectRelationship({
-            _class: RelationshipClass.ASSIGNED,
-            from: group,
-            to: roleEntity,
-          }),
-        );
+        const groupRoleRelationship = createDirectRelationship({
+          _class: RelationshipClass.ASSIGNED,
+          from: group,
+          to: roleEntity,
+        });
+
+        if (!jobState.hasKey(groupRoleRelationship._key)) {
+          await jobState.addRelationship(groupRoleRelationship);
+        }
       });
     },
   );
