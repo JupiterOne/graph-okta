@@ -1,3 +1,15 @@
+# v3.1.2 (Thu Feb 01 2024)
+
+#### 🐛 Bug Fix
+
+- fix missing "settings.app" properties on listApplications [#242](https://github.com/JupiterOne/graph-okta/pull/242) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.1.1 (Thu Feb 01 2024)
 
 #### 🐛 Bug Fix
