@@ -1,3 +1,15 @@
+# v3.1.3 (Thu Mar 14 2024)
+
+#### 🐛 Bug Fix
+
+- Log url for x-rate-limit-reset [#243](https://github.com/JupiterOne/graph-okta/pull/243) ([@i5o](https://github.com/i5o))
+
+#### Authors: 1
+
+- Ignacio Rodríguez ([@i5o](https://github.com/i5o))
+
+---
+
 # v3.1.2 (Thu Feb 01 2024)
 
 #### 🐛 Bug Fix
