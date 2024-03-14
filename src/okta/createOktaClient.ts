@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { IntegrationLogger } from '@jupiterone/integration-sdk-core';
-import { OktaIntegrationConfig } from '../types';
 import { AttemptContext, retry } from '@lifeomic/attempt';
 import { Headers, Response } from 'node-fetch';
+import { OktaIntegrationConfig } from '../types';
 
 import { DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
 import { RequestOptions } from '@okta/okta-sdk-nodejs/src/types/request-options';
@@ -31,7 +31,12 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
     if (shouldThrottleNextRequest({ rateLimitLimit, rateLimitRemaining })) {
       const timeToSleepInMs = this.getRetryDelayMs(response);
       this.logger.info(
-        { rateLimitLimit, rateLimitRemaining, timeToSleepInMs },
+        {
+          rateLimitLimit,
+          rateLimitRemaining,
+          timeToSleepInMs,
+          url: response.url,
+        },
         'Exceeded 50% of rate limit. Sleeping until x-rate-limit-reset',
       );
       await sleep(timeToSleepInMs);
