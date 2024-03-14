@@ -1,3 +1,15 @@
+# v3.2.0 (Thu Mar 14 2024)
+
+#### 🚀 Enhancement
+
+- Info the API rate limit for the API endpoints used [#244](https://github.com/JupiterOne/graph-okta/pull/244) ([@i5o](https://github.com/i5o))
+
+#### Authors: 1
+
+- Ignacio Rodríguez ([@i5o](https://github.com/i5o))
+
+---
+
 # v3.1.3 (Thu Mar 14 2024)
 
 #### 🐛 Bug Fix
