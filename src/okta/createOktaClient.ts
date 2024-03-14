@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { IntegrationLogger } from '@jupiterone/integration-sdk-core';
+import {
+  IntegrationInfoEventName,
+  IntegrationLogger,
+} from '@jupiterone/integration-sdk-core';
 import { AttemptContext, retry } from '@lifeomic/attempt';
 import { Headers, Response } from 'node-fetch';
 import { OktaIntegrationConfig } from '../types';
@@ -8,6 +11,13 @@ import { OktaIntegrationConfig } from '../types';
 import { DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
 import { RequestOptions } from '@okta/okta-sdk-nodejs/src/types/request-options';
 import { OktaClient } from './types';
+
+const alreadyLoggedApiUrls: string[] = [];
+const getApiURL = (url: string): string => {
+  const trimmedUrl = url.substring(url.indexOf('/api/v1/'));
+  const idPattern = /\/([a-zA-Z0-9]{16,})(?=\/|$)/g;
+  return trimmedUrl.replace(idPattern, '/{id}').replace(/\?.*$/, '');
+};
 
 /**
  * A custom Okta request executor that throttles requests when `x-rate-limit-remaining` response
@@ -30,16 +40,30 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
     );
     if (shouldThrottleNextRequest({ rateLimitLimit, rateLimitRemaining })) {
       const timeToSleepInMs = this.getRetryDelayMs(response);
-      this.logger.info(
-        {
-          rateLimitLimit,
-          rateLimitRemaining,
-          timeToSleepInMs,
-          url: response.url,
-        },
-        'Exceeded 50% of rate limit. Sleeping until x-rate-limit-reset',
-      );
-      await sleep(timeToSleepInMs);
+      const apiURL = getApiURL(response.url);
+
+      if (timeToSleepInMs > 0) {
+        this.logger.info(
+          {
+            rateLimitLimit,
+            rateLimitRemaining,
+            timeToSleepInMs,
+            url: response.url,
+          },
+          'Exceeded 50% of rate limit. Sleeping until x-rate-limit-reset',
+        );
+
+        if (!alreadyLoggedApiUrls.includes(apiURL)) {
+          this.logger.publishInfoEvent({
+            description: `[${apiURL}] Reached 50% of the rate limit for this API - currently set as ${rateLimitLimit} requests per min.`,
+            name: IntegrationInfoEventName.Info,
+          });
+
+          alreadyLoggedApiUrls.push(apiURL);
+        }
+
+        await sleep(timeToSleepInMs);
+      }
     }
     return response;
   }
