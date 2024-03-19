@@ -19,6 +19,15 @@ const getApiURL = (url: string): string => {
   return trimmedUrl.replace(idPattern, '/{id}').replace(/\?.*$/, '');
 };
 
+let RATE_LIMIT_THRESHOLD = 0.5;
+// Set threshold to 90% if account is Indeed
+// https://jupiterone.atlassian.net/browse/INT-10529
+if (
+  process.env.JUPITERONE_ACCOUNT_ID === '2a04aebf-04ad-4649-bf8f-73abe00c81b0'
+) {
+  RATE_LIMIT_THRESHOLD = 0.9;
+}
+
 /**
  * A custom Okta request executor that throttles requests when `x-rate-limit-remaining` response
  * headers fall below a provided threshold.
@@ -48,14 +57,15 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
             rateLimitLimit,
             rateLimitRemaining,
             timeToSleepInMs,
+            RATE_LIMIT_THRESHOLD,
             url: response.url,
           },
-          'Exceeded 50% of rate limit. Sleeping until x-rate-limit-reset',
+          `Exceeded ${RATE_LIMIT_THRESHOLD * 100} of rate limit. Sleeping until x-rate-limit-reset`,
         );
 
         if (!alreadyLoggedApiUrls.includes(apiURL)) {
           this.logger.publishInfoEvent({
-            description: `[${apiURL}] Reached 50% of the rate limit for this API - currently set as ${rateLimitLimit} requests per min.`,
+            description: `[${apiURL}] Reached ${RATE_LIMIT_THRESHOLD * 100} of the rate limit for this API - currently set as ${rateLimitLimit} requests per min.`,
             name: IntegrationInfoEventName.Info,
           });
 
@@ -178,9 +188,9 @@ function parseRateLimitHeaders(headers: Headers): {
 }
 
 /**
- * Returns `true` if more than 50% of the limit has been consumed.
+ * Returns `true` if more than RATE_LIMIT_THRESHOLD * 100 of the limit has been consumed.
  *
- * We choose 50% here because Okta's UI allows users to easily set
+ * We choose 50% by default here because Okta's UI allows users to easily set
  * "warning notifications" at thresholds of 60%, 70%, 80%,90%, and 100%.
  *
  * Okta actually allows for custom thresholds between 30% and 90%, so we may
@@ -190,7 +200,6 @@ export function shouldThrottleNextRequest(params: {
   rateLimitLimit: number | undefined;
   rateLimitRemaining: number | undefined;
 }): boolean {
-  const RATE_LIMIT_THRESHOLD = 0.5;
   const { rateLimitLimit, rateLimitRemaining } = params;
   if (rateLimitLimit === undefined || rateLimitRemaining === undefined)
     return false;
