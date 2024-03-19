@@ -1,3 +1,15 @@
+# v3.2.1 (Tue Mar 19 2024)
+
+#### 🐛 Bug Fix
+
+- Use 90% of the API if it's Indeed [#245](https://github.com/JupiterOne/graph-okta/pull/245) ([@i5o](https://github.com/i5o))
+
+#### Authors: 1
+
+- Ignacio Rodríguez ([@i5o](https://github.com/i5o))
+
+---
+
 # v3.2.0 (Thu Mar 14 2024)
 
 #### 🚀 Enhancement
