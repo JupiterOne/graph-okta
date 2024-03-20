@@ -20,12 +20,12 @@ const getApiURL = (url: string): string => {
 };
 
 let RATE_LIMIT_THRESHOLD = 0.5;
-// Set threshold to 90% if account is Indeed
+// Set threshold to 100% if account is Indeed
 // https://jupiterone.atlassian.net/browse/INT-10529
 if (
   process.env.JUPITERONE_ACCOUNT_ID === '2a04aebf-04ad-4649-bf8f-73abe00c81b0'
 ) {
-  RATE_LIMIT_THRESHOLD = 0.9;
+  RATE_LIMIT_THRESHOLD = 1.0;
 }
 
 /**
@@ -51,6 +51,7 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
       const timeToSleepInMs = this.getRetryDelayMs(response);
       const apiURL = getApiURL(response.url);
 
+      const rateLimitPercent = RATE_LIMIT_THRESHOLD * 100;
       if (timeToSleepInMs > 0) {
         this.logger.info(
           {
@@ -60,12 +61,16 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
             RATE_LIMIT_THRESHOLD,
             url: response.url,
           },
-          `Exceeded ${RATE_LIMIT_THRESHOLD * 100} of rate limit. Sleeping until x-rate-limit-reset`,
+          `Exceeded ${rateLimitPercent}% of rate limit. Sleeping until x-rate-limit-reset`,
         );
 
         if (!alreadyLoggedApiUrls.includes(apiURL)) {
+          const msg =
+            rateLimitPercent === 100
+              ? `Exceeded ${rateLimitPercent}% of rate limit for this API.`
+              : `Reached requests limit`;
           this.logger.publishInfoEvent({
-            description: `[${apiURL}] Reached ${RATE_LIMIT_THRESHOLD * 100} of the rate limit for this API - currently set as ${rateLimitLimit} requests per min.`,
+            description: `[${apiURL}] ${msg} - currently set as ${rateLimitLimit} requests per min.`,
             name: IntegrationInfoEventName.Info,
           });
 
@@ -81,7 +86,16 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
   async fetch(request: RequestOptions) {
     const { logger } = this;
     return await retry(
-      () => this.withRateLimiting(() => super.fetch(request)),
+      () =>
+        this.withRateLimiting(() => {
+          if (
+            process.env.JUPITERONE_ACCOUNT_ID ===
+            '2a04aebf-04ad-4649-bf8f-73abe00c81b0'
+          ) {
+            this.logger.info('Fetching data', { url: request.url });
+          }
+          return super.fetch(request);
+        }),
       {
         maxAttempts: 3,
         delay: 30_000, // 30 seconds to start
