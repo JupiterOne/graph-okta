@@ -1,3 +1,15 @@
+# v3.2.3 (Wed Mar 20 2024)
+
+#### 🐛 Bug Fix
+
+- Update integration-deployment.yml [#247](https://github.com/JupiterOne/graph-okta/pull/247) ([@i5o](https://github.com/i5o))
+
+#### Authors: 1
+
+- Ignacio Rodríguez ([@i5o](https://github.com/i5o))
+
+---
+
 # v3.2.2 (Wed Mar 20 2024)
 
 #### 🐛 Bug Fix
