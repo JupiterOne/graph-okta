@@ -1,3 +1,15 @@
+# v3.2.2 (Wed Mar 20 2024)
+
+#### 🐛 Bug Fix
+
+- Add additional debug info for Indeed [#246](https://github.com/JupiterOne/graph-okta/pull/246) ([@i5o](https://github.com/i5o))
+
+#### Authors: 1
+
+- Ignacio Rodríguez ([@i5o](https://github.com/i5o))
+
+---
+
 # v3.2.1 (Tue Mar 19 2024)
 
 #### 🐛 Bug Fix
