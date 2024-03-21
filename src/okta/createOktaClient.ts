@@ -20,12 +20,12 @@ const getApiURL = (url: string): string => {
 };
 
 let RATE_LIMIT_THRESHOLD = 0.5;
-// Set threshold to 100% if account is Indeed
+// Set threshold to 95% if account is flagged
 // https://jupiterone.atlassian.net/browse/INT-10529
-if (
-  process.env.JUPITERONE_ACCOUNT_ID === '2a04aebf-04ad-4649-bf8f-73abe00c81b0'
-) {
-  RATE_LIMIT_THRESHOLD = 1.0;
+const accountFlagged =
+  process.env.JUPITERONE_ACCOUNT_ID === '2a04aebf-04ad-4649-bf8f-73abe00c81b0';
+if (accountFlagged) {
+  RATE_LIMIT_THRESHOLD = 0.95;
 }
 
 /**
@@ -47,6 +47,11 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
     const { rateLimitLimit, rateLimitRemaining } = parseRateLimitHeaders(
       response.headers,
     );
+
+    if (accountFlagged) {
+      this.logger.info(`Finished request ${response.url}`);
+    }
+
     if (shouldThrottleNextRequest({ rateLimitLimit, rateLimitRemaining })) {
       const timeToSleepInMs = this.getRetryDelayMs(response);
       const apiURL = getApiURL(response.url);
@@ -61,20 +66,25 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
             RATE_LIMIT_THRESHOLD,
             url: response.url,
           },
-          `Exceeded ${rateLimitPercent}% of rate limit. Sleeping until x-rate-limit-reset`,
+          `Exceeded ${rateLimitPercent}% of rate limit. Sleeping until x-rate-limit-reset. (${timeToSleepInMs}ms)`,
         );
 
-        if (!alreadyLoggedApiUrls.includes(apiURL)) {
-          const msg =
-            rateLimitPercent === 100
-              ? `Exceeded ${rateLimitPercent}% of rate limit for this API.`
-              : `Reached requests limit`;
+        let description = `[${apiURL}] Exceeded ${rateLimitPercent}% of rate limit for this API. - currently set as ${rateLimitLimit} requests per min.`;
+        if (accountFlagged) {
+          description = `${description}. Sleeping (${timeToSleepInMs}ms)`;
           this.logger.publishInfoEvent({
-            description: `[${apiURL}] ${msg} - currently set as ${rateLimitLimit} requests per min.`,
+            description,
             name: IntegrationInfoEventName.Info,
           });
+        } else {
+          if (!alreadyLoggedApiUrls.includes(apiURL)) {
+            this.logger.publishInfoEvent({
+              description,
+              name: IntegrationInfoEventName.Info,
+            });
 
-          alreadyLoggedApiUrls.push(apiURL);
+            alreadyLoggedApiUrls.push(apiURL);
+          }
         }
 
         await sleep(timeToSleepInMs);
@@ -88,11 +98,8 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
     return await retry(
       () =>
         this.withRateLimiting(() => {
-          if (
-            process.env.JUPITERONE_ACCOUNT_ID ===
-            '2a04aebf-04ad-4649-bf8f-73abe00c81b0'
-          ) {
-            this.logger.info('Fetching data', { url: request.url });
+          if (accountFlagged) {
+            this.logger.info(`Fetching ${request.url}`);
           }
           return super.fetch(request);
         }),
