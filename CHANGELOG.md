@@ -1,3 +1,15 @@
+# v3.2.4 (Thu Mar 21 2024)
+
+#### 🐛 Bug Fix
+
+- Add more logs for flagged customer [#248](https://github.com/JupiterOne/graph-okta/pull/248) ([@i5o](https://github.com/i5o))
+
+#### Authors: 1
+
+- Ignacio Rodríguez ([@i5o](https://github.com/i5o))
+
+---
+
 # v3.2.3 (Wed Mar 20 2024)
 
 #### 🐛 Bug Fix
