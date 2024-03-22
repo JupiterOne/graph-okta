@@ -1,7 +1,4 @@
-import {
-  IntegrationInfoEventName,
-  IntegrationLogger,
-} from '@jupiterone/integration-sdk-core';
+import { IntegrationLogger } from '@jupiterone/integration-sdk-core';
 
 class StepAnnouncer {
   private stepId: string;
@@ -52,22 +49,14 @@ class StepAnnouncer {
   public start(): void {
     if (this.intervalId === null) {
       this.intervalId = setInterval(() => this.announce(), this.announceEvery);
-      this.logger.debug(`[${this.stepId}] has started.`);
-      this.logger.publishInfoEvent({
-        description: `[${this.stepId}] has started.`,
-        name: IntegrationInfoEventName.Stats,
-      });
+      this.logger.info(`[${this.stepId}] has started.`);
     }
   }
 
   private announce(): void {
     const timeMessage = this.getReadableHumanTime();
     const description = `[${this.stepId}] has been running for ${timeMessage}.`;
-    this.logger.debug(description);
-    this.logger.publishInfoEvent({
-      description,
-      name: IntegrationInfoEventName.Stats,
-    });
+    this.logger.info(description);
   }
 
   public finish(): void {
@@ -76,11 +65,7 @@ class StepAnnouncer {
       this.intervalId = null;
 
       const description = `[${this.stepId}] has finished after ${this.getReadableHumanTime()}.`;
-      this.logger.debug(description);
-      this.logger.publishInfoEvent({
-        description,
-        name: IntegrationInfoEventName.Stats,
-      });
+      this.logger.info(description);
     }
   }
 }
