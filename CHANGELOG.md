@@ -1,3 +1,15 @@
+# v3.3.0 (Fri Mar 22 2024)
+
+#### 🚀 Enhancement
+
+- Add try/catch and a StepAnnouncer for customer [#249](https://github.com/JupiterOne/graph-okta/pull/249) ([@i5o](https://github.com/i5o))
+
+#### Authors: 1
+
+- Ignacio Rodríguez ([@i5o](https://github.com/i5o))
+
+---
+
 # v3.2.4 (Thu Mar 21 2024)
 
 #### 🐛 Bug Fix
