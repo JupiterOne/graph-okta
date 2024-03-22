@@ -26,7 +26,7 @@ export async function fetchDevices({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   let stepAnnouncer;
   if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.DEVICES, 10, logger);
+    stepAnnouncer = new StepAnnouncer(Steps.DEVICES, logger);
   }
 
   const apiClient = createAPIClient(instance.config, logger);

@@ -34,7 +34,7 @@ export async function fetchGroups({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   let stepAnnouncer;
   if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.GROUPS, 10, logger);
+    stepAnnouncer = new StepAnnouncer(Steps.GROUPS, logger);
   }
 
   const apiClient = createAPIClient(instance.config, logger);
@@ -96,7 +96,6 @@ export async function buildAppUserGroupUserRelationships(
   if (accountFlagged) {
     stepAnnouncer = new StepAnnouncer(
       Steps.APP_USER_GROUP_USERS_RELATIONSHIP,
-      10,
       context.logger,
     );
   }
@@ -117,7 +116,6 @@ export async function buildUserGroupUserRelationships(
   if (accountFlagged) {
     stepAnnouncer = new StepAnnouncer(
       Steps.USER_GROUP_USERS_RELATIONSHIP,
-      10,
       context.logger,
     );
   }
@@ -137,7 +135,6 @@ async function buildGroupEntityToUserRelationships(
   if (accountFlagged) {
     stepAnnouncer = new StepAnnouncer(
       Steps.APP_USER_GROUP_USERS_RELATIONSHIP,
-      10,
       context.logger,
     );
   }
@@ -186,23 +183,27 @@ async function buildGroupEntityToUserRelationships(
     }
   }
 
-  await batchIterateEntities({
-    context,
-    batchSize: 1000,
-    filter: { _type: groupEntityType },
-    async iteratee(groupEntities) {
-      const usersForGroupEntities = await collectUsersForGroupEntities(
-        apiClient,
-        groupEntities,
-      );
+  try {
+    await batchIterateEntities({
+      context,
+      batchSize: 1000,
+      filter: { _type: groupEntityType },
+      async iteratee(groupEntities) {
+        const usersForGroupEntities = await collectUsersForGroupEntities(
+          apiClient,
+          groupEntities,
+        );
 
-      for (const { groupEntity, users } of usersForGroupEntities) {
-        for (const user of users) {
-          await createGroupUserRelationshipWithJob(groupEntity, user);
+        for (const { groupEntity, users } of usersForGroupEntities) {
+          for (const user of users) {
+            await createGroupUserRelationshipWithJob(groupEntity, user);
+          }
         }
-      }
-    },
-  });
+      },
+    });
+  } catch (err) {
+    logger.error({ err }, 'Failed to build group to user relationships');
+  }
 
   if (accountFlagged) {
     stepAnnouncer.finish();

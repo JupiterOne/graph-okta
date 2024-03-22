@@ -26,7 +26,7 @@ export async function fetchRules({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   let stepAnnouncer;
   if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.RULES, 10, logger);
+    stepAnnouncer = new StepAnnouncer(Steps.RULES, logger);
   }
 
   const apiClient = createAPIClient(instance.config, logger);

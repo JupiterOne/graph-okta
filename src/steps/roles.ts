@@ -53,7 +53,7 @@ export async function fetchRoles({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   let stepAnnouncer;
   if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.ROLES, 10, logger);
+    stepAnnouncer = new StepAnnouncer(Steps.ROLES, logger);
   }
 
   const apiClient = createAPIClient(instance.config, logger);
