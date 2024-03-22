@@ -22,7 +22,7 @@ const getApiURL = (url: string): string => {
 let RATE_LIMIT_THRESHOLD = 0.5;
 // Set threshold to 95% if account is flagged
 // https://jupiterone.atlassian.net/browse/INT-10529
-const accountFlagged =
+export const accountFlagged =
   process.env.JUPITERONE_ACCOUNT_ID === '2a04aebf-04ad-4649-bf8f-73abe00c81b0';
 if (accountFlagged) {
   RATE_LIMIT_THRESHOLD = 0.95;
@@ -47,11 +47,6 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
     const { rateLimitLimit, rateLimitRemaining } = parseRateLimitHeaders(
       response.headers,
     );
-
-    if (accountFlagged) {
-      this.logger.info(`Finished request ${response.url}`);
-    }
-
     if (shouldThrottleNextRequest({ rateLimitLimit, rateLimitRemaining })) {
       const timeToSleepInMs = this.getRetryDelayMs(response);
       const apiURL = getApiURL(response.url);
@@ -69,22 +64,13 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
           `Exceeded ${rateLimitPercent}% of rate limit. Sleeping until x-rate-limit-reset. (${timeToSleepInMs}ms)`,
         );
 
-        let description = `[${apiURL}] Exceeded ${rateLimitPercent}% of rate limit for this API. - currently set as ${rateLimitLimit} requests per min.`;
-        if (accountFlagged) {
-          description = `${description}. Sleeping (${timeToSleepInMs}ms)`;
+        if (!alreadyLoggedApiUrls.includes(apiURL)) {
           this.logger.publishInfoEvent({
-            description,
+            description: `[${apiURL}] Exceeded ${rateLimitPercent}% of rate limit for this API. - currently set as ${rateLimitLimit} requests per min.`,
             name: IntegrationInfoEventName.Info,
           });
-        } else {
-          if (!alreadyLoggedApiUrls.includes(apiURL)) {
-            this.logger.publishInfoEvent({
-              description,
-              name: IntegrationInfoEventName.Info,
-            });
 
-            alreadyLoggedApiUrls.push(apiURL);
-          }
+          alreadyLoggedApiUrls.push(apiURL);
         }
 
         await sleep(timeToSleepInMs);
@@ -96,13 +82,7 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
   async fetch(request: RequestOptions) {
     const { logger } = this;
     return await retry(
-      () =>
-        this.withRateLimiting(() => {
-          if (accountFlagged) {
-            this.logger.info(`Fetching ${request.url}`);
-          }
-          return super.fetch(request);
-        }),
+      () => this.withRateLimiting(() => super.fetch(request)),
       {
         maxAttempts: 3,
         delay: 30_000, // 30 seconds to start

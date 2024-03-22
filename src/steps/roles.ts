@@ -3,13 +3,15 @@ import {
   createIntegrationEntity,
   IntegrationStep,
   IntegrationStepExecutionContext,
-  RelationshipClass,
   parseTimePropertyValue,
+  RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
+import { Role } from '@okta/okta-sdk-nodejs';
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
+import { accountFlagged } from '../okta/createOktaClient';
+import { StepAnnouncer } from '../util/runningTimer';
 import { Entities, IngestionSources, Relationships, Steps } from './constants';
-import { Role } from '@okta/okta-sdk-nodejs';
 
 function generateRoleKey(role: Role) {
   // We don't have an easy to use key, so construct one of our own.  Finally, we
@@ -49,71 +51,88 @@ export async function fetchRoles({
   jobState,
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
+  let stepAnnouncer;
+  if (accountFlagged) {
+    stepAnnouncer = new StepAnnouncer(Steps.ROLES, 10, logger);
+  }
+
   const apiClient = createAPIClient(instance.config, logger);
 
-  await jobState.iterateEntities(
-    {
-      _type: Entities.USER._type,
-    },
-    async (user) => {
-      await apiClient.iterateRolesByUser(user._key, async (role) => {
-        const roleEntity = createRoleEntity(role);
-        if (!roleEntity) {
-          return;
-        }
+  try {
+    await jobState.iterateEntities(
+      {
+        _type: Entities.USER._type,
+      },
+      async (user) => {
+        await apiClient.iterateRolesByUser(user._key, async (role) => {
+          const roleEntity = createRoleEntity(role);
+          if (!roleEntity) {
+            return;
+          }
 
-        if (!jobState.hasKey(roleEntity._key)) {
-          await jobState.addEntity(roleEntity);
-        }
+          if (!jobState.hasKey(roleEntity._key)) {
+            await jobState.addEntity(roleEntity);
+          }
 
-        // Only create relationships if this is a direct USER assignment
-        if (role.assignmentType == 'USER') {
-          // Users may have already been granted access to the same role via multiple different groups.
-          // We need to catch these duplicates to prevent key collisions.
-          const userToRoleRelationship = createDirectRelationship({
+          // Only create relationships if this is a direct USER assignment
+          if (role.assignmentType == 'USER') {
+            // Users may have already been granted access to the same role via multiple different groups.
+            // We need to catch these duplicates to prevent key collisions.
+            const userToRoleRelationship = createDirectRelationship({
+              _class: RelationshipClass.ASSIGNED,
+              from: user,
+              to: roleEntity,
+            });
+            if (!jobState.hasKey(userToRoleRelationship._key)) {
+              await jobState.addRelationship(userToRoleRelationship);
+            } else {
+              logger.info(
+                { userToRoleRelationship },
+                'Skipping relationship creation.  Relationship already exists.',
+              );
+            }
+          }
+        });
+      },
+    );
+  } catch (err) {
+    logger.error({ err }, 'Failed to fetch user roles');
+  }
+
+  try {
+    await jobState.iterateEntities(
+      {
+        _type: Entities.USER_GROUP._type,
+      },
+      async (group) => {
+        await apiClient.iterateRolesByGroup(group._key, async (role) => {
+          const roleEntity = createRoleEntity(role);
+          if (!roleEntity) {
+            return;
+          }
+          if (!jobState.hasKey(roleEntity._key)) {
+            await jobState.addEntity(roleEntity);
+          }
+
+          const groupRoleRelationship = createDirectRelationship({
             _class: RelationshipClass.ASSIGNED,
-            from: user,
+            from: group,
             to: roleEntity,
           });
-          if (!jobState.hasKey(userToRoleRelationship._key)) {
-            await jobState.addRelationship(userToRoleRelationship);
-          } else {
-            logger.info(
-              { userToRoleRelationship },
-              'Skipping relationship creation.  Relationship already exists.',
-            );
+
+          if (!jobState.hasKey(groupRoleRelationship._key)) {
+            await jobState.addRelationship(groupRoleRelationship);
           }
-        }
-      });
-    },
-  );
-
-  await jobState.iterateEntities(
-    {
-      _type: Entities.USER_GROUP._type,
-    },
-    async (group) => {
-      await apiClient.iterateRolesByGroup(group._key, async (role) => {
-        const roleEntity = createRoleEntity(role);
-        if (!roleEntity) {
-          return;
-        }
-        if (!jobState.hasKey(roleEntity._key)) {
-          await jobState.addEntity(roleEntity);
-        }
-
-        const groupRoleRelationship = createDirectRelationship({
-          _class: RelationshipClass.ASSIGNED,
-          from: group,
-          to: roleEntity,
         });
+      },
+    );
+  } catch (err) {
+    logger.error({ err }, 'Failed to fetch group roles');
+  }
 
-        if (!jobState.hasKey(groupRoleRelationship._key)) {
-          await jobState.addRelationship(groupRoleRelationship);
-        }
-      });
-    },
-  );
+  if (accountFlagged) {
+    stepAnnouncer.finish();
+  }
 }
 
 export const roleSteps: IntegrationStep<IntegrationConfig>[] = [

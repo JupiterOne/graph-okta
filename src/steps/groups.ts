@@ -14,8 +14,10 @@ import {
   createGroupUserRelationship,
   createUserGroupEntity,
 } from '../converters/group';
+import { accountFlagged } from '../okta/createOktaClient';
 import { OktaUser } from '../okta/types';
 import { StandardizedOktaAccount, StandardizedOktaUserGroup } from '../types';
+import { StepAnnouncer } from '../util/runningTimer';
 import {
   DATA_ACCOUNT_ENTITY,
   DATA_USER_ENTITIES_MAP,
@@ -30,6 +32,11 @@ export async function fetchGroups({
   jobState,
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
+  let stepAnnouncer;
+  if (accountFlagged) {
+    stepAnnouncer = new StepAnnouncer(Steps.GROUPS, 10, logger);
+  }
+
   const apiClient = createAPIClient(instance.config, logger);
 
   const accountEntity = (await jobState.getData(
@@ -39,24 +46,28 @@ export async function fetchGroups({
   const groupCollectionStartTime = Date.now();
   let totalGroupsCollected = 0;
 
-  await apiClient.iterateGroups(async (group) => {
-    const groupEntity = createUserGroupEntity(
-      instance.config,
-      group,
-    ) as StandardizedOktaUserGroup;
-    if (!groupEntity) {
-      return;
-    }
+  try {
+    await apiClient.iterateGroups(async (group) => {
+      const groupEntity = createUserGroupEntity(
+        instance.config,
+        group,
+      ) as StandardizedOktaUserGroup;
+      if (!groupEntity) {
+        return;
+      }
 
-    logger.debug({ groupId: group.id }, 'Creating group entity');
-    await jobState.addEntity(groupEntity);
+      logger.debug({ groupId: group.id }, 'Creating group entity');
+      await jobState.addEntity(groupEntity);
 
-    totalGroupsCollected++;
+      totalGroupsCollected++;
 
-    await jobState.addRelationship(
-      createAccountGroupRelationship(accountEntity, groupEntity),
-    );
-  });
+      await jobState.addRelationship(
+        createAccountGroupRelationship(accountEntity, groupEntity),
+      );
+    });
+  } catch (err) {
+    logger.error({ err }, 'Failed to fetch groups');
+  }
 
   const groupCollectionEndTime = Date.now() - groupCollectionStartTime;
 
@@ -67,6 +78,10 @@ export async function fetchGroups({
     },
     'Finished processing groups',
   );
+
+  if (accountFlagged) {
+    stepAnnouncer.finish();
+  }
 }
 
 export async function buildAppUserGroupUserRelationships(
@@ -77,22 +92,56 @@ export async function buildAppUserGroupUserRelationships(
     return;
   }
 
+  let stepAnnouncer;
+  if (accountFlagged) {
+    stepAnnouncer = new StepAnnouncer(
+      Steps.APP_USER_GROUP_USERS_RELATIONSHIP,
+      10,
+      context.logger,
+    );
+  }
   await buildGroupEntityToUserRelationships(
     Entities.APP_USER_GROUP._type,
     context,
   );
+
+  if (accountFlagged) {
+    stepAnnouncer.finish();
+  }
 }
 
 export async function buildUserGroupUserRelationships(
   context: IntegrationStepExecutionContext<IntegrationConfig>,
 ) {
+  let stepAnnouncer;
+  if (accountFlagged) {
+    stepAnnouncer = new StepAnnouncer(
+      Steps.USER_GROUP_USERS_RELATIONSHIP,
+      10,
+      context.logger,
+    );
+  }
+
   await buildGroupEntityToUserRelationships(Entities.USER_GROUP._type, context);
+
+  if (accountFlagged) {
+    stepAnnouncer.finish();
+  }
 }
 
 async function buildGroupEntityToUserRelationships(
   groupEntityType: string,
   context: IntegrationStepExecutionContext<IntegrationConfig>,
 ) {
+  let stepAnnouncer;
+  if (accountFlagged) {
+    stepAnnouncer = new StepAnnouncer(
+      Steps.APP_USER_GROUP_USERS_RELATIONSHIP,
+      10,
+      context.logger,
+    );
+  }
+
   const { instance, logger, jobState } = context;
   const apiClient = createAPIClient(instance.config, logger);
   const userIdToUserEntityMap = (await jobState.getData<Map<string, Entity>>(
@@ -154,6 +203,10 @@ async function buildGroupEntityToUserRelationships(
       }
     },
   });
+
+  if (accountFlagged) {
+    stepAnnouncer.finish();
+  }
 }
 
 async function collectUsersForGroupEntities(
