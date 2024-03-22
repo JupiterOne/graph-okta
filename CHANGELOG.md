@@ -1,3 +1,15 @@
+# v3.3.1 (Fri Mar 22 2024)
+
+#### 🐛 Bug Fix
+
+- Increase running timer to 45 seconds and catch errors around batchIterateEntities [#250](https://github.com/JupiterOne/graph-okta/pull/250) ([@i5o](https://github.com/i5o))
+
+#### Authors: 1
+
+- Ignacio Rodríguez ([@i5o](https://github.com/i5o))
+
+---
+
 # v3.3.0 (Fri Mar 22 2024)
 
 #### 🚀 Enhancement
