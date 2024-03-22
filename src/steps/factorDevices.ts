@@ -7,7 +7,9 @@ import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
 import { createUserMfaDeviceRelationship } from '../converters';
 import { createMFADeviceEntity } from '../converters/factorDevice';
+import { accountFlagged } from '../okta/createOktaClient';
 import { StandardizedOktaUser } from '../types';
+import { StepAnnouncer } from '../util/runningTimer';
 import { Entities, IngestionSources, Relationships, Steps } from './constants';
 
 export async function fetchFactorDevices({
@@ -15,33 +17,46 @@ export async function fetchFactorDevices({
   jobState,
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
+  let stepAnnouncer;
+  if (accountFlagged) {
+    stepAnnouncer = new StepAnnouncer(Steps.MFA_DEVICES, 10, logger);
+  }
+
   const apiClient = createAPIClient(instance.config, logger);
-  await jobState.iterateEntities(
-    {
-      _type: Entities.USER._type,
-    },
-    async (userEntity: StandardizedOktaUser) => {
-      if (userEntity.status !== 'deprovisioned') {
-        //asking for factors for DEPROV users throws error
-        await apiClient.iterateFactorDevicesForUser(
-          userEntity.id,
-          async (device) => {
-            const deviceEntity = createMFADeviceEntity(device);
-            if (!deviceEntity) {
-              return;
-            }
-            await jobState.addEntity(deviceEntity);
-            if (device.status === 'ACTIVE') {
-              userEntity.mfaEnabled = true;
-            }
-            await jobState.addRelationship(
-              createUserMfaDeviceRelationship(userEntity, deviceEntity),
-            );
-          },
-        );
-      }
-    },
-  );
+  try {
+    await jobState.iterateEntities(
+      {
+        _type: Entities.USER._type,
+      },
+      async (userEntity: StandardizedOktaUser) => {
+        if (userEntity.status !== 'deprovisioned') {
+          //asking for factors for DEPROV users throws error
+          await apiClient.iterateFactorDevicesForUser(
+            userEntity.id,
+            async (device) => {
+              const deviceEntity = createMFADeviceEntity(device);
+              if (!deviceEntity) {
+                return;
+              }
+              await jobState.addEntity(deviceEntity);
+              if (device.status === 'ACTIVE') {
+                userEntity.mfaEnabled = true;
+              }
+              await jobState.addRelationship(
+                createUserMfaDeviceRelationship(userEntity, deviceEntity),
+              );
+            },
+          );
+        }
+      },
+    );
+  } catch (err) {
+    logger.error({ err }, 'Failed to fetch MFA devices');
+  }
+
+  if (accountFlagged) {
+    stepAnnouncer.finish();
+  }
 }
 
 export const factorDeviceSteps: IntegrationStep<IntegrationConfig>[] = [
