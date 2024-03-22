@@ -26,7 +26,7 @@ export async function fetchUsers({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   let stepAnnouncer;
   if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.USERS, 10, logger);
+    stepAnnouncer = new StepAnnouncer(Steps.USERS, logger);
   }
 
   const apiClient = createAPIClient(instance.config, logger);

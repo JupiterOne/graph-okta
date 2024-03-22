@@ -32,7 +32,7 @@ export async function fetchAccountDetails({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   let stepAnnouncer;
   if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.ACCOUNT, 10, logger);
+    stepAnnouncer = new StepAnnouncer(Steps.ACCOUNT, logger);
   }
 
   const apiClient = createAPIClient(instance.config, logger);

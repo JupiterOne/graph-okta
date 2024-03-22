@@ -31,7 +31,7 @@ export async function fetchApplications({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   let stepAnnouncer;
   if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.APPLICATIONS, 10, logger);
+    stepAnnouncer = new StepAnnouncer(Steps.APPLICATIONS, logger);
   }
 
   const apiClient = createAPIClient(instance.config, logger);

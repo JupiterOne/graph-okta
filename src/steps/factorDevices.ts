@@ -19,7 +19,7 @@ export async function fetchFactorDevices({
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
   let stepAnnouncer;
   if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.MFA_DEVICES, 10, logger);
+    stepAnnouncer = new StepAnnouncer(Steps.MFA_DEVICES, logger);
   }
 
   const apiClient = createAPIClient(instance.config, logger);
