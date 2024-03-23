@@ -134,7 +134,7 @@ async function buildGroupEntityToUserRelationships(
   let stepAnnouncer;
   if (accountFlagged) {
     stepAnnouncer = new StepAnnouncer(
-      Steps.APP_USER_GROUP_USERS_RELATIONSHIP,
+      `${Steps.APP_USER_GROUP_USERS_RELATIONSHIP} - ${groupEntityType}`,
       context.logger,
     );
   }
