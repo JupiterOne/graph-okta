@@ -1,3 +1,15 @@
+# v3.3.2 (Sat Mar 23 2024)
+
+#### 🐛 Bug Fix
+
+- Add groupEntityType to buildGroupEntityToUserRelationships [#251](https://github.com/JupiterOne/graph-okta/pull/251) ([@i5o](https://github.com/i5o))
+
+#### Authors: 1
+
+- Ignacio Rodríguez ([@i5o](https://github.com/i5o))
+
+---
+
 # v3.3.1 (Fri Mar 22 2024)
 
 #### 🐛 Bug Fix
