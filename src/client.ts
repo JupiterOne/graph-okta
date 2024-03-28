@@ -37,7 +37,10 @@ const NINETY_DAYS_AGO = 90 * 24 * 60 * 60 * 1000;
 export class APIClient {
   oktaClient: OktaClient;
   logger: IntegrationLogger;
-  constructor(readonly config: IntegrationConfig, logger: IntegrationLogger) {
+  constructor(
+    readonly config: IntegrationConfig,
+    logger: IntegrationLogger,
+  ) {
     this.oktaClient = createOktaClient(logger, config);
     this.logger = logger;
   }
@@ -72,7 +75,7 @@ export class APIClient {
       await usersCollection.each(iteratee);
       const deprovisionedUsersCollection =
         await this.oktaClient.userApi.listUsers({
-          filter: 'status eq "DEPROVISIONED"',
+          search: 'status eq "DEPROVISIONED"',
         });
       await deprovisionedUsersCollection.each(iteratee);
     } catch (err) {
@@ -121,11 +124,11 @@ export class APIClient {
       const groupUsersCollection =
         await this.oktaClient.groupApi.listGroupUsers({
           groupId,
-          // The number of users returned for the given group defaults to 1000
+          // The recommended page limit is now 200
           // according to the Okta API docs:
           //
           // https://developer.okta.com/docs/reference/api/groups/#list-group-members
-          limit: 10000,
+          limit: 200,
         });
       await groupUsersCollection.each(iteratee);
     } catch (err) {

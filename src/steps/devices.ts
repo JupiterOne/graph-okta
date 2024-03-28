@@ -9,8 +9,6 @@ import {
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
 import { createDeviceEntity } from '../converters/device';
-import { accountFlagged } from '../okta/createOktaClient';
-import { StepAnnouncer } from '../util/runningTimer';
 import {
   DATA_ACCOUNT_ENTITY,
   Entities,
@@ -24,11 +22,6 @@ export async function fetchDevices({
   jobState,
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  let stepAnnouncer;
-  if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.DEVICES, logger);
-  }
-
   const apiClient = createAPIClient(instance.config, logger);
   const accountEntity = (await jobState.getData(DATA_ACCOUNT_ENTITY)) as Entity;
 
@@ -64,10 +57,6 @@ export async function fetchDevices({
     });
   } catch (err) {
     logger.error({ err }, 'Failed to fetch devices');
-  }
-
-  if (accountFlagged) {
-    stepAnnouncer.finish();
   }
 }
 

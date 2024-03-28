@@ -32,6 +32,9 @@ export const instanceConfigFields: IntegrationInstanceConfigFieldMap = {
     type: 'string',
     mask: true,
   },
+  rateLimitThreshold: {
+    type: 'string',
+  },
 };
 
 /**
@@ -48,6 +51,11 @@ export interface IntegrationConfig extends IntegrationInstanceConfig {
    * The provider API client secret used to authenticate requests.
    */
   oktaApiKey: string;
+
+  /**
+   * Custom rate limit threshold for the Okta API client.
+   */
+  rateLimitThreshold?: number;
 }
 
 export async function validateInvocation(
@@ -67,6 +75,10 @@ export async function validateInvocation(
     throw new IntegrationValidationError(
       `Invalid Okta org URL provided (oktaOrgUrl=${config.oktaOrgUrl})`,
     );
+  }
+
+  if (config.rateLimitThreshold) {
+    config.rateLimitThreshold = Number(config.rateLimitThreshold);
   }
 
   const apiClient = createAPIClient(config, context.logger);

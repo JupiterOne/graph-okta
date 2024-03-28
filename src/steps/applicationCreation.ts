@@ -7,8 +7,6 @@ import {
 
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import { accountFlagged } from '../okta/createOktaClient';
-import { StepAnnouncer } from '../util/runningTimer';
 import { Entities, Relationships, Steps } from './constants';
 
 export async function buildUserCreatedApplication({
@@ -16,11 +14,6 @@ export async function buildUserCreatedApplication({
   jobState,
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  let stepAnnouncer;
-  if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.APPLICATION_CREATION, logger);
-  }
-
   const apiClient = createAPIClient(instance.config, logger);
 
   try {
@@ -54,10 +47,6 @@ export async function buildUserCreatedApplication({
     });
   } catch (err) {
     logger.error({ err }, 'Error fetching app created logs');
-  }
-
-  if (accountFlagged) {
-    stepAnnouncer.finish();
   }
 }
 

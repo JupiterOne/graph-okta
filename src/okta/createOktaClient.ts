@@ -19,26 +19,21 @@ const getApiURL = (url: string): string => {
   return trimmedUrl.replace(idPattern, '/{id}').replace(/\?.*$/, '');
 };
 
-let RATE_LIMIT_THRESHOLD = 0.5;
-// Set threshold to 95% if account is flagged
-// https://jupiterone.atlassian.net/browse/INT-10529
-export const accountFlagged =
-  process.env.JUPITERONE_ACCOUNT_ID === '2a04aebf-04ad-4649-bf8f-73abe00c81b0';
-if (accountFlagged) {
-  RATE_LIMIT_THRESHOLD = 0.95;
-}
+const DEFAULT_RATE_LIMIT_THRESHOLD = 0.5;
 
 /**
  * A custom Okta request executor that throttles requests when `x-rate-limit-remaining` response
  * headers fall below a provided threshold.
  */
 export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor {
+  rateLimitThreshold: number;
   logger: IntegrationLogger;
   minimumRateLimitRemaining: number;
   requestAfter: number | undefined;
 
-  constructor(logger: IntegrationLogger) {
+  constructor(rateLimitThreshold: number, logger: IntegrationLogger) {
     super();
+    this.rateLimitThreshold = rateLimitThreshold;
     this.logger = logger;
   }
 
@@ -47,18 +42,24 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
     const { rateLimitLimit, rateLimitRemaining } = parseRateLimitHeaders(
       response.headers,
     );
-    if (shouldThrottleNextRequest({ rateLimitLimit, rateLimitRemaining })) {
+    if (
+      shouldThrottleNextRequest({
+        threshold: this.rateLimitThreshold,
+        rateLimitLimit,
+        rateLimitRemaining,
+      })
+    ) {
       const timeToSleepInMs = this.getRetryDelayMs(response);
       const apiURL = getApiURL(response.url);
 
-      const rateLimitPercent = RATE_LIMIT_THRESHOLD * 100;
+      const rateLimitPercent = this.rateLimitThreshold * 100;
       if (timeToSleepInMs > 0) {
         this.logger.info(
           {
             rateLimitLimit,
             rateLimitRemaining,
             timeToSleepInMs,
-            RATE_LIMIT_THRESHOLD,
+            rateLimitThreshold: this.rateLimitThreshold,
             url: response.url,
           },
           `Exceeded ${rateLimitPercent}% of rate limit. Sleeping until x-rate-limit-reset. (${timeToSleepInMs}ms)`,
@@ -121,6 +122,7 @@ export default function createOktaClient(
   config: OktaIntegrationConfig,
 ) {
   const defaultRequestExecutor = new RequestExecutorWithEarlyRateLimiting(
+    config.rateLimitThreshold ?? DEFAULT_RATE_LIMIT_THRESHOLD,
     logger,
   );
 
@@ -189,7 +191,7 @@ function parseRateLimitHeaders(headers: Headers): {
 }
 
 /**
- * Returns `true` if more than RATE_LIMIT_THRESHOLD * 100 of the limit has been consumed.
+ * Returns `true` if more than threshold * 100 of the limit has been consumed.
  *
  * We choose 50% by default here because Okta's UI allows users to easily set
  * "warning notifications" at thresholds of 60%, 70%, 80%,90%, and 100%.
@@ -198,15 +200,16 @@ function parseRateLimitHeaders(headers: Headers): {
  * need to make this value configurable in the future.
  */
 export function shouldThrottleNextRequest(params: {
+  threshold: number;
   rateLimitLimit: number | undefined;
   rateLimitRemaining: number | undefined;
 }): boolean {
-  const { rateLimitLimit, rateLimitRemaining } = params;
+  const { threshold, rateLimitLimit, rateLimitRemaining } = params;
   if (rateLimitLimit === undefined || rateLimitRemaining === undefined)
     return false;
 
   const rateLimitConsumed = rateLimitLimit - rateLimitRemaining;
-  return rateLimitConsumed / rateLimitLimit > RATE_LIMIT_THRESHOLD;
+  return rateLimitConsumed / rateLimitLimit > threshold;
 }
 
 function sleep(ms: number) {

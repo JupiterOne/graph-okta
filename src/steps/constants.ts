@@ -5,13 +5,14 @@ import {
 } from '@jupiterone/integration-sdk-core';
 
 export const DATA_ACCOUNT_ENTITY = 'DATA_ACCOUNT_ENTITY';
-export const DATA_USER_ENTITIES_MAP = 'DATA_USER_ENTITIES_MAP';
 
 export const Steps = {
   ACCOUNT: 'fetch-account',
   GROUPS: 'fetch-groups',
   USERS: 'fetch-users',
   APPLICATIONS: 'fetch-applications',
+  GROUP_APP_RELATIONSHIP: 'build-group-app-relationships',
+  USER_APP_RELATIONSHIP: 'build-user-app-relationships',
   MFA_DEVICES: 'fetch-mfa-devices',
   RULES: 'fetch-rules',
   ROLES: 'fetch-roles',
