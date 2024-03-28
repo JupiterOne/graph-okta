@@ -1,3 +1,15 @@
+# v3.3.3 (Thu Mar 28 2024)
+
+#### 🐛 Bug Fix
+
+- make improvements to request concurrently on big steps [#252](https://github.com/JupiterOne/graph-okta/pull/252) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.2 (Sat Mar 23 2024)
 
 #### 🐛 Bug Fix
