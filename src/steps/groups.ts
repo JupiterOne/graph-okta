@@ -14,13 +14,9 @@ import {
   createGroupUserRelationship,
   createUserGroupEntity,
 } from '../converters/group';
-import { accountFlagged } from '../okta/createOktaClient';
-import { OktaUser } from '../okta/types';
 import { StandardizedOktaAccount, StandardizedOktaUserGroup } from '../types';
-import { StepAnnouncer } from '../util/runningTimer';
 import {
   DATA_ACCOUNT_ENTITY,
-  DATA_USER_ENTITIES_MAP,
   Entities,
   IngestionSources,
   Relationships,
@@ -32,11 +28,6 @@ export async function fetchGroups({
   jobState,
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  let stepAnnouncer;
-  if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.GROUPS, logger);
-  }
-
   const apiClient = createAPIClient(instance.config, logger);
 
   const accountEntity = (await jobState.getData(
@@ -78,10 +69,6 @@ export async function fetchGroups({
     },
     'Finished processing groups',
   );
-
-  if (accountFlagged) {
-    stepAnnouncer.finish();
-  }
 }
 
 export async function buildAppUserGroupUserRelationships(
@@ -92,58 +79,24 @@ export async function buildAppUserGroupUserRelationships(
     return;
   }
 
-  let stepAnnouncer;
-  if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(
-      Steps.APP_USER_GROUP_USERS_RELATIONSHIP,
-      context.logger,
-    );
-  }
   await buildGroupEntityToUserRelationships(
     Entities.APP_USER_GROUP._type,
     context,
   );
-
-  if (accountFlagged) {
-    stepAnnouncer.finish();
-  }
 }
 
 export async function buildUserGroupUserRelationships(
   context: IntegrationStepExecutionContext<IntegrationConfig>,
 ) {
-  let stepAnnouncer;
-  if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(
-      Steps.USER_GROUP_USERS_RELATIONSHIP,
-      context.logger,
-    );
-  }
-
   await buildGroupEntityToUserRelationships(Entities.USER_GROUP._type, context);
-
-  if (accountFlagged) {
-    stepAnnouncer.finish();
-  }
 }
 
 async function buildGroupEntityToUserRelationships(
   groupEntityType: string,
   context: IntegrationStepExecutionContext<IntegrationConfig>,
 ) {
-  let stepAnnouncer;
-  if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(
-      `${Steps.APP_USER_GROUP_USERS_RELATIONSHIP} - ${groupEntityType}`,
-      context.logger,
-    );
-  }
-
   const { instance, logger, jobState } = context;
   const apiClient = createAPIClient(instance.config, logger);
-  const userIdToUserEntityMap = (await jobState.getData<Map<string, Entity>>(
-    DATA_USER_ENTITIES_MAP,
-  ))!;
 
   logger.info(
     {
@@ -154,30 +107,28 @@ async function buildGroupEntityToUserRelationships(
 
   async function createGroupUserRelationshipWithJob(
     groupEntity: Entity,
-    user: OktaUser,
+    userKey?: string,
   ) {
-    if (!user.id) {
+    if (!userKey) {
       return;
     }
 
     const groupId = groupEntity.id as string;
-    const userEntity = userIdToUserEntityMap.get(user.id);
-
-    if (userEntity) {
+    if (jobState.hasKey(userKey)) {
       await jobState.addRelationship(
-        createGroupUserRelationship(groupEntity, userEntity),
+        createGroupUserRelationship(groupEntity, userKey),
       );
 
       logger.debug(
         {
           groupId,
-          userId: user.id,
+          userId: userKey,
         },
         'Successfully created user group relationship',
       );
     } else {
       logger.warn(
-        { groupId, userId: user.id },
+        { groupId, userId: userKey },
         '[SKIP] User not found in job state, could not build relationship to group',
       );
     }
@@ -194,19 +145,22 @@ async function buildGroupEntityToUserRelationships(
           groupEntities,
         );
 
-        for (const { groupEntity, users } of usersForGroupEntities) {
-          for (const user of users) {
-            await createGroupUserRelationshipWithJob(groupEntity, user);
+        const relationshipPromises: Promise<void>[] = [];
+
+        for (const { groupEntity, userKeys } of usersForGroupEntities) {
+          for (const userKey of userKeys) {
+            const relationshipPromise = createGroupUserRelationshipWithJob(
+              groupEntity,
+              userKey,
+            );
+            relationshipPromises.push(relationshipPromise);
           }
         }
+        await Promise.all(relationshipPromises);
       },
     });
   } catch (err) {
     logger.error({ err }, 'Failed to build group to user relationships');
-  }
-
-  if (accountFlagged) {
-    stepAnnouncer.finish();
   }
 }
 
@@ -218,14 +172,14 @@ async function collectUsersForGroupEntities(
     groupEntities,
     async (groupEntity) => {
       const groupId = groupEntity.id as string;
-      const users: OktaUser[] = [];
+      const userKeys: (string | undefined)[] = [];
 
       await apiClient.iterateUsersForGroup(groupId, async (user) => {
-        users.push(user);
+        userKeys.push(user.id);
         return Promise.resolve();
       });
 
-      return { groupEntity, users };
+      return { groupEntity, userKeys };
     },
     {
       /**
@@ -280,7 +234,7 @@ export const groupSteps: IntegrationStep<IntegrationConfig>[] = [
       Relationships.ACCOUNT_HAS_USER_GROUP,
       Relationships.ACCOUNT_HAS_APP_USER_GROUP,
     ],
-    dependsOn: [Steps.USERS],
+    dependsOn: [Steps.ACCOUNT],
     executionHandler: fetchGroups,
   },
   {

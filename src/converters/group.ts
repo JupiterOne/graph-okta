@@ -75,16 +75,18 @@ export function createUserGroupEntity(
 
 export function createGroupUserRelationship(
   group: Entity,
-  user: Entity,
+  userKey: string,
 ): Relationship {
   return createDirectRelationship({
     _class: RelationshipClass.HAS,
-    from: group,
-    to: user,
+    fromType: Entities.USER_GROUP._type,
+    fromKey: group._key,
+    toType: Entities.USER._type,
+    toKey: userKey,
     properties: {
-      _key: `${group._key}|has_user|${user._key}`,
+      _key: `${group._key}|has_user|${userKey}`,
       _type: Relationships.USER_GROUP_HAS_USER._type,
-      userId: user.id as string,
+      userId: userKey,
       groupId: group.id as string,
     },
   });

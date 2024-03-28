@@ -4,6 +4,7 @@ describe('shouldThrottleNextRequest', () => {
   test('should throttle if > 50% of limit has been consumed', () => {
     expect(
       shouldThrottleNextRequest({
+        threshold: 0.5,
         rateLimitLimit: 100,
         rateLimitRemaining: 49,
       }),
@@ -13,6 +14,7 @@ describe('shouldThrottleNextRequest', () => {
   test('should not throttle if < 50% of the limit has been consumed', () => {
     expect(
       shouldThrottleNextRequest({
+        threshold: 0.5,
         rateLimitLimit: 100,
         rateLimitRemaining: 51,
       }),
@@ -22,6 +24,7 @@ describe('shouldThrottleNextRequest', () => {
   test('should not throttle if `rate-limit-limit` is undefined', () => {
     expect(
       shouldThrottleNextRequest({
+        threshold: 0.5,
         rateLimitLimit: undefined,
         rateLimitRemaining: 100 - 45,
       }),
@@ -31,6 +34,7 @@ describe('shouldThrottleNextRequest', () => {
   test('should not throttle if `rate-limit-remaining` is undefined', () => {
     expect(
       shouldThrottleNextRequest({
+        threshold: 0.5,
         rateLimitLimit: 100,
         rateLimitRemaining: undefined,
       }),

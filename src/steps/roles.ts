@@ -9,9 +9,9 @@ import {
 import { Role } from '@okta/okta-sdk-nodejs';
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import { accountFlagged } from '../okta/createOktaClient';
-import { StepAnnouncer } from '../util/runningTimer';
 import { Entities, IngestionSources, Relationships, Steps } from './constants';
+import { buildBatchProcessing } from '../util/buildBatchProcessing';
+import { StandardizedOktaUser, StandardizedOktaUserGroup } from '../types';
 
 function generateRoleKey(role: Role) {
   // We don't have an easy to use key, so construct one of our own.  Finally, we
@@ -51,87 +51,103 @@ export async function fetchRoles({
   jobState,
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  let stepAnnouncer;
-  if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.ROLES, logger);
-  }
-
   const apiClient = createAPIClient(instance.config, logger);
 
+  const processUserRoles = async (user: StandardizedOktaUser) => {
+    await apiClient.iterateRolesByUser(user._key, async (role) => {
+      const roleEntity = createRoleEntity(role);
+      if (!roleEntity) {
+        return;
+      }
+
+      if (!jobState.hasKey(roleEntity._key)) {
+        await jobState.addEntity(roleEntity);
+      }
+
+      // Only create relationships if this is a direct USER assignment
+      if (role.assignmentType !== 'USER') {
+        return;
+      }
+      // Users may have already been granted access to the same role via multiple different groups.
+      // We need to catch these duplicates to prevent key collisions.
+      const userToRoleRelationship = createDirectRelationship({
+        _class: RelationshipClass.ASSIGNED,
+        from: user,
+        to: roleEntity,
+      });
+      if (!jobState.hasKey(userToRoleRelationship._key)) {
+        await jobState.addRelationship(userToRoleRelationship);
+      } else {
+        logger.info(
+          { userToRoleRelationship },
+          'Skipping relationship creation.  Relationship already exists.',
+        );
+      }
+    });
+  };
+
+  const processUserGroupRoles = async (group: StandardizedOktaUserGroup) => {
+    await apiClient.iterateRolesByGroup(group._key, async (role) => {
+      const roleEntity = createRoleEntity(role);
+      if (!roleEntity) {
+        return;
+      }
+      if (!jobState.hasKey(roleEntity._key)) {
+        await jobState.addEntity(roleEntity);
+      }
+
+      const groupRoleRelationship = createDirectRelationship({
+        _class: RelationshipClass.ASSIGNED,
+        from: group,
+        to: roleEntity,
+      });
+
+      if (!jobState.hasKey(groupRoleRelationship._key)) {
+        await jobState.addRelationship(groupRoleRelationship);
+      }
+    });
+  };
+
   try {
+    const { withBatchProcessing, flushBatch } =
+      buildBatchProcessing<StandardizedOktaUser>({
+        processCallback: processUserRoles,
+        batchSize: 200,
+        concurrency: 4,
+      });
     await jobState.iterateEntities(
       {
         _type: Entities.USER._type,
       },
-      async (user) => {
-        await apiClient.iterateRolesByUser(user._key, async (role) => {
-          const roleEntity = createRoleEntity(role);
-          if (!roleEntity) {
-            return;
-          }
-
-          if (!jobState.hasKey(roleEntity._key)) {
-            await jobState.addEntity(roleEntity);
-          }
-
-          // Only create relationships if this is a direct USER assignment
-          if (role.assignmentType == 'USER') {
-            // Users may have already been granted access to the same role via multiple different groups.
-            // We need to catch these duplicates to prevent key collisions.
-            const userToRoleRelationship = createDirectRelationship({
-              _class: RelationshipClass.ASSIGNED,
-              from: user,
-              to: roleEntity,
-            });
-            if (!jobState.hasKey(userToRoleRelationship._key)) {
-              await jobState.addRelationship(userToRoleRelationship);
-            } else {
-              logger.info(
-                { userToRoleRelationship },
-                'Skipping relationship creation.  Relationship already exists.',
-              );
-            }
-          }
-        });
+      async (user: StandardizedOktaUser) => {
+        await withBatchProcessing(user);
       },
     );
+    await flushBatch();
   } catch (err) {
     logger.error({ err }, 'Failed to fetch user roles');
+    throw err;
   }
 
   try {
+    const { withBatchProcessing, flushBatch } =
+      buildBatchProcessing<StandardizedOktaUserGroup>({
+        processCallback: processUserGroupRoles,
+        batchSize: 200,
+        concurrency: 4,
+      });
     await jobState.iterateEntities(
       {
         _type: Entities.USER_GROUP._type,
       },
-      async (group) => {
-        await apiClient.iterateRolesByGroup(group._key, async (role) => {
-          const roleEntity = createRoleEntity(role);
-          if (!roleEntity) {
-            return;
-          }
-          if (!jobState.hasKey(roleEntity._key)) {
-            await jobState.addEntity(roleEntity);
-          }
-
-          const groupRoleRelationship = createDirectRelationship({
-            _class: RelationshipClass.ASSIGNED,
-            from: group,
-            to: roleEntity,
-          });
-
-          if (!jobState.hasKey(groupRoleRelationship._key)) {
-            await jobState.addRelationship(groupRoleRelationship);
-          }
-        });
+      async (group: StandardizedOktaUserGroup) => {
+        await withBatchProcessing(group);
       },
     );
+    await flushBatch();
   } catch (err) {
     logger.error({ err }, 'Failed to fetch group roles');
-  }
-
-  if (accountFlagged) {
-    stepAnnouncer.finish();
+    throw err;
   }
 }
 

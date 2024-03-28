@@ -7,9 +7,10 @@ import {
   ingestionConfig,
 } from './config';
 
-export const invocationConfig: IntegrationInvocationConfig<IntegrationConfig> = {
-  instanceConfigFields,
-  validateInvocation,
-  integrationSteps,
-  ingestionConfig,
-};
+export const invocationConfig: IntegrationInvocationConfig<IntegrationConfig> =
+  {
+    instanceConfigFields,
+    validateInvocation,
+    integrationSteps,
+    ingestionConfig,
+  };

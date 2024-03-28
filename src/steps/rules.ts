@@ -9,8 +9,6 @@ import {
 } from '@jupiterone/integration-sdk-core';
 import { createAPIClient } from '../client';
 import { IntegrationConfig } from '../config';
-import { accountFlagged } from '../okta/createOktaClient';
-import { StepAnnouncer } from '../util/runningTimer';
 import {
   DATA_ACCOUNT_ENTITY,
   Entities,
@@ -24,11 +22,6 @@ export async function fetchRules({
   jobState,
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  let stepAnnouncer;
-  if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.RULES, logger);
-  }
-
   const apiClient = createAPIClient(instance.config, logger);
 
   const accountEntity = (await jobState.getData(DATA_ACCOUNT_ENTITY)) as Entity;
@@ -89,10 +82,6 @@ export async function fetchRules({
     });
   } catch (err) {
     logger.error({ err }, 'Failed to fetch rules');
-  }
-
-  if (accountFlagged) {
-    stepAnnouncer.finish();
   }
 }
 

@@ -15,9 +15,7 @@ import {
   createMFAServiceEntity,
   createSSOServiceEntity,
 } from '../converters/service';
-import { accountFlagged } from '../okta/createOktaClient';
 import getOktaAccountInfo from '../util/getOktaAccountInfo';
-import { StepAnnouncer } from '../util/runningTimer';
 import {
   DATA_ACCOUNT_ENTITY,
   Entities,
@@ -30,11 +28,6 @@ export async function fetchAccountDetails({
   instance,
   logger,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  let stepAnnouncer;
-  if (accountFlagged) {
-    stepAnnouncer = new StepAnnouncer(Steps.ACCOUNT, logger);
-  }
-
   const apiClient = createAPIClient(instance.config, logger);
 
   const oktaAccountInfo = getOktaAccountInfo({
@@ -103,10 +96,6 @@ export async function fetchAccountDetails({
       to: mfaServiceEntity,
     }),
   );
-
-  if (accountFlagged) {
-    stepAnnouncer.finish();
-  }
 }
 
 export const accountSteps: IntegrationStep<IntegrationConfig>[] = [
