@@ -1,3 +1,15 @@
+# v3.3.4 (Mon Apr 01 2024)
+
+#### 🐛 Bug Fix
+
+- revert change of pagination limit [#253](https://github.com/JupiterOne/graph-okta/pull/253) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.3 (Thu Mar 28 2024)
 
 #### 🐛 Bug Fix
