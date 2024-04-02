@@ -1,18 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import {
-  IntegrationInfoEventName,
   IntegrationLogger,
+  IntegrationProviderAPIError,
 } from '@jupiterone/integration-sdk-core';
-import { AttemptContext, retry } from '@lifeomic/attempt';
-import { Headers, Response } from 'node-fetch';
+import { AttemptContext, retry, sleep } from '@lifeomic/attempt';
 import { OktaIntegrationConfig } from '../types';
 
-import { DefaultRequestExecutor } from '@okta/okta-sdk-nodejs';
+import { RequestExecutor } from '@okta/okta-sdk-nodejs';
 import { RequestOptions } from '@okta/okta-sdk-nodejs/src/types/request-options';
 import { OktaClient } from './types';
+import {
+  fatalRequestError,
+  isRetryableRequest,
+  retryableRequestError,
+} from './errors';
+import { HierarchicalTokenBucket } from '@jupiterone/hierarchical-token-bucket';
 
-const alreadyLoggedApiUrls: string[] = [];
 const getApiURL = (url: string): string => {
   const trimmedUrl = url.substring(url.indexOf('/api/v1/'));
   const idPattern = /\/([a-zA-Z0-9]{16,})(?=\/|$)/g;
@@ -22,14 +26,15 @@ const getApiURL = (url: string): string => {
 const DEFAULT_RATE_LIMIT_THRESHOLD = 0.5;
 
 /**
- * A custom Okta request executor that throttles requests when `x-rate-limit-remaining` response
- * headers fall below a provided threshold.
+ * A custom Okta request executor that limits the rate at which requests are sent to the Okta API
+ * based on the rate limit headers returned by the server, to avoid hitting rate limits.
  */
-export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor {
+export class RequestExecutorWithTokenBucket extends RequestExecutor {
   rateLimitThreshold: number;
   logger: IntegrationLogger;
   minimumRateLimitRemaining: number;
   requestAfter: number | undefined;
+  tokenBuckets: Record<string, HierarchicalTokenBucket> = {};
 
   constructor(rateLimitThreshold: number, logger: IntegrationLogger) {
     super();
@@ -37,181 +42,142 @@ export class RequestExecutorWithEarlyRateLimiting extends DefaultRequestExecutor
     this.logger = logger;
   }
 
-  async withRateLimiting(fn: () => Promise<Response>) {
-    const response = await fn();
-    const { rateLimitLimit, rateLimitRemaining } = parseRateLimitHeaders(
-      response.headers,
-    );
-    if (
-      shouldThrottleNextRequest({
-        threshold: this.rateLimitThreshold,
-        rateLimitLimit,
-        rateLimitRemaining,
-      })
-    ) {
-      const timeToSleepInMs = this.getRetryDelayMs(response);
-      const apiURL = getApiURL(response.url);
-
-      const rateLimitPercent = this.rateLimitThreshold * 100;
-      if (timeToSleepInMs > 0) {
-        this.logger.info(
-          {
-            rateLimitLimit,
-            rateLimitRemaining,
-            timeToSleepInMs,
-            rateLimitThreshold: this.rateLimitThreshold,
-            url: response.url,
-          },
-          `Exceeded ${rateLimitPercent}% of rate limit. Sleeping until x-rate-limit-reset. (${timeToSleepInMs}ms)`,
-        );
-
-        if (!alreadyLoggedApiUrls.includes(apiURL)) {
-          this.logger.publishInfoEvent({
-            description: `[${apiURL}] Exceeded ${rateLimitPercent}% of rate limit for this API. - currently set as ${rateLimitLimit} requests per min.`,
-            name: IntegrationInfoEventName.Info,
-          });
-
-          alreadyLoggedApiUrls.push(apiURL);
-        }
-
-        await sleep(timeToSleepInMs);
-      }
-    }
-    return response;
-  }
-
-  async fetch(request: RequestOptions) {
+  override async fetch(request: RequestOptions) {
     const { logger } = this;
     return await retry(
-      () => this.withRateLimiting(() => super.fetch(request)),
+      async () => {
+        const tokenBucket = this.tokenBuckets[getApiURL(request.url as string)];
+        if (tokenBucket) {
+          const timeToWaitInMs = tokenBucket.take();
+          await sleep(timeToWaitInMs);
+        }
+
+        let response: any;
+        try {
+          response = await super.fetch(request);
+        } catch (err) {
+          this.logger.error(
+            { code: err.code, err, endpoint: request.url },
+            'Error sending request',
+          );
+          throw err;
+        }
+
+        if (response.ok) {
+          if (response.headers.has('x-rate-limit-limit')) {
+            const apiUrl = getApiURL(request.url as string);
+            if (!this.tokenBuckets[apiUrl]) {
+              // We multiply the limit by the threshold to make our bucket smaller than the server's bucket.
+              // This way we can avoid getting 429 errors.
+              // For example, if okta's limit is 300 / minute and the threshold is 0.9, then the max capacity will be 270.
+              const capacity =
+                parseInt(
+                  response.headers.get('x-rate-limit-limit') as string,
+                  10,
+                ) * this.rateLimitThreshold;
+              this.tokenBuckets[apiUrl] = new HierarchicalTokenBucket({
+                maximumCapacity: capacity,
+                // The refill rate is per second. We want to completely refill every minute.
+                // If capacity is 270 per minute, then the refill rate will be 270 / 60 = 4.5 per second.
+                refillRate: capacity / 60,
+              });
+            }
+          }
+          return response;
+        }
+
+        let error: IntegrationProviderAPIError | undefined;
+        const requestErrorParams = {
+          endpoint: request.url as string,
+          response,
+        };
+        if (isRetryableRequest(response.status)) {
+          error = retryableRequestError(requestErrorParams);
+        } else {
+          error = fatalRequestError(requestErrorParams);
+        }
+        for await (const _chunk of response.body) {
+          // force consumption of body to avoid memory leaks
+          // https://github.com/node-fetch/node-fetch/issues/83
+        }
+        throw error;
+      },
       {
         maxAttempts: 3,
         delay: 30_000, // 30 seconds to start
         timeout: 180_000, // 3 min timeout. We need this in case Node hangs with ETIMEDOUT
         factor: 2, //exponential backoff factor. with 30 sec start and 3 attempts, longest wait is 2 min
-        handleError(err: any, attemptContext: AttemptContext) {
-          /* retry will keep trying to the limits of retryOptions
-           * but it lets you intervene in this function
-           */
-          // don't keep trying if it's not going to get better
-          if (
-            err.retryable === false ||
-            err.status === 401 ||
-            err.status === 403 ||
-            err.status === 404
-          ) {
+        handleError: async (err: any, context: AttemptContext) => {
+          if (!err.retryable) {
+            // can't retry this? just abort
+            context.abort();
+            return;
+          }
+
+          if (err.status === 429) {
+            const retryAfter = err.retryAfter || 60_000;
             logger.warn(
-              { attemptContext, err },
-              `Hit an unrecoverable error when attempting fetch. Aborting.`,
+              { retryAfter, endpoint: err.endpoint },
+              'Received a rate limit error. Waiting before retrying.',
             );
-            attemptContext.abort();
-          } else {
-            logger.warn(
-              { attemptContext, err },
-              `Hit a possibly recoverable error when attempting fetch. Retrying in a moment.`,
-            );
+            await sleep(retryAfter);
+
+            // Empty the token bucket to 0 to equal the server's bucket state.
+            // In subsequent requests we'll get less 429 errors because our token bucket is smaller.
+            this.emptyTokenBucket(err.endpoint as string);
           }
         },
       },
     );
   }
+
+  private emptyTokenBucket(endpoint: string | undefined): void {
+    if (!endpoint) {
+      return;
+    }
+    const apiUrl = getApiURL(endpoint);
+    const tokenBucket = this.tokenBuckets[apiUrl];
+    const currentCapacity = tokenBucket.metadata.metrics.capacity;
+    for (let i = currentCapacity; i > 0; i--) {
+      tokenBucket.take();
+    }
+  }
 }
+
+let client: OktaClient | undefined;
 
 export default function createOktaClient(
   logger: IntegrationLogger,
   config: OktaIntegrationConfig,
 ) {
-  const defaultRequestExecutor = new RequestExecutorWithEarlyRateLimiting(
-    config.rateLimitThreshold ?? DEFAULT_RATE_LIMIT_THRESHOLD,
-    logger,
-  );
+  if (!client) {
+    const defaultRequestExecutor = new RequestExecutorWithTokenBucket(
+      config.rateLimitThreshold ?? DEFAULT_RATE_LIMIT_THRESHOLD,
+      logger,
+    );
 
-  defaultRequestExecutor.on(
-    'backoff',
-    (request: any, response: any, requestId: any, delayMs: any) => {
-      logger.info(
+    defaultRequestExecutor.on('request', (request: any) => {
+      logger.trace(
         {
-          delayMs,
-          requestId,
           url: request.url,
         },
-        'Okta client backoff',
+        'Okta client initiated request',
       );
-    },
-  );
+    });
 
-  defaultRequestExecutor.on('resume', (request: any, requestId: any) => {
-    logger.info(
-      {
-        requestId,
-        url: request.url,
-      },
-      'Okta client resuming',
-    );
-  });
+    defaultRequestExecutor.on('response', (_response: any) => {
+      logger.trace('Okta client received response');
+    });
 
-  defaultRequestExecutor.on('request', (request: any) => {
-    logger.trace(
-      {
-        url: request.url,
-      },
-      'Okta client initiated request',
-    );
-  });
-
-  defaultRequestExecutor.on('response', (response: any) => {
-    logger.trace('Okta client received response');
-  });
-
-  return new OktaClient({
-    orgUrl: config.oktaOrgUrl,
-    token: config.oktaApiKey,
-    requestExecutor: defaultRequestExecutor,
-    // Disable caching as it may be causing high memory usage
-    //
-    // See: https://github.com/okta/okta-sdk-nodejs#middleware
-    cacheMiddleware: null,
-  });
-}
-
-function parseRateLimitHeaders(headers: Headers): {
-  rateLimitLimit: number | undefined;
-  rateLimitRemaining: number | undefined;
-} {
-  const strRateLimitLimit = headers.get('x-rate-limit-limit');
-  const strRateLimitRemaining = headers.get('x-rate-limit-remaining');
-  return {
-    rateLimitLimit: strRateLimitLimit
-      ? parseInt(strRateLimitLimit, 10)
-      : undefined,
-    rateLimitRemaining: strRateLimitRemaining
-      ? parseInt(strRateLimitRemaining, 10)
-      : undefined,
-  };
-}
-
-/**
- * Returns `true` if more than threshold * 100 of the limit has been consumed.
- *
- * We choose 50% by default here because Okta's UI allows users to easily set
- * "warning notifications" at thresholds of 60%, 70%, 80%,90%, and 100%.
- *
- * Okta actually allows for custom thresholds between 30% and 90%, so we may
- * need to make this value configurable in the future.
- */
-export function shouldThrottleNextRequest(params: {
-  threshold: number;
-  rateLimitLimit: number | undefined;
-  rateLimitRemaining: number | undefined;
-}): boolean {
-  const { threshold, rateLimitLimit, rateLimitRemaining } = params;
-  if (rateLimitLimit === undefined || rateLimitRemaining === undefined)
-    return false;
-
-  const rateLimitConsumed = rateLimitLimit - rateLimitRemaining;
-  return rateLimitConsumed / rateLimitLimit > threshold;
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+    client = new OktaClient({
+      orgUrl: config.oktaOrgUrl,
+      token: config.oktaApiKey,
+      requestExecutor: defaultRequestExecutor,
+      // Disable caching as it may be causing high memory usage
+      //
+      // See: https://github.com/okta/okta-sdk-nodejs#middleware
+      cacheMiddleware: null,
+    });
+  }
+  return client;
 }
