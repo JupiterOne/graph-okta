@@ -138,6 +138,11 @@ async function buildGroupEntityToUserRelationships(
             }
           }
         }
+
+        // Add any remaining relationships
+        if (relationships.length) {
+          await jobState.addRelationships(relationships);
+        }
       },
     });
   } catch (err) {
