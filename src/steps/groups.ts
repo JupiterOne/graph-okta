@@ -4,6 +4,7 @@ import {
   GraphObjectIteratee,
   IntegrationStep,
   IntegrationStepExecutionContext,
+  Relationship,
 } from '@jupiterone/integration-sdk-core';
 import pMap from 'p-map';
 
@@ -105,35 +106,6 @@ async function buildGroupEntityToUserRelationships(
     'Starting to build user group relationships',
   );
 
-  async function createGroupUserRelationshipWithJob(
-    groupEntity: Entity,
-    userKey?: string,
-  ) {
-    if (!userKey) {
-      return;
-    }
-
-    const groupId = groupEntity.id as string;
-    if (jobState.hasKey(userKey)) {
-      await jobState.addRelationship(
-        createGroupUserRelationship(groupEntity, userKey),
-      );
-
-      logger.debug(
-        {
-          groupId,
-          userId: userKey,
-        },
-        'Successfully created user group relationship',
-      );
-    } else {
-      logger.warn(
-        { groupId, userId: userKey },
-        '[SKIP] User not found in job state, could not build relationship to group',
-      );
-    }
-  }
-
   try {
     await batchIterateEntities({
       context,
@@ -145,18 +117,27 @@ async function buildGroupEntityToUserRelationships(
           groupEntities,
         );
 
-        const relationshipPromises: Promise<void>[] = [];
+        let relationships: Relationship[] = [];
 
         for (const { groupEntity, userKeys } of usersForGroupEntities) {
           for (const userKey of userKeys) {
-            const relationshipPromise = createGroupUserRelationshipWithJob(
-              groupEntity,
-              userKey,
-            );
-            relationshipPromises.push(relationshipPromise);
+            if (jobState.hasKey(userKey)) {
+              relationships.push(
+                createGroupUserRelationship(groupEntity, userKey),
+              );
+            } else {
+              logger.warn(
+                { groupId: groupEntity.id as string, userId: userKey },
+                '[SKIP] User not found in job state, could not build relationship to group',
+              );
+            }
+
+            if (relationships.length >= 500) {
+              await jobState.addRelationships(relationships);
+              relationships = [];
+            }
           }
         }
-        await Promise.all(relationshipPromises);
       },
     });
   } catch (err) {
@@ -172,9 +153,12 @@ async function collectUsersForGroupEntities(
     groupEntities,
     async (groupEntity) => {
       const groupId = groupEntity.id as string;
-      const userKeys: (string | undefined)[] = [];
+      const userKeys: string[] = [];
 
       await apiClient.iterateUsersForGroup(groupId, async (user) => {
+        if (!user.id) {
+          return;
+        }
         userKeys.push(user.id);
         return Promise.resolve();
       });
