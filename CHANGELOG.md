@@ -1,3 +1,15 @@
+# v3.3.5 (Tue Apr 02 2024)
+
+#### 🐛 Bug Fix
+
+- handle rate limiting in a defensive manner with token buckets [#254](https://github.com/JupiterOne/graph-okta/pull/254) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.4 (Mon Apr 01 2024)
 
 #### 🐛 Bug Fix
