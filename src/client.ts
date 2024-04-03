@@ -434,9 +434,14 @@ export class APIClient {
   }
 }
 
+let client: APIClient | undefined;
+
 export function createAPIClient(
   config: IntegrationConfig,
   logger: IntegrationLogger,
 ): APIClient {
-  return new APIClient(config, logger);
+  if (!client) {
+    client = new APIClient(config, logger);
+  }
+  return client;
 }
