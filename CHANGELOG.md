@@ -1,3 +1,15 @@
+# v3.3.7 (Thu Apr 04 2024)
+
+#### 🐛 Bug Fix
+
+- improve group-user relationships step [#256](https://github.com/JupiterOne/graph-okta/pull/256) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.6 (Wed Apr 03 2024)
 
 #### 🐛 Bug Fix
