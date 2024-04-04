@@ -97,7 +97,9 @@ export class APIClient {
    */
   public async iterateGroups(iteratee: ResourceIteratee<Group>): Promise<void> {
     try {
-      const groupsCollection = await this.oktaClient.groupApi.listGroups();
+      const groupsCollection = await this.oktaClient.groupApi.listGroups({
+        expand: 'stats',
+      });
       await groupsCollection.each(iteratee);
     } catch (err) {
       if (err.status === 403) {
