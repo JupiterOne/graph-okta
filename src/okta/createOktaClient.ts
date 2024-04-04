@@ -15,7 +15,7 @@ import {
   isRetryableRequest,
   retryableRequestError,
 } from './errors';
-import { HierarchicalTokenBucket } from '@jupiterone/hierarchical-token-bucket';
+import { TokenBucket } from './tokenBucket';
 
 const getApiURL = (url: string): string => {
   const trimmedUrl = url.substring(url.indexOf('/api/v1/'));
@@ -35,7 +35,7 @@ export class RequestExecutorWithTokenBucket extends RequestExecutor {
   logger: IntegrationLogger;
   minimumRateLimitRemaining: number;
   requestAfter: number | undefined;
-  tokenBuckets: Record<string, HierarchicalTokenBucket> = {};
+  tokenBuckets: Record<string, TokenBucket> = {};
 
   constructor(rateLimitThreshold: number, logger: IntegrationLogger) {
     super();
@@ -47,8 +47,8 @@ export class RequestExecutorWithTokenBucket extends RequestExecutor {
     const doFetch = async (timeoutRetryAttempt = 0) => {
       return await retry(
         async () => {
-          const tokenBucket =
-            this.tokenBuckets[getApiURL(request.url as string)];
+          const apiURL = getApiURL(request.url as string);
+          const tokenBucket = this.tokenBuckets[apiURL];
           if (tokenBucket) {
             const timeToWaitInMs = tokenBucket.take();
             await sleep(timeToWaitInMs);
@@ -72,17 +72,16 @@ export class RequestExecutorWithTokenBucket extends RequestExecutor {
                 // We multiply the limit by the threshold to make our bucket smaller than the server's bucket.
                 // This way we can avoid getting 429 errors.
                 // For example, if okta's limit is 300 / minute and the threshold is 0.9, then the max capacity will be 270.
-                const capacity =
-                  parseInt(
-                    response.headers.get('x-rate-limit-limit') as string,
-                    10,
-                  ) * this.rateLimitThreshold;
-                this.tokenBuckets[apiUrl] = new HierarchicalTokenBucket({
-                  maximumCapacity: capacity,
-                  // The refill rate is per second. We want to completely refill every minute.
-                  // If capacity is 270 per minute, then the refill rate will be 270 / 60 = 4.5 per second.
-                  refillRate: capacity / 60,
-                });
+                const serverCapacity = parseInt(
+                  response.headers.get('x-rate-limit-limit') as string,
+                  10,
+                );
+                const capacity = serverCapacity * this.rateLimitThreshold;
+                this.tokenBuckets[apiUrl] = new TokenBucket(capacity);
+                this.logger.info(
+                  { capacity },
+                  `Created token bucket for ${apiUrl}`,
+                );
               }
             }
             return response;
@@ -130,17 +129,14 @@ export class RequestExecutorWithTokenBucket extends RequestExecutor {
                 {
                   retryAfter,
                   endpoint: err.endpoint,
-                  capacity:
-                    this.tokenBuckets[getApiURL(err.endpoint as string)]
-                      ?.metadata.options.maximumCapacity,
                 },
                 'Received a rate limit error. Waiting before retrying.',
               );
               await sleep(retryAfter);
 
-              // Empty the token bucket to 0 to equal the server's bucket state.
+              // Restart the token bucket to equal the server's bucket state.
               // In subsequent requests we'll get less 429 errors because our token bucket is smaller.
-              this.emptyTokenBucket(err.endpoint as string);
+              this.restartTokenBucket(err.endpoint as string);
             }
           },
           handleTimeout: async (attemptContext, options) => {
@@ -177,16 +173,13 @@ export class RequestExecutorWithTokenBucket extends RequestExecutor {
     return await doFetch();
   }
 
-  private emptyTokenBucket(endpoint: string | undefined): void {
+  private restartTokenBucket(endpoint: string | undefined): void {
     if (!endpoint) {
       return;
     }
     const apiUrl = getApiURL(endpoint);
     const tokenBucket = this.tokenBuckets[apiUrl];
-    const currentCapacity = tokenBucket.metadata.metrics.capacity;
-    for (let i = currentCapacity; i > 0; i--) {
-      tokenBucket.take();
-    }
+    tokenBucket.restart();
   }
 }
 
