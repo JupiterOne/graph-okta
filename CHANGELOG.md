@@ -1,3 +1,15 @@
+# v3.3.10 (Fri Apr 05 2024)
+
+#### 🐛 Bug Fix
+
+- when groups "expand" returns 500, fallback to request groups without it [#259](https://github.com/JupiterOne/graph-okta/pull/259) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.9 (Fri Apr 05 2024)
 
 #### 🐛 Bug Fix
