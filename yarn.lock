@@ -1230,7 +1230,7 @@
     upath "^1.2.0"
     url-exists "^1.0.3"
 
-"@jupiterone/integration-sdk-core@^12.3.1":
+"@jupiterone/integration-sdk-core@^12.2.5", "@jupiterone/integration-sdk-core@^12.3.1":
   version "12.3.1"
   resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-core/-/integration-sdk-core-12.3.1.tgz#a9420e832b68b1b9ecb12c013728fa96476e983d"
   integrity sha512-F37UBFGueymuW8GI7mTaMgfrUi5s5aeRWJYWq78xDUteW4yxNRKnLfnpCG1IxvZ7WrNsDRp5N88d5mkBXl/HcQ==
@@ -1238,7 +1238,7 @@
     "@jupiterone/data-model" "^0.55.0"
     lodash "^4.17.21"
 
-"@jupiterone/integration-sdk-dev-tools@^12.3.1":
+"@jupiterone/integration-sdk-dev-tools@^12.2.5":
   version "12.3.1"
   resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-dev-tools/-/integration-sdk-dev-tools-12.3.1.tgz#94853b6f8b44d9f08dd876f1b841d5e1654c4793"
   integrity sha512-iySZNFIr0uKipROgkOo2x3KwpKaXMcf3ZQAtyCRejnqezQAFFB6wL27AeUbu0S53IBBKu2RFL/4zdqt80zVGwg==
@@ -1282,7 +1282,7 @@
     p-queue "^6.3.0"
     rimraf "^3.0.2"
 
-"@jupiterone/integration-sdk-testing@^12.3.1":
+"@jupiterone/integration-sdk-testing@^12.2.5", "@jupiterone/integration-sdk-testing@^12.3.1":
   version "12.3.1"
   resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-testing/-/integration-sdk-testing-12.3.1.tgz#2937eff24812a61cbb011fc67b6819011bb2e5a5"
   integrity sha512-1fDUU/5kwv2MxKwHa8eIWtXV4oNq+UJs1ArQaOP2NyU76fiHEuM09fnQoO7ZvsWuAUIFHJCApBgo6Y8tYMUn2Q==
