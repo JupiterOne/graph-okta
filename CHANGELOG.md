@@ -1,3 +1,15 @@
+# v3.3.9 (Fri Apr 05 2024)
+
+#### 🐛 Bug Fix
+
+- stop using the okta sdk and log the error body [#258](https://github.com/JupiterOne/graph-okta/pull/258) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.8 (Fri Apr 05 2024)
 
 #### 🐛 Bug Fix
