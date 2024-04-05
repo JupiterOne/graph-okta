@@ -1,3 +1,15 @@
+# v3.3.8 (Fri Apr 05 2024)
+
+#### 🐛 Bug Fix
+
+- remove unnecessary try/catch on client [#257](https://github.com/JupiterOne/graph-okta/pull/257) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.7 (Thu Apr 04 2024)
 
 #### 🐛 Bug Fix
