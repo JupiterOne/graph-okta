@@ -97,9 +97,11 @@ export class RequestExecutorWithTokenBucket extends RequestExecutor {
           } else {
             error = fatalRequestError(requestErrorParams);
           }
-          for await (const _chunk of response.body) {
-            // force consumption of body to avoid memory leaks
-            // https://github.com/node-fetch/node-fetch/issues/83
+          if (response.body) {
+            for await (const _chunk of response.body) {
+              // force consumption of body to avoid memory leaks
+              // https://github.com/node-fetch/node-fetch/issues/83
+            }
           }
           throw error;
         },
@@ -179,7 +181,7 @@ export class RequestExecutorWithTokenBucket extends RequestExecutor {
     }
     const apiUrl = getApiURL(endpoint);
     const tokenBucket = this.tokenBuckets[apiUrl];
-    tokenBucket.restart();
+    tokenBucket?.restart();
   }
 }
 
