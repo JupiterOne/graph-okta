@@ -82,6 +82,7 @@ export async function fetchRules({
     });
   } catch (err) {
     logger.error({ err }, 'Failed to fetch rules');
+    throw err;
   }
 }
 

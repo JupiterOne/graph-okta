@@ -2,6 +2,7 @@ import {
   Entity,
   IntegrationStep,
   IntegrationStepExecutionContext,
+  IntegrationWarnEventName,
   RelationshipClass,
   createDirectRelationship,
 } from '@jupiterone/integration-sdk-core';
@@ -56,7 +57,14 @@ export async function fetchDevices({
       );
     });
   } catch (err) {
-    logger.error({ err }, 'Failed to fetch devices');
+    if (err.status === 401) {
+      logger.publishWarnEvent({
+        name: IntegrationWarnEventName.MissingPermission,
+        description: 'The API key does not have permission to fetch devices.',
+      });
+      return;
+    }
+    throw err;
   }
 }
 

@@ -53,6 +53,7 @@ export async function fetchApplications({
     });
   } catch (err) {
     logger.error({ err }, 'Failed to fetch applications');
+    throw err;
   }
 }
 

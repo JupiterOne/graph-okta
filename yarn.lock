@@ -1199,22 +1199,22 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
-"@jupiterone/data-model@^0.54.0":
-  version "0.54.0"
-  resolved "https://registry.yarnpkg.com/@jupiterone/data-model/-/data-model-0.54.0.tgz#904b2629e2606b9fe334fa480472caa8c242bd20"
-  integrity sha512-cBFJT/q/UH40yOQsqAr1O75v64rnwC3bywDO81wWK+B0YbP+RCotzz/VFqgwNAhVb/QMCFuXhJk/ewaz704CoQ==
+"@jupiterone/data-model@^0.55.0":
+  version "0.55.0"
+  resolved "https://registry.yarnpkg.com/@jupiterone/data-model/-/data-model-0.55.0.tgz#e67dfa2901ca8e7ad9bd111d30d4caa6b7dd8fe0"
+  integrity sha512-lZ/R8z/6HrhitCywyhuLcSD7josRicvj6z5Rh1Bv4ksa5ye00PrI0fg8cQ0GyunYe0FAJtS5hAoit0i+uzVDiw==
   dependencies:
     ajv "^8.0.0"
     ajv-formats "^2.0.0"
 
-"@jupiterone/integration-sdk-cli@^12.2.5":
-  version "12.2.5"
-  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-cli/-/integration-sdk-cli-12.2.5.tgz#771254bdf77b1c8bf09a2328dd85c3faa5c726ca"
-  integrity sha512-bbART+M0qzwIzXJM/Z8mrdguSWDa9Hfy26zjfDglRzlea559V0yJ69wc8UB1ga63mV1y4l6H3ItLhviKcW+FnQ==
+"@jupiterone/integration-sdk-cli@^12.3.1":
+  version "12.3.1"
+  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-cli/-/integration-sdk-cli-12.3.1.tgz#5289a6d43f2f15680b000506b959c15c2390c50e"
+  integrity sha512-fMzvwAv73dAk0Yyp7Oi5qOXpjggW4CxYDYdGgDAuGG24fu99ZD5jZ/WTek9pampUu4EmMgVE5K8fo8ifSlGgzw==
   dependencies:
-    "@jupiterone/data-model" "^0.54.0"
-    "@jupiterone/integration-sdk-core" "^12.2.5"
-    "@jupiterone/integration-sdk-runtime" "^12.2.5"
+    "@jupiterone/data-model" "^0.55.0"
+    "@jupiterone/integration-sdk-core" "^12.3.1"
+    "@jupiterone/integration-sdk-runtime" "^12.3.1"
     chalk "^4"
     commander "^9.4.0"
     fs-extra "^10.1.0"
@@ -1230,21 +1230,21 @@
     upath "^1.2.0"
     url-exists "^1.0.3"
 
-"@jupiterone/integration-sdk-core@^12.2.5":
-  version "12.2.5"
-  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-core/-/integration-sdk-core-12.2.5.tgz#1a86bb176eafa7f441a9ec9313f54e3b899dbd3c"
-  integrity sha512-kW+/tyjgZfU0gpXoBPUStqIGkuQ2lvy7/o4wvUam+rj2u4mY5trxpIK3LTaOth2xaXl1Fm0Cdlq03dnWbKS5jA==
+"@jupiterone/integration-sdk-core@^12.2.5", "@jupiterone/integration-sdk-core@^12.3.1":
+  version "12.3.1"
+  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-core/-/integration-sdk-core-12.3.1.tgz#a9420e832b68b1b9ecb12c013728fa96476e983d"
+  integrity sha512-F37UBFGueymuW8GI7mTaMgfrUi5s5aeRWJYWq78xDUteW4yxNRKnLfnpCG1IxvZ7WrNsDRp5N88d5mkBXl/HcQ==
   dependencies:
-    "@jupiterone/data-model" "^0.54.0"
+    "@jupiterone/data-model" "^0.55.0"
     lodash "^4.17.21"
 
 "@jupiterone/integration-sdk-dev-tools@^12.2.5":
-  version "12.2.5"
-  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-dev-tools/-/integration-sdk-dev-tools-12.2.5.tgz#93c78dd541b5fc7561da4ab6d54cc770dedbc8d3"
-  integrity sha512-BylFtiVAYYaKt9gn0bCgea7yFcGVmIQlezIPvi8YHMR63FOURdMNiYVNMAAR4b7Yce+ozxHrQ/mIogrvsPS/oA==
+  version "12.3.1"
+  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-dev-tools/-/integration-sdk-dev-tools-12.3.1.tgz#94853b6f8b44d9f08dd876f1b841d5e1654c4793"
+  integrity sha512-iySZNFIr0uKipROgkOo2x3KwpKaXMcf3ZQAtyCRejnqezQAFFB6wL27AeUbu0S53IBBKu2RFL/4zdqt80zVGwg==
   dependencies:
-    "@jupiterone/integration-sdk-cli" "^12.2.5"
-    "@jupiterone/integration-sdk-testing" "^12.2.5"
+    "@jupiterone/integration-sdk-cli" "^12.3.1"
+    "@jupiterone/integration-sdk-testing" "^12.3.1"
     "@types/jest" "^29.5.3"
     "@types/node" "^18"
     "@typescript-eslint/eslint-plugin" "^6.2.1"
@@ -1261,12 +1261,12 @@
     ts-node "^9.1.1"
     typescript "^5.1.6"
 
-"@jupiterone/integration-sdk-runtime@^12.2.5":
-  version "12.2.5"
-  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-runtime/-/integration-sdk-runtime-12.2.5.tgz#b65324705ac514ff0d3b3ae19cb4d91f369d7152"
-  integrity sha512-0JkHNKZm5OgvIBs3kRIk0XjIfCIKKhr4UjwYPEENP+0YoZkIlgGAy9p/y5x82mt/PLfP+cQO0NTQ1NvwkDGceQ==
+"@jupiterone/integration-sdk-runtime@^12.3.1":
+  version "12.3.1"
+  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-runtime/-/integration-sdk-runtime-12.3.1.tgz#28d1c8c02b284a89deb6a8adf0b4966d23c51262"
+  integrity sha512-ZwrRVUOGwQaaZB9xoOzszUAfoeyxWPdsFTLE8UTbsAlJmTvH5+HDARxD9yn9LHLF9oSKyeMgw5zoQuVMw4Iz2Q==
   dependencies:
-    "@jupiterone/integration-sdk-core" "^12.2.5"
+    "@jupiterone/integration-sdk-core" "^12.3.1"
     "@lifeomic/alpha" "^5.2.0"
     "@lifeomic/attempt" "^3.0.3"
     async-sema "^3.1.0"
@@ -1282,13 +1282,13 @@
     p-queue "^6.3.0"
     rimraf "^3.0.2"
 
-"@jupiterone/integration-sdk-testing@^12.2.5":
-  version "12.2.5"
-  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-testing/-/integration-sdk-testing-12.2.5.tgz#a87952e4218dbad01781a9a13f386bdc246edada"
-  integrity sha512-JRodBBMNQKW7JDcgNJm7oSyaPGb2wVTQp+97sqsQN/GMfQMLAxQkvgPDJN5aTXMUdBTC4lPLij3B9Q8oYCC+og==
+"@jupiterone/integration-sdk-testing@^12.2.5", "@jupiterone/integration-sdk-testing@^12.3.1":
+  version "12.3.1"
+  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-testing/-/integration-sdk-testing-12.3.1.tgz#2937eff24812a61cbb011fc67b6819011bb2e5a5"
+  integrity sha512-1fDUU/5kwv2MxKwHa8eIWtXV4oNq+UJs1ArQaOP2NyU76fiHEuM09fnQoO7ZvsWuAUIFHJCApBgo6Y8tYMUn2Q==
   dependencies:
-    "@jupiterone/integration-sdk-core" "^12.2.5"
-    "@jupiterone/integration-sdk-runtime" "^12.2.5"
+    "@jupiterone/integration-sdk-core" "^12.3.1"
+    "@jupiterone/integration-sdk-runtime" "^12.3.1"
     "@pollyjs/adapter-node-http" "^6.0.5"
     "@pollyjs/core" "^6.0.5"
     "@pollyjs/persister-fs" "^6.0.5"
@@ -2228,6 +2228,14 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.200.tgz#435b6035c7eba9cdf1e039af8212c9e9281e7149"
   integrity sha512-YI/M/4HRImtNf3pJgbF+W6FrXovqj+T+/HpENLTooK9PnkacBsDpeP3IpHab40CClUfhNmdM2WTNP2sa2dni5Q==
 
+"@types/node-fetch@^2.6.11":
+  version "2.6.11"
+  resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.6.11.tgz#9b39b78665dae0e82a08f02f4967d62c66f95d24"
+  integrity sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==
+  dependencies:
+    "@types/node" "*"
+    form-data "^4.0.0"
+
 "@types/node-forge@^1.3.1":
   version "1.3.8"
   resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.3.8.tgz#044ad98354ff309a031a55a40ad122f3be1ac2bb"
@@ -2261,6 +2269,11 @@
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/parse-json/-/parse-json-4.0.0.tgz#2f8bb441434d163b35fb8ffdccd7138927ffb8c0"
   integrity sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==
+
+"@types/parse-link-header@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@types/parse-link-header/-/parse-link-header-2.0.3.tgz#37ad650d12aecb055b64c2d43ddb1534e356ad33"
+  integrity sha512-ffLAxD6Xqcf2gSbtEJehj8yJ5R/2OZqD4liodQvQQ+hhO4kg1mk9ToEZQPMtNTm/zIQj2GNleQbsjPp9+UQm4Q==
 
 "@types/semver@^7.3.12", "@types/semver@^7.5.0":
   version "7.5.6"
@@ -5722,6 +5735,13 @@ node-fetch@^2.6.7:
   version "2.6.12"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.12.tgz#02eb8e22074018e3d5a83016649d04df0e348fba"
   integrity sha512-C/fGU2E8ToujUivIO0H+tpQ6HWo4eEmchoPIoXtxCrVghxdKq+QOHqEZW7tuP3KlV3bC8FRMO5nMCC7Zm1VP6g==
+  dependencies:
+    whatwg-url "^5.0.0"
+
+node-fetch@^2.7.0:
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.7.0.tgz#d0f0fa6e3e2dc1d27efcd8ad99d550bda94d187d"
+  integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==
   dependencies:
     whatwg-url "^5.0.0"
 
