@@ -133,11 +133,14 @@ export class APIClient {
         } else {
           error = fatalRequestError(requestErrorParams);
         }
-        try {
-          const body = await response.text();
-          this.logger.error({ endpoint, body }, 'Error response body');
-        } catch (err) {
-          // ignore
+
+        if (response.status >= 500) {
+          try {
+            const body = await response.text();
+            this.logger.error({ endpoint, body }, 'Error response body');
+          } catch (err) {
+            // ignore
+          }
         }
         throw error;
       },
@@ -284,10 +287,23 @@ export class APIClient {
    * @param iteratee receives each resource to produce entities/relationships
    */
   public async iterateGroups(iteratee: ResourceIteratee<Group>): Promise<void> {
-    for await (const group of this.paginate<Group>(
-      '/api/v1/groups?limit=10000&expand=stats',
-    )) {
-      await iteratee(group);
+    const baseEndpoint = '/api/v1/groups?limit=1000';
+    try {
+      for await (const group of this.paginate<Group>(
+        `${baseEndpoint}&expand=stats`,
+      )) {
+        await iteratee(group);
+      }
+      this.logger.info('Groups expanded with stats');
+    } catch (err) {
+      if (err.status === 500) {
+        // Fallback: retry without expand option
+        for await (const group of this.paginate<Group>(baseEndpoint)) {
+          await iteratee(group);
+        }
+      } else {
+        throw err;
+      }
     }
   }
 
