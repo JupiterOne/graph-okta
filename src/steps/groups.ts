@@ -152,7 +152,7 @@ async function buildGroupEntityToUserRelationships(
       { _type: groupEntityType },
       async (groupEntity) => {
         const rawGroup = getRawData(groupEntity) as Group;
-        if (!rawGroup._embedded?.stats?.usersCount) {
+        if ('_embedded' in rawGroup && !rawGroup._embedded?.stats?.usersCount) {
           return;
         }
 
