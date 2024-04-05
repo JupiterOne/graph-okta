@@ -69,6 +69,7 @@ export function fatalRequestError({
     endpoint,
     status: response.status,
     statusText: response.statusText,
+    fatal: false,
   };
   if (response.status === 401) {
     return new IntegrationProviderAuthenticationError(apiErrorOptions);

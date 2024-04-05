@@ -47,6 +47,7 @@ export async function buildUserCreatedApplication({
     });
   } catch (err) {
     logger.error({ err }, 'Error fetching app created logs');
+    throw err;
   }
 }
 

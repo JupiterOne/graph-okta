@@ -59,6 +59,7 @@ export async function fetchGroups({
     });
   } catch (err) {
     logger.error({ err }, 'Failed to fetch groups');
+    throw err;
   }
 
   const groupCollectionEndTime = Date.now() - groupCollectionStartTime;
