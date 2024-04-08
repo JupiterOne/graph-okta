@@ -282,29 +282,104 @@ export class APIClient {
   }
 
   /**
-   * Iterates each group resource in the provider.
+   * Iterates over groups fetched from the Okta API, applying a provided function (iteratee) to each group.
+   * This method handles pagination and can dynamically adjust request limits based on API response status.
    *
-   * @param iteratee receives each resource to produce entities/relationships
+   * The iteration starts with an initial request to fetch groups, using a specified or default limit.
+   * If the API returns a 500 error (indicating a potential overload or other server-side issue),
+   * the method attempts to mitigate this by reducing the limit (halving it) for subsequent requests,
+   * down to a minimum limit calculated as a third of the initial limit, but not less than 1.
+   * If reducing the limit does not resolve the error (indicating the limit cannot be reduced further
+   * or removing 'expand=stats' does not help), the method throws the error, halting execution.
+   *
+   * The function uses the 'Link' header from the API response to determine if there are more pages of data.
+   * If so, it continues to fetch and process data until all pages have been processed or an unrecoverable error occurs.
+   * It supports a mechanism to adjust for smaller pages after experiencing a 500 error, by tracking the number
+   * of smaller pages left to process before attempting to return to the initial page size.
+   *
+   * @param {ResourceIteratee<Group>} iteratee - An async function applied to each group.
+   * @param {number} [initialLimit=1000] - The initial number of groups to fetch per API request. This can be adjusted
+   *        dynamically in response to API errors.
+   * @returns {Promise<void>} A promise that resolves when all groups have been processed or rejects if an error occurs.
    */
-  public async iterateGroups(iteratee: ResourceIteratee<Group>): Promise<void> {
-    const baseEndpoint = '/api/v1/groups?limit=1000';
-    try {
-      for await (const group of this.paginate<Group>(
-        `${baseEndpoint}&expand=stats`,
-      )) {
-        await iteratee(group);
-      }
-      this.logger.info('Groups expanded with stats');
-    } catch (err) {
-      if (err.status === 500) {
-        // Fallback: retry without expand option
-        for await (const group of this.paginate<Group>(baseEndpoint)) {
-          await iteratee(group);
+  public async iterateGroups(
+    iteratee: ResourceIteratee<Group>,
+    initialLimit: number = 1000,
+  ): Promise<void> {
+    const initialEndpoint = `/api/v1/groups?limit=${initialLimit}&expand=stats`;
+    let currentLimit = initialLimit;
+    const minLimit = Math.max(initialLimit / 2 ** 3, 1);
+    let smallPagesLeft = 0;
+    let nextUrl: string | undefined;
+
+    const executeRequest = async (url: string) => {
+      do {
+        const response = await this.retryableRequest(nextUrl || url);
+        const data = await response.json();
+        for (const item of data) {
+          await iteratee(item as Group);
         }
-      } else {
-        throw err;
+
+        const link = response.headers.get('link') as string | undefined;
+        if (!link) {
+          nextUrl = undefined;
+          return;
+        }
+
+        const parsedLink = parse(link);
+        if (!parsedLink?.next?.url) {
+          nextUrl = undefined;
+          return;
+        }
+
+        nextUrl = parsedLink.next.url;
+        smallPagesLeft = Math.max(smallPagesLeft - 1, 0);
+      } while (smallPagesLeft);
+    };
+
+    do {
+      const url = nextUrl || initialEndpoint;
+      try {
+        await executeRequest(url);
+
+        // If we've reached this point, we've successfully processed the smaller pages
+        // and can now go back to the initial page size.
+        if (nextUrl) {
+          const parsedUrl = new URL(nextUrl as string);
+          parsedUrl.searchParams.set('limit', initialLimit.toString());
+          parsedUrl.searchParams.set('expand', 'stats');
+          nextUrl = parsedUrl.toString();
+        }
+      } catch (err) {
+        if (err.status === 500) {
+          const parsedUrl = new URL(url);
+          // We'll stop trying to reduce the page size when we reach 125. Starting from 1000 that gives us 3 retries.
+          const newLimit = Math.max(Math.floor(currentLimit / 2), minLimit);
+          if (newLimit === currentLimit) {
+            if (!parsedUrl.searchParams.has('expand')) {
+              // We removed the expand option and can't reduce the page size any further.
+              throw err;
+            }
+            // We can't reduce the page size any further, remove the expand option
+            // and continue with the max limit.
+            currentLimit = initialLimit;
+            smallPagesLeft = 0;
+            parsedUrl.searchParams.set('limit', currentLimit.toString());
+            parsedUrl.searchParams.delete('expand');
+            nextUrl = parsedUrl.toString();
+            this.logger.warn({ currentLimit }, 'Removing expand and retrying.');
+            continue;
+          }
+          currentLimit = newLimit;
+          smallPagesLeft = Math.floor(initialLimit / currentLimit);
+          parsedUrl.searchParams.set('limit', currentLimit.toString());
+          nextUrl = parsedUrl.toString();
+          this.logger.warn({ currentLimit }, 'Reducing limit and retrying.');
+        } else {
+          throw err;
+        }
       }
-    }
+    } while (nextUrl);
   }
 
   /**
