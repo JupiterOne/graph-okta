@@ -288,7 +288,7 @@ export class APIClient {
    * The iteration starts with an initial request to fetch groups, using a specified or default limit.
    * If the API returns a 500 error (indicating a potential overload or other server-side issue),
    * the method attempts to mitigate this by reducing the limit (halving it) for subsequent requests,
-   * down to a minimum limit calculated as a third of the initial limit, but not less than 1.
+   * down to a minimum limit calculated as a quarter of the initial limit, but not less than 1.
    * If reducing the limit does not resolve the error (indicating the limit cannot be reduced further
    * or removing 'expand=stats' does not help), the method throws the error, halting execution.
    *
@@ -338,9 +338,8 @@ export class APIClient {
     };
 
     do {
-      const url = nextUrl || initialEndpoint;
       try {
-        await executeRequest(url);
+        await executeRequest(nextUrl || initialEndpoint);
 
         // If we've reached this point, we've successfully processed the smaller pages
         // and can now go back to the initial page size.
@@ -352,7 +351,7 @@ export class APIClient {
         }
       } catch (err) {
         if (err.status === 500) {
-          const parsedUrl = new URL(url);
+          const parsedUrl = new URL(nextUrl || initialEndpoint);
           // We'll stop trying to reduce the page size when we reach 125. Starting from 1000 that gives us 3 retries.
           const newLimit = Math.max(Math.floor(currentLimit / 2), minLimit);
           if (newLimit === currentLimit) {
@@ -370,8 +369,16 @@ export class APIClient {
             this.logger.warn({ currentLimit }, 'Removing expand and retrying.');
             continue;
           }
+          let newSmallPagesLeft = Math.floor(initialLimit / newLimit);
+          if (smallPagesLeft > 0) {
+            // If we're already processing smaller pages, we need to adjust the number of pages left.
+            newSmallPagesLeft =
+              smallPagesLeft +
+              (smallPagesLeft * Math.floor(initialLimit / currentLimit)) /
+                newLimit;
+          }
+          smallPagesLeft = newSmallPagesLeft;
           currentLimit = newLimit;
-          smallPagesLeft = Math.floor(initialLimit / currentLimit);
           parsedUrl.searchParams.set('limit', currentLimit.toString());
           nextUrl = parsedUrl.toString();
           this.logger.warn({ currentLimit }, 'Reducing limit and retrying.');

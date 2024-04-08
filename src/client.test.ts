@@ -367,5 +367,79 @@ describe('APIClient', () => {
         expect(iterateeMock).toHaveBeenNthCalledWith(i, { id: `entity${i}` });
       }
     });
+
+    it('should handle correctly smallPagesLeft when it fails mid pagination on small pages', async () => {
+      const bodyResponses = [
+        // First call
+        getEntities(1, 6),
+        // Second call fails (should reduce limit to 3)
+        [],
+        // Third call returns 3 entities (limit should be 3)
+        getEntities(7, 3),
+        // Fourth call fails (limit should be 3)
+        getEntities(10, 3),
+        // 5th,6th and 7th call returns 1 entity (limit should be 1)
+        [{ id: 'entity10' }],
+        [{ id: 'entity11' }],
+        [{ id: 'entity12' }],
+        // Eighth call returns 6 entities (limit goes back to 6)
+        getEntities(13, 6),
+      ];
+      const errorResponse = new IntegrationProviderAPIError({
+        endpoint: '',
+        status: 500,
+        statusText: 'Internal Server Error',
+      });
+
+      const client = new APIClient(config, logger);
+
+      const mockRetryableRequest = jest.spyOn(
+        client as any,
+        'retryableRequest',
+      );
+
+      let call = 0;
+      mockRetryableRequest.mockImplementation(() => {
+        call++;
+        if ([2, 4].includes(call)) {
+          return Promise.reject(errorResponse);
+        }
+        const body = bodyResponses[call - 1];
+        const selfLink = `<https://example.okta.com/api/v1/groups?limit=${body.length}&expand=stats>; rel="self"`;
+        const nextLink = `<https://example.okta.com/api/v1/groups?after=${body[body.length - 1].id}&limit=${body.length}&expand=stats>; rel="next"`;
+        return Promise.resolve({
+          headers: {
+            get: () => `${selfLink}${call < 8 ? `, ${nextLink}` : ''}`,
+          },
+          json: () => Promise.resolve(body),
+        });
+      });
+
+      const iterateeMock = jest.fn();
+      await client.iterateGroups(iterateeMock, 6);
+
+      expect(mockRetryableRequest).toHaveBeenCalledTimes(8);
+      const expectedUrlCalls = [
+        '/api/v1/groups?limit=6&expand=stats',
+        'https://example.okta.com/api/v1/groups?after=entity6&limit=6&expand=stats', // fails
+        'https://example.okta.com/api/v1/groups?after=entity6&limit=3&expand=stats',
+        'https://example.okta.com/api/v1/groups?after=entity9&limit=3&expand=stats', // fails
+        'https://example.okta.com/api/v1/groups?after=entity9&limit=1&expand=stats',
+        'https://example.okta.com/api/v1/groups?after=entity10&limit=1&expand=stats',
+        'https://example.okta.com/api/v1/groups?after=entity11&limit=1&expand=stats',
+        'https://example.okta.com/api/v1/groups?after=entity12&limit=6&expand=stats',
+      ];
+      for (let i = 1; i <= 8; i++) {
+        expect(mockRetryableRequest).toHaveBeenNthCalledWith(
+          i,
+          expectedUrlCalls[i - 1],
+        );
+      }
+
+      expect(iterateeMock).toHaveBeenCalledTimes(18);
+      for (let i = 1; i <= 18; i++) {
+        expect(iterateeMock).toHaveBeenNthCalledWith(i, { id: `entity${i}` });
+      }
+    });
   });
 });
