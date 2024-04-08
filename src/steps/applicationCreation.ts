@@ -2,6 +2,7 @@ import {
   createDirectRelationship,
   IntegrationStep,
   IntegrationStepExecutionContext,
+  IntegrationWarnEventName,
   RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
 
@@ -46,7 +47,13 @@ export async function buildUserCreatedApplication({
       }
     });
   } catch (err) {
-    logger.error({ err }, 'Error fetching app created logs');
+    if (err.status === 403) {
+      logger.publishWarnEvent({
+        name: IntegrationWarnEventName.MissingPermission,
+        description: 'The API key does not have access to fetch system logs.',
+      });
+      return;
+    }
     throw err;
   }
 }
