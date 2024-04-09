@@ -28,7 +28,7 @@ import {
 const NINETY_DAYS_AGO = 90 * 24 * 60 * 60 * 1000;
 const DEFAULT_RATE_LIMIT_THRESHOLD = 0.5;
 
-function sleep(ms: number) {
+async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
