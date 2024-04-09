@@ -8,7 +8,7 @@ import {
 import pMap from 'p-map';
 
 import { APIClient, createAPIClient } from '../client';
-import { IntegrationConfig } from '../config';
+import { ExecutionConfig, IntegrationConfig } from '../config';
 import { createAccountGroupRelationship } from '../converters';
 import {
   createGroupUserRelationship,
@@ -28,15 +28,17 @@ export async function fetchGroups({
   instance,
   jobState,
   logger,
-}: IntegrationStepExecutionContext<IntegrationConfig>) {
+  executionConfig,
+}: IntegrationStepExecutionContext<IntegrationConfig, ExecutionConfig>) {
   const apiClient = createAPIClient(instance.config, logger);
+  const { logGroupMetrics } = executionConfig;
 
   const accountEntity = (await jobState.getData(
     DATA_ACCOUNT_ENTITY,
   )) as StandardizedOktaAccount;
 
   const groupCollectionStartTime = Date.now();
-  let totalGroupsCollected = 0;
+  const { stats, collectStats } = getGroupStatsCollector();
 
   try {
     await apiClient.iterateGroups(async (group) => {
@@ -51,7 +53,7 @@ export async function fetchGroups({
       logger.debug({ groupId: group.id }, 'Creating group entity');
       await jobState.addEntity(groupEntity);
 
-      totalGroupsCollected++;
+      collectStats(stats, group);
 
       await jobState.addRelationship(
         createAccountGroupRelationship(accountEntity, groupEntity),
@@ -67,10 +69,49 @@ export async function fetchGroups({
   logger.info(
     {
       groupCollectionEndTime,
-      totalGroupsCollected,
+      ...(logGroupMetrics && { stats }),
     },
     'Finished processing groups',
   );
+}
+
+type GroupStats = {
+  totalGroupsCollected: number;
+  userGroupsCollected: number;
+  appUserGroupsCollected: number;
+  userGroupsCollectedWithUsers: number;
+  appUserGroupsCollectedWithUsers: number;
+};
+
+function getGroupStatsCollector() {
+  const stats = {
+    totalGroupsCollected: 0,
+    userGroupsCollected: 0,
+    appUserGroupsCollected: 0,
+    userGroupsCollectedWithUsers: 0,
+    appUserGroupsCollectedWithUsers: 0,
+  };
+
+  return {
+    stats,
+    collectStats: (stats: GroupStats, group: Group) => {
+      stats.totalGroupsCollected++;
+      const isUserGroup =
+        group.type === 'OKTA_GROUP' || group.type === 'BUILT_IN';
+      if (isUserGroup) {
+        stats.userGroupsCollected++;
+      } else {
+        stats.appUserGroupsCollected++;
+      }
+      if (group._embedded?.stats?.usersCount) {
+        if (isUserGroup) {
+          stats.userGroupsCollectedWithUsers++;
+        } else {
+          stats.appUserGroupsCollectedWithUsers++;
+        }
+      }
+    },
+  };
 }
 
 export async function buildAppUserGroupUserRelationships(
@@ -88,16 +129,18 @@ export async function buildAppUserGroupUserRelationships(
 }
 
 export async function buildUserGroupUserRelationships(
-  context: IntegrationStepExecutionContext<IntegrationConfig>,
+  context: IntegrationStepExecutionContext<IntegrationConfig, ExecutionConfig>,
 ) {
   await buildGroupEntityToUserRelationships(Entities.USER_GROUP._type, context);
 }
 
 async function buildGroupEntityToUserRelationships(
   groupEntityType: string,
-  context: IntegrationStepExecutionContext<IntegrationConfig>,
+  context: IntegrationStepExecutionContext<IntegrationConfig, ExecutionConfig>,
 ) {
-  const { instance, logger, jobState } = context;
+  const { instance, logger, jobState, executionConfig } = context;
+  const { logGroupMetrics } = executionConfig;
+
   const apiClient = createAPIClient(instance.config, logger);
 
   logger.info(
@@ -107,11 +150,18 @@ async function buildGroupEntityToUserRelationships(
     'Starting to build user group relationships',
   );
 
+  const stats = {
+    processedGroups: 0,
+    requestedGroups: 0,
+    relationshipsCreated: 0,
+  };
+
   const processGroupEntities = async (groupEntities: Entity[]) => {
     const usersForGroupEntities = await collectUsersForGroupEntities(
       apiClient,
       groupEntities,
     );
+    stats.requestedGroups += groupEntities.length;
 
     let relationships: Relationship[] = [];
 
@@ -119,6 +169,7 @@ async function buildGroupEntityToUserRelationships(
       for (const userKey of userKeys) {
         if (jobState.hasKey(userKey)) {
           relationships.push(createGroupUserRelationship(groupEntity, userKey));
+          stats.relationshipsCreated++;
         } else {
           logger.warn(
             { groupId: groupEntity.id as string, userId: userKey },
@@ -128,6 +179,9 @@ async function buildGroupEntityToUserRelationships(
 
         if (relationships.length >= 500) {
           await jobState.addRelationships(relationships);
+          if (logGroupMetrics) {
+            logger.info({ stats }, `[${groupEntityType}] Added relationships`);
+          }
           relationships = [];
         }
       }
@@ -136,6 +190,9 @@ async function buildGroupEntityToUserRelationships(
     // Add any remaining relationships
     if (relationships.length) {
       await jobState.addRelationships(relationships);
+      if (logGroupMetrics) {
+        logger.info({ stats }, `[${groupEntityType}] Added relationships`);
+      }
     }
   };
 
@@ -151,6 +208,7 @@ async function buildGroupEntityToUserRelationships(
     await jobState.iterateEntities(
       { _type: groupEntityType },
       async (groupEntity) => {
+        stats.processedGroups++;
         const rawGroup = getRawData(groupEntity) as Group;
         if ('_embedded' in rawGroup && !rawGroup._embedded?.stats?.usersCount) {
           return;
@@ -172,12 +230,18 @@ async function buildGroupEntityToUserRelationships(
 
         if (entitiesBuffer.length >= 1000) {
           await processBufferedEntities();
+          if (logGroupMetrics) {
+            logger.info({ stats }, `[${groupEntityType}] Processed groups`);
+          }
         }
       },
     );
 
     if (entitiesBuffer.length) {
       await processBufferedEntities();
+      if (logGroupMetrics) {
+        logger.info({ stats }, `[${groupEntityType}] Processed groups`);
+      }
     }
   } catch (err) {
     logger.error({ err }, 'Failed to build group to user relationships');
