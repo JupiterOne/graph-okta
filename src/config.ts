@@ -58,6 +58,10 @@ export interface IntegrationConfig extends IntegrationInstanceConfig {
   rateLimitThreshold?: number;
 }
 
+export interface ExecutionConfig {
+  logGroupMetrics?: boolean;
+}
+
 export async function validateInvocation(
   context: IntegrationExecutionContext<IntegrationConfig>,
 ) {

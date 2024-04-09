@@ -8,7 +8,7 @@ import {
 import pMap from 'p-map';
 
 import { APIClient, createAPIClient } from '../client';
-import { IntegrationConfig } from '../config';
+import { ExecutionConfig, IntegrationConfig } from '../config';
 import { createAccountGroupRelationship } from '../converters';
 import {
   createGroupUserRelationship,
@@ -28,8 +28,10 @@ export async function fetchGroups({
   instance,
   jobState,
   logger,
-}: IntegrationStepExecutionContext<IntegrationConfig>) {
+  executionConfig,
+}: IntegrationStepExecutionContext<IntegrationConfig, ExecutionConfig>) {
   const apiClient = createAPIClient(instance.config, logger);
+  const { logGroupMetrics } = executionConfig;
 
   const accountEntity = (await jobState.getData(
     DATA_ACCOUNT_ENTITY,
@@ -67,7 +69,7 @@ export async function fetchGroups({
   logger.info(
     {
       groupCollectionEndTime,
-      stats,
+      ...(logGroupMetrics && { stats }),
     },
     'Finished processing groups',
   );
@@ -127,16 +129,18 @@ export async function buildAppUserGroupUserRelationships(
 }
 
 export async function buildUserGroupUserRelationships(
-  context: IntegrationStepExecutionContext<IntegrationConfig>,
+  context: IntegrationStepExecutionContext<IntegrationConfig, ExecutionConfig>,
 ) {
   await buildGroupEntityToUserRelationships(Entities.USER_GROUP._type, context);
 }
 
 async function buildGroupEntityToUserRelationships(
   groupEntityType: string,
-  context: IntegrationStepExecutionContext<IntegrationConfig>,
+  context: IntegrationStepExecutionContext<IntegrationConfig, ExecutionConfig>,
 ) {
-  const { instance, logger, jobState } = context;
+  const { instance, logger, jobState, executionConfig } = context;
+  const { logGroupMetrics } = executionConfig;
+
   const apiClient = createAPIClient(instance.config, logger);
 
   logger.info(
@@ -149,6 +153,7 @@ async function buildGroupEntityToUserRelationships(
   const stats = {
     processedGroups: 0,
     requestedGroups: 0,
+    relationshipsCreated: 0,
   };
 
   const processGroupEntities = async (groupEntities: Entity[]) => {
@@ -164,6 +169,7 @@ async function buildGroupEntityToUserRelationships(
       for (const userKey of userKeys) {
         if (jobState.hasKey(userKey)) {
           relationships.push(createGroupUserRelationship(groupEntity, userKey));
+          stats.relationshipsCreated++;
         } else {
           logger.warn(
             { groupId: groupEntity.id as string, userId: userKey },
@@ -173,6 +179,9 @@ async function buildGroupEntityToUserRelationships(
 
         if (relationships.length >= 500) {
           await jobState.addRelationships(relationships);
+          if (logGroupMetrics) {
+            logger.info({ stats }, `[${groupEntityType}] Added relationships`);
+          }
           relationships = [];
         }
       }
@@ -181,6 +190,9 @@ async function buildGroupEntityToUserRelationships(
     // Add any remaining relationships
     if (relationships.length) {
       await jobState.addRelationships(relationships);
+      if (logGroupMetrics) {
+        logger.info({ stats }, `[${groupEntityType}] Added relationships`);
+      }
     }
   };
 
@@ -218,14 +230,18 @@ async function buildGroupEntityToUserRelationships(
 
         if (entitiesBuffer.length >= 1000) {
           await processBufferedEntities();
-          logger.info({ stats }, `[${groupEntityType}] Processed groups`);
+          if (logGroupMetrics) {
+            logger.info({ stats }, `[${groupEntityType}] Processed groups`);
+          }
         }
       },
     );
 
     if (entitiesBuffer.length) {
       await processBufferedEntities();
-      logger.info({ stats }, `[${groupEntityType}] Processed groups`);
+      if (logGroupMetrics) {
+        logger.info({ stats }, `[${groupEntityType}] Processed groups`);
+      }
     }
   } catch (err) {
     logger.error({ err }, 'Failed to build group to user relationships');
