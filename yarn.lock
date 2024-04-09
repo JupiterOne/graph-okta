@@ -1243,6 +1243,14 @@
     "@jupiterone/data-model" "^0.55.0"
     lodash "^4.17.21"
 
+"@jupiterone/integration-sdk-core@^12.4.0":
+  version "12.4.0"
+  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-core/-/integration-sdk-core-12.4.0.tgz#4a8af7e36666189ffcb9174eed81ac45cf341743"
+  integrity sha512-iMB0avjI6xiHtVoIgfBv2+D7Fh1VBz/l+uD+GsYF4bBhEAiDeaeRuQPVqUykN6YxSfjDKcwX7miFR7sUDzHxaw==
+  dependencies:
+    "@jupiterone/data-model" "^0.55.0"
+    lodash "^4.17.21"
+
 "@jupiterone/integration-sdk-dev-tools@^12.2.5":
   version "12.3.1"
   resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-dev-tools/-/integration-sdk-dev-tools-12.3.1.tgz#94853b6f8b44d9f08dd876f1b841d5e1654c4793"
@@ -1266,13 +1274,13 @@
     ts-node "^9.1.1"
     typescript "^5.1.6"
 
-"@jupiterone/integration-sdk-http-client@^12.3.1":
-  version "12.3.1"
-  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-http-client/-/integration-sdk-http-client-12.3.1.tgz#5ae507ead2463c82e6e2ee792e58ffdcf7c8d7e1"
-  integrity sha512-3GHbPgI+h8EXfiMSt5AbbrJFYJASWtFT7SfFUx8nLOvNTi/esb9Z7OuShzPsl3yOY8aCE40Z5xWdxQC+/Vyv8Q==
+"@jupiterone/integration-sdk-http-client@^12.4.0":
+  version "12.4.0"
+  resolved "https://registry.yarnpkg.com/@jupiterone/integration-sdk-http-client/-/integration-sdk-http-client-12.4.0.tgz#054e00ac528389360b12fd60d06c02d9e0568f11"
+  integrity sha512-81OOnSP+8jwUi7YrmBUkCi4FgoTYL3Dd/Px+I8rRHnFGCiPKMHjYXHo1gVFi/PMHFGc6QJQaNElPi+f++byFTA==
   dependencies:
     "@jupiterone/hierarchical-token-bucket" "^0.3.1"
-    "@jupiterone/integration-sdk-core" "^12.3.1"
+    "@jupiterone/integration-sdk-core" "^12.4.0"
     "@lifeomic/attempt" "^3.0.3"
     form-data "^4.0.0"
     lodash "^4.17.21"

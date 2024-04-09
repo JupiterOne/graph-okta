@@ -33,7 +33,7 @@
     "postversion": "cp package.json ./dist/package.json"
   },
   "dependencies": {
-    "@jupiterone/integration-sdk-http-client": "^12.3.1",
+    "@jupiterone/integration-sdk-http-client": "^12.4.0",
     "lodash": "^4.17.21",
     "lodash.startcase": "^4.4.0",
     "p-map": "^4",
