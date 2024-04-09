@@ -1,3 +1,15 @@
+# v3.3.12 (Tue Apr 09 2024)
+
+#### 🐛 Bug Fix
+
+- add group stats to monitor heavy loads [#261](https://github.com/JupiterOne/graph-okta/pull/261) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.11 (Mon Apr 08 2024)
 
 #### 🐛 Bug Fix
