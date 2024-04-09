@@ -1,3 +1,16 @@
+# v3.3.13 (Tue Apr 09 2024)
+
+#### 🐛 Bug Fix
+
+- fix test error [#263](https://github.com/JupiterOne/graph-okta/pull/263) ([@RonaldEAM](https://github.com/RonaldEAM))
+- bump http-client version [#262](https://github.com/JupiterOne/graph-okta/pull/262) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.12 (Tue Apr 09 2024)
 
 #### 🐛 Bug Fix
