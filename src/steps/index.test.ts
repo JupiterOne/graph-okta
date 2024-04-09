@@ -3,8 +3,6 @@ import {
   Recording,
 } from '@jupiterone/integration-sdk-testing';
 
-import { IntegrationProviderAuthorizationError } from '@jupiterone/integration-sdk-core';
-
 import { setupOktaRecording } from '../../test/setup/recording';
 import { IntegrationConfig } from '../config';
 import { fetchUsers } from './users';
@@ -249,5 +247,7 @@ test('mocked 403', async () => {
     apiClient.iterateFactorDevicesForUser('thisisafakekey', () => {
       jest.fn;
     }),
-  ).rejects.toThrowError(IntegrationProviderAuthorizationError);
+  ).rejects.toThrow(
+    'Provider authorization failed at /api/v1/users/thisisafakekey/factors: 403 Forbidden',
+  );
 });
