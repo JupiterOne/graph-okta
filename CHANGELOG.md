@@ -1,3 +1,15 @@
+# v3.3.14 (Wed Apr 10 2024)
+
+#### 🐛 Bug Fix
+
+- execute group->users relationship steps sequentially, remove timeout [#264](https://github.com/JupiterOne/graph-okta/pull/264) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.13 (Tue Apr 09 2024)
 
 #### 🐛 Bug Fix
