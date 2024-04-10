@@ -50,6 +50,9 @@ export class APIClient extends BaseAPIClient {
     super({
       baseUrl: config.oktaOrgUrl,
       logger,
+      retryOptions: {
+        timeout: 0,
+      },
       rateLimitThrottling: {
         threshold: rateLimitThreshold,
         resetMode: 'datetime_epoch_s',
@@ -71,11 +74,7 @@ export class APIClient extends BaseAPIClient {
 
   private getHandleErrorFn(): RetryOptions['handleError'] {
     return async (err, context, logger) => {
-      if (
-        ['ECONNRESET', 'ETIMEDOUT'].some(
-          (code) => err.code === code || err.message.includes(code),
-        )
-      ) {
+      if (err.code === 'ETIMEDOUT') {
         return;
       }
 
