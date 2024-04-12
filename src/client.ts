@@ -3,7 +3,6 @@ import {
   IntegrationProviderAuthenticationError,
 } from '@jupiterone/integration-sdk-core';
 import { IntegrationConfig } from './config';
-export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
 import {
   ApplicationGroupAssignment,
   Group,
@@ -24,6 +23,9 @@ import {
   BaseAPIClient,
   RetryOptions,
 } from '@jupiterone/integration-sdk-http-client';
+import Bottleneck from 'bottleneck';
+
+export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
 
 const NINETY_DAYS_AGO = 90 * 24 * 60 * 60 * 1000;
 const DEFAULT_RATE_LIMIT_THRESHOLD = 0.5;
@@ -281,28 +283,78 @@ export class APIClient extends BaseAPIClient {
     } while (nextUrl);
   }
 
+  public async getGroupUsersLimit(
+    groupId: string,
+  ): Promise<number | undefined> {
+    const response = await this.retryableRequest(
+      `/api/v1/groups/${groupId}/users?limit=1`,
+    );
+    await response.text(); // Consume body to avoid memory leaks
+    if (!response.headers.has('x-rate-limit-limit')) {
+      return;
+    }
+    const limitHeader = response.headers.get('x-rate-limit-limit');
+    return parseInt(limitHeader as string, 10);
+  }
+
   /**
    * Iterates each user resource assigned to a given group.
    *
    * @param iteratee receives each resource to produce relationships
    */
-  public async iterateUsersForGroup(
+  public iterateUsersForGroup(
     groupId: string,
     iteratee: ResourceIteratee<OktaUser>,
-  ): Promise<void> {
-    try {
-      for await (const user of this.iteratePages<OktaUser>(
-        `/api/v1/groups/${groupId}/users?limit=1000`,
-      )) {
-        await iteratee(user);
+    limiter: Bottleneck,
+    tasksState: { error: any },
+  ): void {
+    const initialUrl = `/api/v1/groups/${groupId}/users?limit=1000`;
+    const iteratePages = async (url: string) => {
+      if (tasksState.error) {
+        // Stop processing if an error has occurred in previous tasks
+        // This happens when this task has been queued before the error occurred
+        return;
       }
-    } catch (err) {
-      if (err.status === 404) {
-        //ignore it. It's probably a group that got deleted between steps
-      } else {
-        throw err;
+      let nextUrl: string | undefined;
+      try {
+        nextUrl = await this.requestPage(url, iteratee);
+      } catch (err) {
+        if (err.status === 404) {
+          //ignore it. It's probably a group that got deleted between steps
+        } else {
+          err.groupId = groupId;
+          throw err;
+        }
       }
+      if (nextUrl) {
+        // Queue another task to process the next page
+        void limiter.schedule(() => iteratePages(nextUrl as string));
+      }
+    };
+    void limiter.schedule(() => iteratePages(initialUrl));
+  }
+
+  private async requestPage<T>(
+    url: string,
+    iteratee: ResourceIteratee<T>,
+  ): Promise<string | undefined> {
+    const response = await this.retryableRequest(url);
+    const data = await response.json();
+    for (const item of data) {
+      await iteratee(item);
     }
+
+    const link = response.headers.get('link') as string | undefined;
+    if (!link) {
+      return;
+    }
+
+    const parsedLink = parse(link);
+    if (!parsedLink?.next?.url) {
+      return;
+    }
+
+    return parsedLink.next.url;
   }
 
   /**

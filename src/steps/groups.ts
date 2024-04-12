@@ -1,5 +1,4 @@
 import {
-  Entity,
   IntegrationLogger,
   IntegrationStep,
   IntegrationStepExecutionContext,
@@ -16,13 +15,18 @@ import {
 } from '../converters/group';
 import { StandardizedOktaAccount, StandardizedOktaUserGroup } from '../types';
 import {
+  APP_USER_GROUP_IDS,
   DATA_ACCOUNT_ENTITY,
+  EVERYONE_GROUP_KEY,
   Entities,
   IngestionSources,
   Relationships,
   Steps,
+  USER_GROUP_IDS,
 } from './constants';
 import { Group } from '@okta/okta-sdk-nodejs';
+import Bottleneck from 'bottleneck';
+import { chunk } from 'lodash';
 
 export async function fetchGroups({
   instance,
@@ -40,6 +44,7 @@ export async function fetchGroups({
   const groupCollectionStartTime = Date.now();
   const { stats, collectStats } = getGroupStatsCollector();
 
+  const { groupIds, collectGroupId } = getGroupIdsCollector();
   try {
     await apiClient.iterateGroups(async (group) => {
       const groupEntity = createUserGroupEntity(
@@ -52,6 +57,12 @@ export async function fetchGroups({
 
       logger.debug({ groupId: group.id }, 'Creating group entity');
       await jobState.addEntity(groupEntity);
+
+      if (group.type === 'BUILT_IN' && group.profile?.name === 'Everyone') {
+        await jobState.setData(EVERYONE_GROUP_KEY, groupEntity._key);
+      } else {
+        collectGroupId(groupEntity);
+      }
 
       collectStats(stats, group);
 
@@ -66,6 +77,11 @@ export async function fetchGroups({
 
   const groupCollectionEndTime = Date.now() - groupCollectionStartTime;
 
+  await Promise.all([
+    jobState.setData(USER_GROUP_IDS, groupIds.userGroupIds),
+    jobState.setData(APP_USER_GROUP_IDS, groupIds.appUserGroupIds),
+  ]);
+
   logger.info(
     {
       groupCollectionEndTime,
@@ -73,6 +89,30 @@ export async function fetchGroups({
     },
     'Finished processing groups',
   );
+}
+
+function getGroupIdsCollector() {
+  const userGroupIds: string[] = [];
+  const appUserGroupIds: string[] = [];
+
+  return {
+    groupIds: {
+      userGroupIds,
+      appUserGroupIds,
+    },
+    collectGroupId: (groupEntity: StandardizedOktaUserGroup) => {
+      const rawGroup = getRawData(groupEntity) as Group;
+      if ('_embedded' in rawGroup && !rawGroup._embedded?.stats?.usersCount) {
+        return;
+      }
+      if (groupEntity._type === Entities.USER_GROUP._type) {
+        userGroupIds.push(groupEntity.id);
+      }
+      if (groupEntity._type === Entities.APP_USER_GROUP._type) {
+        appUserGroupIds.push(groupEntity.id);
+      }
+    },
+  };
 }
 
 type GroupStats = {
@@ -121,7 +161,13 @@ export async function buildAppUserGroupUserRelationships(
     return;
   }
 
+  const groupIds = await context.jobState.getData<string[]>(APP_USER_GROUP_IDS);
+  if (!groupIds) {
+    throw new Error('No APP_USER_GROUP_IDS found in job state');
+  }
+
   await buildGroupEntityToUserRelationships(
+    groupIds,
     Entities.APP_USER_GROUP._type,
     context,
   );
@@ -130,24 +176,47 @@ export async function buildAppUserGroupUserRelationships(
 export async function buildUserGroupUserRelationships(
   context: IntegrationStepExecutionContext<IntegrationConfig, ExecutionConfig>,
 ) {
-  await buildGroupEntityToUserRelationships(Entities.USER_GROUP._type, context);
+  const groupIds = await context.jobState.getData<string[]>(USER_GROUP_IDS);
+  if (!groupIds) {
+    throw new Error('No USER_GROUP_IDS found in job state');
+  }
+
+  await buildGroupEntityToUserRelationships(
+    groupIds,
+    Entities.USER_GROUP._type,
+    context,
+  );
+
+  const { jobState, logger } = context;
+  const everyoneGroupKey = await jobState.getData<string>(EVERYONE_GROUP_KEY);
+  if (everyoneGroupKey) {
+    logger.info('Adding all users to the "Everyone" group');
+    await jobState.iterateEntities(
+      { _type: Entities.USER._type },
+      async (userEntity) => {
+        await jobState.addRelationship(
+          createGroupUserRelationship(
+            everyoneGroupKey,
+            userEntity._key as string,
+          ),
+        );
+      },
+    );
+  }
 }
 
 async function buildGroupEntityToUserRelationships(
+  groupIds: string[],
   groupEntityType: string,
   context: IntegrationStepExecutionContext<IntegrationConfig, ExecutionConfig>,
 ) {
+  if (!groupIds.length) {
+    return;
+  }
   const { instance, logger, jobState, executionConfig } = context;
   const { logGroupMetrics } = executionConfig;
 
   const apiClient = createAPIClient(instance.config, logger);
-
-  logger.info(
-    {
-      groupEntityType,
-    },
-    'Starting to build user group relationships',
-  );
 
   const stats = {
     processedGroups: 0,
@@ -155,83 +224,97 @@ async function buildGroupEntityToUserRelationships(
     relationshipsCreated: 0,
   };
   const skippedGroups: string[] = [];
-  let everyoneGroupEntity: Entity | undefined;
   const statsLogger = createStatsLogger(stats, logger, logGroupMetrics);
 
+  const limit = await apiClient.getGroupUsersLimit(groupIds[0]);
+  const maxConcurrent = limit ? limit * 0.5 : 20; // 50% of the limit.
+  logger.info(
+    `[${groupEntityType}] Calculated concurrent requests: ${maxConcurrent}`,
+  );
+  const limiter = new Bottleneck({
+    maxConcurrent,
+    minTime: Math.floor(60_000 / maxConcurrent), // space requests evenly over 1 minute.
+    reservoir: maxConcurrent,
+    reservoirRefreshAmount: maxConcurrent,
+    reservoirRefreshInterval: 60 * 1_000, // refresh every minute.
+  });
+
+  const tasksState: { error: any } = {
+    error: undefined,
+  };
+  limiter.on('failed', (err) => {
+    if (err.code === 'ECONNRESET') {
+      const groupId = err.groupId as string;
+      logger.warn(`ECONNRESET error for group ${err.groupId}. Skipping.`);
+      if (typeof groupId === 'string') {
+        skippedGroups.push(err.groupId);
+      }
+    } else {
+      if (!tasksState.error) {
+        tasksState.error = err;
+      }
+    }
+  });
+
+  let resolveIdlePromise: () => void | undefined;
+  limiter.on('idle', () => {
+    resolveIdlePromise?.();
+  });
+  const waitForTasksCompletion = () => {
+    return new Promise<void>((resolve) => {
+      resolveIdlePromise = resolve;
+    });
+  };
+
+  const groupIdBatches = chunk(groupIds, 1000);
   try {
-    await jobState.iterateEntities(
-      { _type: groupEntityType },
-      async (groupEntity) => {
+    for (const groupIdBatch of groupIdBatches) {
+      for (const groupId of groupIdBatch) {
         stats.processedGroups++;
-        statsLogger(`[${groupEntityType}] Processed groups`);
-
-        const rawGroup = getRawData(groupEntity) as Group;
-        if ('_embedded' in rawGroup && !rawGroup._embedded?.stats?.usersCount) {
-          return;
-        }
-
-        if (
-          rawGroup.type === 'BUILT_IN' &&
-          rawGroup.profile?.name === 'Everyone'
-        ) {
-          // Don't process the "Everyone" group here.
-          // We already know this group relates to all existing users, so no need to fetch all the related users.
-          // We'll relate it to all users at the end of this step.
-          // https://support.okta.com/help/s/article/The-Everyone-Group-in-Okta?language=en_US
-          everyoneGroupEntity = groupEntity;
-          return;
-        }
-
-        const groupId = groupEntity.id as string;
-        try {
-          await apiClient.iterateUsersForGroup(groupId, async (user) => {
+        apiClient.iterateUsersForGroup(
+          groupId,
+          async (user) => {
             if (!user.id) {
               return;
             }
             const userKey = user.id;
             if (jobState.hasKey(userKey)) {
-              await jobState.addRelationship(
-                createGroupUserRelationship(groupEntity, userKey),
+              const relationship = createGroupUserRelationship(
+                groupId,
+                userKey,
               );
-              stats.relationshipsCreated++;
-              statsLogger(`[${groupEntityType}] Added relationships`);
+              if (!jobState.hasKey(relationship._key)) {
+                await jobState.addRelationship(relationship);
+                stats.relationshipsCreated++;
+                statsLogger(`[${groupEntityType}] Added relationships`);
+              }
             } else {
               logger.warn(
-                { groupId: groupEntity.id as string, userId: userKey },
+                { groupId, userId: userKey },
                 '[SKIP] User not found in job state, could not build relationship to group',
               );
             }
-          });
-        } catch (err) {
-          if (err.code === 'ECONNRESET') {
-            logger.warn(`ECONNRESET error for group ${groupId}. Skipping.`);
-            skippedGroups.push(groupId);
-          } else {
-            throw err;
-          }
-        } finally {
-          stats.requestedGroups++;
-        }
-      },
-    );
+          },
+          limiter,
+          tasksState,
+        );
+      }
+      await waitForTasksCompletion();
+      // Check if any of the tasks has failed with an unrecoverable error
+      // If so, throw the error to stop the execution.
+      if (tasksState.error) {
+        throw tasksState.error;
+      }
+
+      stats.requestedGroups += groupIdBatch.length;
+      logger.info(
+        { stats },
+        `[${groupEntityType}] Finished requesting groups batch`,
+      );
+    }
   } catch (err) {
     logger.error({ err }, 'Failed to build group to user relationships');
     throw err;
-  }
-
-  if (everyoneGroupEntity) {
-    logger.info('Adding all users to the "Everyone" group');
-    await jobState.iterateEntities(
-      { _type: Entities.USER._type },
-      async (userEntity) => {
-        await jobState.addRelationship(
-          createGroupUserRelationship(
-            everyoneGroupEntity as Entity,
-            userEntity._key as string,
-          ),
-        );
-      },
-    );
   }
 
   if (skippedGroups.length) {
@@ -280,7 +363,13 @@ export const groupSteps: IntegrationStep<IntegrationConfig>[] = [
     name: 'Create app user group to user relationships',
     entities: [],
     relationships: [Relationships.APP_USER_GROUP_HAS_USER],
-    dependsOn: [Steps.USERS, Steps.GROUPS],
+    dependsOn: [
+      Steps.USERS,
+      Steps.GROUPS,
+      // Added so these steps are not executed in parallel.
+      // They use the same endpoint, which can cause rate limiting issues.
+      Steps.USER_GROUP_USERS_RELATIONSHIP,
+    ],
     executionHandler: buildAppUserGroupUserRelationships,
   },
   {
