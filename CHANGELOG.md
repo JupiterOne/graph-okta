@@ -1,3 +1,15 @@
+# v3.3.15 (Fri Apr 12 2024)
+
+#### 🐛 Bug Fix
+
+- use concurrent queue to fetch group users [#265](https://github.com/JupiterOne/graph-okta/pull/265) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.14 (Wed Apr 10 2024)
 
 #### 🐛 Bug Fix
