@@ -5,6 +5,9 @@ import {
 } from '@jupiterone/integration-sdk-core';
 
 export const DATA_ACCOUNT_ENTITY = 'DATA_ACCOUNT_ENTITY';
+export const USER_GROUP_IDS = 'USER_GROUP_IDS';
+export const APP_USER_GROUP_IDS = 'APP_USER_GROUP_IDS';
+export const EVERYONE_GROUP_KEY = 'EVERYONE_GROUP_KEY';
 
 export const Steps = {
   ACCOUNT: 'fetch-account',

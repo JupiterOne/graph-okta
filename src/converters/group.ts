@@ -3,7 +3,6 @@ import * as url from 'url';
 import {
   createDirectRelationship,
   createIntegrationEntity,
-  Entity,
   parseTimePropertyValue,
   Relationship,
   RelationshipClass,
@@ -74,20 +73,20 @@ export function createUserGroupEntity(
 }
 
 export function createGroupUserRelationship(
-  group: Entity,
+  groupKey: string,
   userKey: string,
 ): Relationship {
   return createDirectRelationship({
     _class: RelationshipClass.HAS,
     fromType: Entities.USER_GROUP._type,
-    fromKey: group._key,
+    fromKey: groupKey,
     toType: Entities.USER._type,
     toKey: userKey,
     properties: {
-      _key: `${group._key}|has_user|${userKey}`,
+      _key: `${groupKey}|has_user|${userKey}`,
       _type: Relationships.USER_GROUP_HAS_USER._type,
       userId: userKey,
-      groupId: group.id as string,
+      groupId: groupKey,
     },
   });
 }
