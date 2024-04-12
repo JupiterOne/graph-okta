@@ -279,15 +279,11 @@ async function buildGroupEntityToUserRelationships(
             }
             const userKey = user.id;
             if (jobState.hasKey(userKey)) {
-              const relationship = createGroupUserRelationship(
-                groupId,
-                userKey,
+              await jobState.addRelationship(
+                createGroupUserRelationship(groupId, userKey),
               );
-              if (!jobState.hasKey(relationship._key)) {
-                await jobState.addRelationship(relationship);
-                stats.relationshipsCreated++;
-                statsLogger(`[${groupEntityType}] Added relationships`);
-              }
+              stats.relationshipsCreated++;
+              statsLogger(`[${groupEntityType}] Added relationships`);
             } else {
               logger.warn(
                 { groupId, userId: userKey },
