@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@jupiterone/integration-sdk-http-client": "^12.4.0",
+    "@lifeomic/attempt": "^3.1.0",
     "bottleneck": "^2.19.5",
     "lodash": "^4.17.21",
     "lodash.startcase": "^4.4.0",

@@ -27,6 +27,7 @@ import {
 import { Group } from '@okta/okta-sdk-nodejs';
 import Bottleneck from 'bottleneck';
 import { chunk } from 'lodash';
+import { QueueTasksState } from '../types/queue';
 
 export async function fetchGroups({
   instance,
@@ -213,6 +214,8 @@ async function buildGroupEntityToUserRelationships(
   if (!groupIds.length) {
     return;
   }
+  const BATCH_SIZE = 500;
+  const ONE_MINUTE_IN_MS = 60_000;
   const { instance, logger, jobState, executionConfig } = context;
   const { logGroupMetrics } = executionConfig;
 
@@ -233,14 +236,15 @@ async function buildGroupEntityToUserRelationships(
   );
   const limiter = new Bottleneck({
     maxConcurrent,
-    minTime: Math.floor(60_000 / maxConcurrent), // space requests evenly over 1 minute.
+    minTime: Math.floor(ONE_MINUTE_IN_MS / maxConcurrent), // space requests evenly over 1 minute.
     reservoir: maxConcurrent,
     reservoirRefreshAmount: maxConcurrent,
-    reservoirRefreshInterval: 60 * 1_000, // refresh every minute.
+    reservoirRefreshInterval: ONE_MINUTE_IN_MS, // refresh every minute.
   });
 
-  const tasksState: { error: any } = {
+  const tasksState: QueueTasksState = {
     error: undefined,
+    rateLimitReached: false,
   };
   limiter.on('failed', (err) => {
     if (err.code === 'ECONNRESET') {
@@ -252,6 +256,14 @@ async function buildGroupEntityToUserRelationships(
     } else {
       if (!tasksState.error) {
         tasksState.error = err;
+        // After the first error, reset the limiter to allow all remaining tasks to finish immediately.
+        limiter.updateSettings({
+          reservoir: null,
+          maxConcurrent: null,
+          minTime: 0,
+          reservoirRefreshAmount: null,
+          reservoirRefreshInterval: null,
+        });
       }
     }
   });
@@ -266,7 +278,15 @@ async function buildGroupEntityToUserRelationships(
     });
   };
 
-  const groupIdBatches = chunk(groupIds, 1000);
+  // Log queue state every 5 minutes
+  const debugLimiterIntervalId = setInterval(
+    () => {
+      logger.info(`[${groupEntityType}] ${JSON.stringify(limiter.counts())}`);
+    },
+    5 * 60 * 1_000,
+  );
+
+  const groupIdBatches = chunk(groupIds, BATCH_SIZE);
   try {
     for (const groupIdBatch of groupIdBatches) {
       for (const groupId of groupIdBatch) {
@@ -279,11 +299,15 @@ async function buildGroupEntityToUserRelationships(
             }
             const userKey = user.id;
             if (jobState.hasKey(userKey)) {
-              await jobState.addRelationship(
-                createGroupUserRelationship(groupId, userKey),
+              const relationship = createGroupUserRelationship(
+                groupId,
+                userKey,
               );
-              stats.relationshipsCreated++;
-              statsLogger(`[${groupEntityType}] Added relationships`);
+              if (!jobState.hasKey(relationship._key)) {
+                await jobState.addRelationship(relationship);
+                stats.relationshipsCreated++;
+                statsLogger(`[${groupEntityType}] Added relationships`);
+              }
             } else {
               logger.warn(
                 { groupId, userId: userKey },
@@ -311,6 +335,9 @@ async function buildGroupEntityToUserRelationships(
   } catch (err) {
     logger.error({ err }, 'Failed to build group to user relationships');
     throw err;
+  } finally {
+    clearInterval(debugLimiterIntervalId);
+    limiter.removeAllListeners();
   }
 
   if (skippedGroups.length) {

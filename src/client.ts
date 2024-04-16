@@ -1,5 +1,7 @@
 import {
+  IntegrationError,
   IntegrationLogger,
+  IntegrationProviderAPIError,
   IntegrationProviderAuthenticationError,
 } from '@jupiterone/integration-sdk-core';
 import { IntegrationConfig } from './config';
@@ -22,17 +24,20 @@ import parse from 'parse-link-header';
 import {
   BaseAPIClient,
   RetryOptions,
+  fatalRequestError,
+  isRetryableRequest,
+  retryableRequestError,
 } from '@jupiterone/integration-sdk-http-client';
 import Bottleneck from 'bottleneck';
+import { retry } from '@lifeomic/attempt';
+import { Response } from 'node-fetch';
+import { QueueTasksState } from './types/queue';
+import { setTimeout } from 'node:timers/promises';
 
 export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
 
 const NINETY_DAYS_AGO = 90 * 24 * 60 * 60 * 1000;
 const DEFAULT_RATE_LIMIT_THRESHOLD = 0.5;
-
-async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 /**
  * An APIClient maintains authentication state and provides an interface to
@@ -76,7 +81,11 @@ export class APIClient extends BaseAPIClient {
 
   private getHandleErrorFn(): RetryOptions['handleError'] {
     return async (err, context, logger) => {
-      if (err.code === 'ETIMEDOUT') {
+      if (
+        ['ECONNRESET', 'ETIMEDOUT'].some(
+          (code) => err.code === code || err.message.includes(code),
+        )
+      ) {
         return;
       }
 
@@ -93,14 +102,11 @@ export class APIClient extends BaseAPIClient {
           err.cause.headers?.['date'] &&
           err.cause.headers?.['x-rate-limit-reset']
         ) {
-          // Determine wait time by getting the delta X-Rate-Limit-Reset and the Date header
-          // Add 1 second to account for sub second differences between the clocks that create these headers
-          const nowDate = new Date(err.cause.headers['date'] as string);
-          const retryDate = new Date(
-            parseInt(err.cause.headers['x-rate-limit-reset'] as string, 10) *
-              1000,
+          const headers = err.cause.headers;
+          retryAfter = this.getDelayUntilReset(
+            headers.get('date') as string,
+            headers.get('x-rate-limit-reset') as string,
           );
-          retryAfter = retryDate.getTime() - nowDate.getTime() + 1000;
         }
 
         logger.warn(
@@ -110,7 +116,7 @@ export class APIClient extends BaseAPIClient {
           },
           'Received a rate limit error. Waiting before retrying.',
         );
-        await sleep(retryAfter);
+        await setTimeout(retryAfter);
       }
     };
   }
@@ -306,7 +312,7 @@ export class APIClient extends BaseAPIClient {
     groupId: string,
     iteratee: ResourceIteratee<OktaUser>,
     limiter: Bottleneck,
-    tasksState: { error: any },
+    tasksState: QueueTasksState,
   ): void {
     const initialUrl = `/api/v1/groups/${groupId}/users?limit=1000`;
     const iteratePages = async (url: string) => {
@@ -317,9 +323,12 @@ export class APIClient extends BaseAPIClient {
       }
       let nextUrl: string | undefined;
       try {
-        nextUrl = await this.requestPage(url, iteratee);
+        nextUrl = await this.requestPage(url, iteratee, tasksState);
       } catch (err) {
-        if (err.status === 404) {
+        if (err.code === 'RATE_LIMIT_REACHED') {
+          // Retry this task after the rate limit is reset
+          void limiter.schedule(() => iteratePages(url));
+        } else if (err.status === 404) {
           //ignore it. It's probably a group that got deleted between steps
         } else {
           err.groupId = groupId;
@@ -337,8 +346,9 @@ export class APIClient extends BaseAPIClient {
   private async requestPage<T>(
     url: string,
     iteratee: ResourceIteratee<T>,
+    tasksState: QueueTasksState,
   ): Promise<string | undefined> {
-    const response = await this.retryableRequest(url);
+    const response = await this.retryableQueueRequest(url, tasksState);
     const data = await response.json();
     for (const item of data) {
       await iteratee(item);
@@ -355,6 +365,157 @@ export class APIClient extends BaseAPIClient {
     }
 
     return parsedLink.next.url;
+  }
+
+  private async retryableQueueRequest(
+    endpoint: string,
+    tasksState: QueueTasksState,
+  ) {
+    return retry(
+      async () => {
+        return this.withQueueRateLimiting(async () => {
+          if (tasksState.rateLimitReached) {
+            // throw error to re-enqueue this task until rate limit is reset
+            const error = new IntegrationError({
+              code: 'RATE_LIMIT_REACHED',
+              message: 'Rate limit reached',
+            });
+            throw error;
+          }
+          let response: Response | undefined;
+          try {
+            response = await this.request(endpoint);
+          } catch (err) {
+            this.logger.error(
+              { code: err.code, err, endpoint },
+              'Error sending request',
+            );
+            throw err;
+          }
+
+          if (response.ok) {
+            return response;
+          }
+
+          let error: IntegrationProviderAPIError | undefined;
+          const requestErrorParams = {
+            endpoint,
+            response,
+            logger: this.logger,
+            logErrorBody: this.logErrorBody,
+          };
+          if (isRetryableRequest(response.status)) {
+            error = await retryableRequestError(requestErrorParams);
+          } else {
+            error = await fatalRequestError(requestErrorParams);
+          }
+          for await (const _chunk of response.body) {
+            // force consumption of body to avoid memory leaks
+            // https://github.com/node-fetch/node-fetch/issues/83
+          }
+          throw error;
+        }, tasksState);
+      },
+      {
+        maxAttempts: this.retryOptions.maxAttempts,
+        delay: this.retryOptions.delay,
+        factor: this.retryOptions.factor,
+        handleError: async (err, context) => {
+          if (err.code === 'ETIMEDOUT') {
+            return;
+          }
+
+          if (!err.retryable) {
+            // can't retry this? just abort
+            context.abort();
+            return;
+          }
+
+          if (err.status === 429) {
+            let retryAfter = 60_000;
+            if (
+              err.cause &&
+              err.cause.headers?.['date'] &&
+              err.cause.headers?.['x-rate-limit-reset']
+            ) {
+              const headers = err.cause.headers;
+              retryAfter = this.getDelayUntilReset(
+                headers.get('date') as string,
+                headers.get('x-rate-limit-reset') as string,
+              );
+            }
+
+            this.logger.warn(
+              {
+                retryAfter,
+                endpoint: err.endpoint,
+              },
+              'Received a rate limit error. Waiting before retrying.',
+            );
+
+            tasksState.rateLimitReached = true;
+            await setTimeout(retryAfter);
+            tasksState.rateLimitReached = false;
+          }
+        },
+      },
+    );
+  }
+
+  private async withQueueRateLimiting(
+    fn: () => Promise<Response>,
+    tasksState: QueueTasksState,
+  ): Promise<Response> {
+    const response = await fn();
+    const { headers } = response;
+    if (
+      !headers.has('x-rate-limit-limit') ||
+      !headers.has('x-rate-limit-remaining') ||
+      !headers.has('x-rate-limit-reset')
+    ) {
+      return response;
+    }
+    const limit = parseInt(headers.get('x-rate-limit-limit') as string, 10);
+    const remaining = parseInt(
+      headers.get('x-rate-limit-remaining') as string,
+      10,
+    );
+    const rateLimitConsumed = limit - remaining;
+    const shouldThrottleRequests =
+      rateLimitConsumed / limit > this.rateLimitThrottling!.threshold;
+
+    if (shouldThrottleRequests) {
+      const timeToSleepInMs = this.getDelayUntilReset(
+        headers.get('date')!,
+        headers.get('x-rate-limit-reset')!,
+      );
+      this.logger.warn(
+        {
+          endpoint: response.url,
+          limit,
+          remaining,
+          timeToSleepInMs,
+        },
+        `Exceeded ${this.rateLimitThrottling!.threshold * 100}% of rate limit. Sleeping until x-rate-limit-reset.`,
+      );
+      tasksState.rateLimitReached = true;
+      await setTimeout(timeToSleepInMs);
+      tasksState.rateLimitReached = false;
+    }
+    return response;
+  }
+
+  /**
+   * Determine wait time by getting the delta X-Rate-Limit-Reset and the Date header
+   * Add 1 second to account for sub second differences between the clocks that create these headers
+   */
+  private getDelayUntilReset(
+    nowTimestamp: string,
+    resetTimestamp: string,
+  ): number {
+    const nowDate = new Date(nowTimestamp);
+    const retryDate = new Date(parseInt(resetTimestamp, 10) * 1000);
+    return retryDate.getTime() - nowDate.getTime() + 1000;
   }
 
   /**
