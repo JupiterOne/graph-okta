@@ -1,3 +1,15 @@
+# v3.3.16 (Tue Apr 16 2024)
+
+#### 🐛 Bug Fix
+
+- re-enqueue tasks when rate limit is reached [#266](https://github.com/JupiterOne/graph-okta/pull/266) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.15 (Fri Apr 12 2024)
 
 #### 🐛 Bug Fix
