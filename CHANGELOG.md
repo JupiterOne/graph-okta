@@ -1,3 +1,15 @@
+# v3.3.17 (Wed Apr 17 2024)
+
+#### 🐛 Bug Fix
+
+- fix access to headers in error cause [#267](https://github.com/JupiterOne/graph-okta/pull/267) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.16 (Tue Apr 16 2024)
 
 #### 🐛 Bug Fix
