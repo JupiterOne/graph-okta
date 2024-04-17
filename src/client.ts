@@ -104,8 +104,8 @@ export class APIClient extends BaseAPIClient {
         ) {
           const headers = err.cause.headers;
           retryAfter = this.getDelayUntilReset(
-            headers.get('date') as string,
-            headers.get('x-rate-limit-reset') as string,
+            headers['date'] as string,
+            headers['x-rate-limit-reset'] as string,
           );
         }
 
@@ -440,8 +440,8 @@ export class APIClient extends BaseAPIClient {
             ) {
               const headers = err.cause.headers;
               retryAfter = this.getDelayUntilReset(
-                headers.get('date') as string,
-                headers.get('x-rate-limit-reset') as string,
+                headers['date'] as string,
+                headers['x-rate-limit-reset'] as string,
               );
             }
 
