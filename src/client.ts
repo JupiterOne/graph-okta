@@ -315,6 +315,218 @@ export class APIClient extends BaseAPIClient {
     tasksState: QueueTasksState,
   ): void {
     const initialUrl = `/api/v1/groups/${groupId}/users?limit=1000`;
+    this.scheduleRequest(initialUrl, iteratee, limiter, tasksState, (err) => {
+      if (err.status === 404) {
+        //ignore it. It's probably a group that got deleted between steps
+      } else {
+        err.groupId = groupId;
+        throw err;
+      }
+    });
+  }
+
+  /**
+   * Iterates each Multi-Factor Authentication device assigned to a given user.
+   *
+   * @param iteratee receives each resource to produce relationships
+   */
+  public async iterateFactorDevicesForUser(
+    userId: string,
+    iteratee: ResourceIteratee<OktaFactor>,
+  ): Promise<void> {
+    try {
+      // Okta API does not currently allow a limit to be specified on the list
+      // factors API.
+      //
+      // See: https://developer.okta.com/docs/reference/api/factors/#list-enrolled-factors
+      const response = await this.retryableRequest(
+        `/api/v1/users/${userId}/factors`,
+      );
+      const factors = await response.json();
+      for (const factor of factors) {
+        await iteratee(factor);
+      }
+    } catch (err) {
+      if (err.status === 404) {
+        //ignore it. It's probably a user that got deleted between steps
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  /**
+   * Iterates each device resource in the provider.
+   *
+   * @param iteratee receives each resource to produce entities/relationships
+   */
+  public async iterateDevices(
+    iteratee: ResourceIteratee<OktaDevice>,
+  ): Promise<void> {
+    for await (const device of this.iteratePages<OktaDevice>(
+      '/api/v1/devices?limit=200&expand=user',
+    )) {
+      await iteratee(device);
+    }
+  }
+
+  /**
+   * Iterates each application resource in the provider.
+   *
+   * @param iteratee receives each resource to produce entities/relationships
+   */
+  public async iterateApplications(
+    iteratee: ResourceIteratee<OktaApplication>,
+  ): Promise<void> {
+    for await (const application of this.iteratePages<OktaApplication>(
+      '/api/v1/apps?limit=200',
+    )) {
+      await iteratee(application);
+    }
+  }
+
+  /**
+   * Iterates each group assigned to a given application.
+   *
+   * @param iteratee receives each resource to produce entities/relationships
+   */
+  public async iterateGroupsForApp(
+    appId: string,
+    iteratee: ResourceIteratee<ApplicationGroupAssignment>,
+  ): Promise<void> {
+    try {
+      for await (const group of this.iteratePages<ApplicationGroupAssignment>(
+        `/api/v1/apps/${appId}/groups?limit=200`,
+      )) {
+        await iteratee(group);
+      }
+    } catch (err) {
+      if (err.status === 404) {
+        //ignore it. It's probably an app that got deleted between steps
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  public async getAppUsersLimit(appId: string): Promise<number | undefined> {
+    const response = await this.retryableRequest(
+      `/api/v1/apps/${appId}/users?limit=1`,
+    );
+    await response.text(); // Consume body to avoid memory leaks
+    if (!response.headers.has('x-rate-limit-limit')) {
+      return;
+    }
+    const limitHeader = response.headers.get('x-rate-limit-limit');
+    return parseInt(limitHeader as string, 10);
+  }
+
+  /**
+   * Iterates each individual user assigned to a given application.
+   *
+   * @param iteratee receives each resource to produce entities/relationships
+   */
+  public iterateUsersForApp(
+    appId: string,
+    iteratee: ResourceIteratee<OktaApplicationUser>,
+    limiter: Bottleneck,
+    tasksState: QueueTasksState,
+  ) {
+    const initialUrl = `/api/v1/apps/${appId}/users?limit=500`;
+    this.scheduleRequest(initialUrl, iteratee, limiter, tasksState, (err) => {
+      if (err.status === 404) {
+        //ignore it. It's probably an app that got deleted between steps
+      } else {
+        throw err;
+      }
+    });
+  }
+
+  /**
+   * Iterates each rule resource in the provider.
+   *
+   * @param iteratee receives each resource to produce entities/relationships
+   */
+  public async iterateRules(
+    iteratee: ResourceIteratee<GroupRule>,
+  ): Promise<void> {
+    try {
+      for await (const rule of this.iteratePages<GroupRule>(
+        '/api/v1/groups/rules?limit=200',
+      )) {
+        await iteratee(rule);
+      }
+    } catch (err) {
+      //per https://developer.okta.com/docs/reference/error-codes/
+      if (/\/api\/v1\/groups\/rules/.test(err.url) && err.status === 400) {
+        this.logger.info(
+          'Rules not enabled for this account. Skipping processing of Okta Rules.',
+        );
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  public async getSupportInfo(): Promise<OrgOktaSupportSettingsObj> {
+    const response = await this.retryableRequest(
+      '/api/v1/org/privacy/oktaSupport',
+    );
+    return await response.json();
+  }
+
+  public async iterateRolesByUser(
+    userId: string,
+    iteratee: ResourceIteratee<Role>,
+  ): Promise<void> {
+    const response = await this.retryableRequest(
+      `/api/v1/users/${userId}/roles`,
+    );
+    const roles = await response.json();
+    for (const role of roles) {
+      await iteratee(role);
+    }
+  }
+
+  public async iterateRolesByGroup(
+    groupId: string,
+    iteratee: ResourceIteratee<Role>,
+  ): Promise<void> {
+    const response = await this.retryableRequest(
+      `/api/v1/groups/${groupId}/roles`,
+    );
+    const roles = await response.json();
+    for (const role of roles) {
+      await iteratee(role);
+    }
+  }
+
+  public async iterateAppCreatedLogs(
+    iteratee: ResourceIteratee<LogEvent>,
+  ): Promise<void> {
+    // Use filter to only find instances of a newly created application.
+    // We must specify 'since' to a time far in the past, otherwise we
+    // will only get the last 7 days of data.  Okta only saves the last
+    // 90 days, so this is not us limiting what we're able to get.
+    const daysAgo = Date.now() - NINETY_DAYS_AGO;
+    const startDate = new Date(daysAgo);
+    const filter =
+      'eventType eq "application.lifecycle.update" and debugContext.debugData.requestUri ew "_new_"';
+    const url = `/api/v1/logs?filter=${encodeURIComponent(
+      filter,
+    )}&since=${startDate.toISOString()}&until=${new Date().toISOString()}`;
+    for await (const logEvent of this.iteratePages<LogEvent>(url)) {
+      await iteratee(logEvent);
+    }
+  }
+
+  private scheduleRequest<T>(
+    initialUrl: string,
+    iteratee: ResourceIteratee<T>,
+    limiter: Bottleneck,
+    tasksState: QueueTasksState,
+    onError?: (err: any) => void,
+  ) {
     const iteratePages = async (url: string) => {
       if (tasksState.error) {
         // Stop processing if an error has occurred in previous tasks
@@ -328,10 +540,11 @@ export class APIClient extends BaseAPIClient {
         if (err.code === 'RATE_LIMIT_REACHED') {
           // Retry this task after the rate limit is reset
           void limiter.schedule(() => iteratePages(url));
-        } else if (err.status === 404) {
-          //ignore it. It's probably a group that got deleted between steps
+          return;
+        }
+        if (onError) {
+          onError(err);
         } else {
-          err.groupId = groupId;
           throw err;
         }
       }
@@ -516,192 +729,6 @@ export class APIClient extends BaseAPIClient {
     const nowDate = new Date(nowTimestamp);
     const retryDate = new Date(parseInt(resetTimestamp, 10) * 1000);
     return retryDate.getTime() - nowDate.getTime() + 1000;
-  }
-
-  /**
-   * Iterates each Multi-Factor Authentication device assigned to a given user.
-   *
-   * @param iteratee receives each resource to produce relationships
-   */
-  public async iterateFactorDevicesForUser(
-    userId: string,
-    iteratee: ResourceIteratee<OktaFactor>,
-  ): Promise<void> {
-    try {
-      // Okta API does not currently allow a limit to be specified on the list
-      // factors API.
-      //
-      // See: https://developer.okta.com/docs/reference/api/factors/#list-enrolled-factors
-      const response = await this.retryableRequest(
-        `/api/v1/users/${userId}/factors`,
-      );
-      const factors = await response.json();
-      for (const factor of factors) {
-        await iteratee(factor);
-      }
-    } catch (err) {
-      if (err.status === 404) {
-        //ignore it. It's probably a user that got deleted between steps
-      } else {
-        throw err;
-      }
-    }
-  }
-
-  /**
-   * Iterates each device resource in the provider.
-   *
-   * @param iteratee receives each resource to produce entities/relationships
-   */
-  public async iterateDevices(
-    iteratee: ResourceIteratee<OktaDevice>,
-  ): Promise<void> {
-    for await (const device of this.iteratePages<OktaDevice>(
-      '/api/v1/devices?limit=200&expand=user',
-    )) {
-      await iteratee(device);
-    }
-  }
-
-  /**
-   * Iterates each application resource in the provider.
-   *
-   * @param iteratee receives each resource to produce entities/relationships
-   */
-  public async iterateApplications(
-    iteratee: ResourceIteratee<OktaApplication>,
-  ): Promise<void> {
-    for await (const application of this.iteratePages<OktaApplication>(
-      '/api/v1/apps?limit=200',
-    )) {
-      await iteratee(application);
-    }
-  }
-
-  /**
-   * Iterates each group assigned to a given application.
-   *
-   * @param iteratee receives each resource to produce entities/relationships
-   */
-  public async iterateGroupsForApp(
-    appId: string,
-    iteratee: ResourceIteratee<ApplicationGroupAssignment>,
-  ): Promise<void> {
-    try {
-      for await (const group of this.iteratePages<ApplicationGroupAssignment>(
-        `/api/v1/apps/${appId}/groups?limit=200`,
-      )) {
-        await iteratee(group);
-      }
-    } catch (err) {
-      if (err.status === 404) {
-        //ignore it. It's probably an app that got deleted between steps
-      } else {
-        throw err;
-      }
-    }
-  }
-
-  /**
-   * Iterates each individual user assigned to a given application.
-   *
-   * @param iteratee receives each resource to produce entities/relationships
-   */
-  public async iterateUsersForApp(
-    appId: string,
-    iteratee: ResourceIteratee<OktaApplicationUser>,
-  ): Promise<void> {
-    try {
-      for await (const user of this.iteratePages<OktaApplicationUser>(
-        `/api/v1/apps/${appId}/users?limit=500`,
-      )) {
-        await iteratee(user);
-      }
-    } catch (err) {
-      if (err.status === 404) {
-        //ignore it. It's probably an app that got deleted between steps
-      } else {
-        throw err;
-      }
-    }
-  }
-
-  /**
-   * Iterates each rule resource in the provider.
-   *
-   * @param iteratee receives each resource to produce entities/relationships
-   */
-  public async iterateRules(
-    iteratee: ResourceIteratee<GroupRule>,
-  ): Promise<void> {
-    try {
-      for await (const rule of this.iteratePages<GroupRule>(
-        '/api/v1/groups/rules?limit=200',
-      )) {
-        await iteratee(rule);
-      }
-    } catch (err) {
-      //per https://developer.okta.com/docs/reference/error-codes/
-      if (/\/api\/v1\/groups\/rules/.test(err.url) && err.status === 400) {
-        this.logger.info(
-          'Rules not enabled for this account. Skipping processing of Okta Rules.',
-        );
-      } else {
-        throw err;
-      }
-    }
-  }
-
-  public async getSupportInfo(): Promise<OrgOktaSupportSettingsObj> {
-    const response = await this.retryableRequest(
-      '/api/v1/org/privacy/oktaSupport',
-    );
-    return await response.json();
-  }
-
-  public async iterateRolesByUser(
-    userId: string,
-    iteratee: ResourceIteratee<Role>,
-  ): Promise<void> {
-    const response = await this.retryableRequest(
-      `/api/v1/users/${userId}/roles`,
-    );
-    const roles = await response.json();
-    for (const role of roles) {
-      await iteratee(role);
-    }
-  }
-
-  public async iterateRolesByGroup(
-    groupId: string,
-    iteratee: ResourceIteratee<Role>,
-  ): Promise<void> {
-    const response = await this.retryableRequest(
-      `/api/v1/groups/${groupId}/roles`,
-    );
-    const roles = await response.json();
-    for (const role of roles) {
-      await iteratee(role);
-    }
-  }
-
-  public async iterateAppCreatedLogs(
-    iteratee: ResourceIteratee<LogEvent>,
-  ): Promise<void> {
-    // Use filter to only find instances of a newly created application.
-    // We must specify 'since' to a time far in the past, otherwise we
-    // will only get the last 7 days of data.  Okta only saves the last
-    // 90 days, so this is not us limiting what we're able to get.
-    const daysAgo = Date.now() - NINETY_DAYS_AGO;
-    const startDate = new Date(daysAgo);
-    const filter =
-      'eventType eq "application.lifecycle.update" and debugContext.debugData.requestUri ew "_new_"';
-    const url = `/api/v1/logs?filter=${encodeURIComponent(
-      filter,
-    )}&since=${startDate.toISOString()}&until=${new Date().toISOString()}`;
-    for await (const logEvent of this.iteratePages<LogEvent>(url)) {
-      await iteratee(logEvent);
-    }
   }
 }
 

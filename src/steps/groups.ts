@@ -1,5 +1,4 @@
 import {
-  IntegrationLogger,
   IntegrationStep,
   IntegrationStepExecutionContext,
   IntegrationWarnEventName,
@@ -25,9 +24,9 @@ import {
   USER_GROUP_IDS,
 } from './constants';
 import { Group } from '@okta/okta-sdk-nodejs';
-import Bottleneck from 'bottleneck';
 import { chunk } from 'lodash';
-import { QueueTasksState } from '../types/queue';
+import { withConcurrentQueue } from '../util/withConcurrentQueue';
+import { createStatsLogger } from '../util/createStatsLogger';
 
 export async function fetchGroups({
   instance,
@@ -36,7 +35,7 @@ export async function fetchGroups({
   executionConfig,
 }: IntegrationStepExecutionContext<IntegrationConfig, ExecutionConfig>) {
   const apiClient = createAPIClient(instance.config, logger);
-  const { logGroupMetrics } = executionConfig;
+  const { logMetrics } = executionConfig;
 
   const accountEntity = (await jobState.getData(
     DATA_ACCOUNT_ENTITY,
@@ -86,7 +85,7 @@ export async function fetchGroups({
   logger.info(
     {
       groupCollectionEndTime,
-      ...(logGroupMetrics && { stats }),
+      ...(logMetrics && { stats }),
     },
     'Finished processing groups',
   );
@@ -215,9 +214,8 @@ async function buildGroupEntityToUserRelationships(
     return;
   }
   const BATCH_SIZE = 500;
-  const ONE_MINUTE_IN_MS = 60_000;
   const { instance, logger, jobState, executionConfig } = context;
-  const { logGroupMetrics } = executionConfig;
+  const { logMetrics } = executionConfig;
 
   const apiClient = createAPIClient(instance.config, logger);
 
@@ -227,117 +225,80 @@ async function buildGroupEntityToUserRelationships(
     relationshipsCreated: 0,
   };
   const skippedGroups: string[] = [];
-  const statsLogger = createStatsLogger(stats, logger, logGroupMetrics);
+  const statsLogger = createStatsLogger(stats, logger, logMetrics);
 
   const limit = await apiClient.getGroupUsersLimit(groupIds[0]);
   const maxConcurrent = limit ? limit * 0.5 : 20; // 50% of the limit.
   logger.info(
     `[${groupEntityType}] Calculated concurrent requests: ${maxConcurrent}`,
   );
-  const limiter = new Bottleneck({
-    maxConcurrent,
-    minTime: Math.floor(ONE_MINUTE_IN_MS / maxConcurrent), // space requests evenly over 1 minute.
-    reservoir: maxConcurrent,
-    reservoirRefreshAmount: maxConcurrent,
-    reservoirRefreshInterval: ONE_MINUTE_IN_MS, // refresh every minute.
-  });
-
-  const tasksState: QueueTasksState = {
-    error: undefined,
-    rateLimitReached: false,
-  };
-  limiter.on('failed', (err) => {
-    if (err.code === 'ECONNRESET') {
-      const groupId = err.groupId as string;
-      logger.warn(`ECONNRESET error for group ${err.groupId}. Skipping.`);
-      if (typeof groupId === 'string') {
-        skippedGroups.push(err.groupId);
-      }
-    } else {
-      if (!tasksState.error) {
-        tasksState.error = err;
-        // After the first error, reset the limiter to allow all remaining tasks to finish immediately.
-        limiter.updateSettings({
-          reservoir: null,
-          maxConcurrent: null,
-          minTime: 0,
-          reservoirRefreshAmount: null,
-          reservoirRefreshInterval: null,
-        });
-      }
-    }
-  });
-
-  let resolveIdlePromise: () => void | undefined;
-  limiter.on('idle', () => {
-    resolveIdlePromise?.();
-  });
-  const waitForTasksCompletion = () => {
-    return new Promise<void>((resolve) => {
-      resolveIdlePromise = resolve;
-    });
-  };
-
-  // Log queue state every 5 minutes
-  const debugLimiterIntervalId = setInterval(
-    () => {
-      logger.info(`[${groupEntityType}] ${JSON.stringify(limiter.counts())}`);
-    },
-    5 * 60 * 1_000,
-  );
-
   const groupIdBatches = chunk(groupIds, BATCH_SIZE);
-  try {
-    for (const groupIdBatch of groupIdBatches) {
-      for (const groupId of groupIdBatch) {
-        stats.processedGroups++;
-        apiClient.iterateUsersForGroup(
-          groupId,
-          async (user) => {
-            if (!user.id) {
-              return;
-            }
-            const userKey = user.id;
-            if (jobState.hasKey(userKey)) {
-              const relationship = createGroupUserRelationship(
-                groupId,
-                userKey,
-              );
-              if (!jobState.hasKey(relationship._key)) {
-                await jobState.addRelationship(relationship);
-                stats.relationshipsCreated++;
-                statsLogger(`[${groupEntityType}] Added relationships`);
-              }
-            } else {
-              logger.warn(
-                { groupId, userId: userKey },
-                '[SKIP] User not found in job state, could not build relationship to group',
-              );
-            }
-          },
-          limiter,
-          tasksState,
-        );
-      }
-      await waitForTasksCompletion();
-      // Check if any of the tasks has failed with an unrecoverable error
-      // If so, throw the error to stop the execution.
-      if (tasksState.error) {
-        throw tasksState.error;
-      }
 
-      stats.requestedGroups += groupIdBatch.length;
-      logger.info(
-        { stats },
-        `[${groupEntityType}] Finished requesting groups batch`,
-      );
-    }
+  try {
+    await withConcurrentQueue(
+      {
+        maxConcurrent,
+        logger,
+        logPrefix: `[${groupEntityType}]`,
+        onFailed: (err) => {
+          if (err.code === 'ECONNRESET') {
+            const groupId = err.groupId as string;
+            logger.warn(`ECONNRESET error for group ${err.groupId}. Skipping.`);
+            if (typeof groupId === 'string') {
+              skippedGroups.push(err.groupId);
+            }
+            return true; // Ignore the error.
+          } else {
+            return false;
+          }
+        },
+        logQueueState: logMetrics,
+      },
+      async (limiter, tasksState, waitForTasksCompletion) => {
+        for (const groupIdBatch of groupIdBatches) {
+          for (const groupId of groupIdBatch) {
+            stats.processedGroups++;
+            apiClient.iterateUsersForGroup(
+              groupId,
+              async (user) => {
+                if (!user.id) {
+                  return;
+                }
+                const userKey = user.id;
+                if (jobState.hasKey(userKey)) {
+                  const relationship = createGroupUserRelationship(
+                    groupId,
+                    userKey,
+                  );
+                  if (!jobState.hasKey(relationship._key)) {
+                    await jobState.addRelationship(relationship);
+                    stats.relationshipsCreated++;
+                    statsLogger(`[${groupEntityType}] Added relationships`);
+                  }
+                } else {
+                  logger.warn(
+                    { groupId, userId: userKey },
+                    '[SKIP] User not found in job state, could not build relationship to group',
+                  );
+                }
+              },
+              limiter,
+              tasksState,
+            );
+          }
+          await waitForTasksCompletion();
+
+          stats.requestedGroups += groupIdBatch.length;
+          logger.info(
+            { stats },
+            `[${groupEntityType}] Finished requesting groups batch`,
+          );
+        }
+      },
+    );
   } catch (err) {
     logger.error({ err }, 'Failed to build group to user relationships');
     throw err;
-  } finally {
-    clearInterval(debugLimiterIntervalId);
-    limiter.removeAllListeners();
   }
 
   if (skippedGroups.length) {
@@ -346,25 +307,6 @@ async function buildGroupEntityToUserRelationships(
       description: `Skipped groups due to ECONNRESET error: ${JSON.stringify(skippedGroups)}`,
     });
   }
-}
-
-/**
- * Create a function that logs group stats every 5 minutes.
- */
-function createStatsLogger(
-  stats: any,
-  logger: IntegrationLogger,
-  logGroupMetrics: boolean | undefined,
-) {
-  const FIVE_MINUTES = 5 * 60 * 1000;
-  let lastLogTime = Date.now();
-  return (message: string) => {
-    const now = Date.now();
-    if (Date.now() - lastLogTime >= FIVE_MINUTES && logGroupMetrics) {
-      logger.info({ stats }, message);
-      lastLogTime = now;
-    }
-  };
 }
 
 export const groupSteps: IntegrationStep<IntegrationConfig>[] = [
