@@ -1,3 +1,15 @@
+# v3.3.18 (Fri Apr 19 2024)
+
+#### 🐛 Bug Fix
+
+- refactor code and use concurrent queue on app->users step [#268](https://github.com/JupiterOne/graph-okta/pull/268) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.17 (Wed Apr 17 2024)
 
 #### 🐛 Bug Fix
