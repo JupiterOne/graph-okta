@@ -1,3 +1,15 @@
+# v3.3.19 (Fri Apr 19 2024)
+
+#### 🐛 Bug Fix
+
+- retry econnreset error [#269](https://github.com/JupiterOne/graph-okta/pull/269) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.18 (Fri Apr 19 2024)
 
 #### 🐛 Bug Fix
