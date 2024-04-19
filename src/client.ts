@@ -634,7 +634,7 @@ export class APIClient extends BaseAPIClient {
         delay: this.retryOptions.delay,
         factor: this.retryOptions.factor,
         handleError: async (err, context) => {
-          if (err.code === 'ETIMEDOUT') {
+          if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
             return;
           }
 
