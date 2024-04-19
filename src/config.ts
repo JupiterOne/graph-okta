@@ -59,7 +59,7 @@ export interface IntegrationConfig extends IntegrationInstanceConfig {
 }
 
 export interface ExecutionConfig {
-  logGroupMetrics?: boolean;
+  logMetrics?: boolean;
 }
 
 export async function validateInvocation(

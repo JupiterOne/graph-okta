@@ -1,4 +1,5 @@
 import {
+  IntegrationError,
   IntegrationLogger,
   IntegrationStep,
   IntegrationStepExecutionContext,
@@ -7,7 +8,7 @@ import {
 } from '@jupiterone/integration-sdk-core';
 
 import { createAPIClient } from '../client';
-import { IntegrationConfig } from '../config';
+import { ExecutionConfig, IntegrationConfig } from '../config';
 import {
   createAccountApplicationRelationship,
   createApplicationEntity,
@@ -24,6 +25,10 @@ import {
 } from './constants';
 import { OktaApplication } from '../okta/types';
 import { buildBatchProcessing } from '../util/buildBatchProcessing';
+import { withConcurrentQueue } from '../util/withConcurrentQueue';
+import Bottleneck from 'bottleneck';
+import { QueueTasksState } from '../types/queue';
+import { createStatsLogger } from '../util/createStatsLogger';
 
 export async function fetchApplications({
   instance,
@@ -143,65 +148,145 @@ export async function buildUserApplicationRelationships({
   instance,
   jobState,
   logger,
-}: IntegrationStepExecutionContext<IntegrationConfig>) {
+  executionConfig,
+}: IntegrationStepExecutionContext<IntegrationConfig, ExecutionConfig>) {
+  const BATCH_SIZE = 500;
   const apiClient = createAPIClient(instance.config, logger);
+  const { logMetrics } = executionConfig;
 
-  const processApplicationUsers = async (
+  const stats = {
+    processedApps: 0,
+    requestedApps: 0,
+    relationshipsCreated: 0,
+  };
+  const statsLogger = createStatsLogger(stats, logger, logMetrics);
+
+  const processApplicationUsers = (
     appEntity: StandardizedOktaApplication,
+    limiter: Bottleneck,
+    tasksState: QueueTasksState,
   ) => {
     const app = getRawData(appEntity) as OktaApplication;
 
     const appId = app.id as string;
 
     //get the individual users that are assigned to this app (ie. not assigned as part of group)
-    await apiClient.iterateUsersForApp(appId, async (user) => {
-      if (!user.id) {
-        return;
-      }
-
-      if (jobState.hasKey(user.id)) {
-        const relationships: Relationship[] =
-          createApplicationUserRelationships(
-            appEntity as StandardizedOktaApplication,
-            user,
-            createOnInvalidRoleFormatFunction(logger, {
-              appId,
-              userId: user.id,
-            }),
-          );
-        //these relationships include both USER_ASSIGNED_APPLICATION and USER_ASSIGNED_AWS_IAM_ROLE
-        //USER_ASSIGNED_APPLICATION will be unique to this user and app pair
-        //however, multiple apps for that user can use AWS and have the same IAM Role assigned
-        //therefore, the USER_ASSIGNED_AWS_IAM_ROLE relationship may have been specified in a previous app for this user
-        for (const rel of relationships) {
-          if (!jobState.hasKey(rel._key)) {
-            await jobState.addRelationship(rel);
-          }
+    apiClient.iterateUsersForApp(
+      appId,
+      async (user) => {
+        if (!user.id) {
+          return;
         }
-      } else {
-        logger.warn(
-          { appId: app.id, appName: app.name, userId: user.id },
-          '[SKIP] User not found in job state, could not build relationship to application',
-        );
-      }
-    });
+
+        if (jobState.hasKey(user.id)) {
+          const relationships: Relationship[] =
+            createApplicationUserRelationships(
+              appEntity as StandardizedOktaApplication,
+              user,
+              createOnInvalidRoleFormatFunction(logger, {
+                appId,
+                userId: user.id,
+              }),
+            );
+          //these relationships include both USER_ASSIGNED_APPLICATION and USER_ASSIGNED_AWS_IAM_ROLE
+          //USER_ASSIGNED_APPLICATION will be unique to this user and app pair
+          //however, multiple apps for that user can use AWS and have the same IAM Role assigned
+          //therefore, the USER_ASSIGNED_AWS_IAM_ROLE relationship may have been specified in a previous app for this user
+          for (const rel of relationships) {
+            if (!jobState.hasKey(rel._key)) {
+              await jobState.addRelationship(rel);
+              stats.relationshipsCreated++;
+              statsLogger(
+                `[${Steps.USER_APP_RELATIONSHIP}] Added relationships`,
+              );
+            }
+          }
+        } else {
+          logger.warn(
+            { appId: app.id, appName: app.name, userId: user.id },
+            '[SKIP] User not found in job state, could not build relationship to application',
+          );
+        }
+      },
+      limiter,
+      tasksState,
+    );
   };
 
-  const { withBatchProcessing, flushBatch } =
-    buildBatchProcessing<StandardizedOktaApplication>({
-      processCallback: processApplicationUsers,
-      batchSize: 200,
-      concurrency: 4,
-    });
+  let firstAppId: string | undefined;
+  try {
+    await jobState.iterateEntities(
+      { _type: Entities.APPLICATION._type },
+      (entity: StandardizedOktaApplication) => {
+        const rawEntity = getRawData(entity) as OktaApplication;
+        firstAppId = rawEntity?.id;
+        if (firstAppId) {
+          throw new IntegrationError({
+            code: 'STOP_ITERATION',
+            message: 'Stop iteration',
+          });
+        }
+      },
+    );
+  } catch (err) {
+    // Stop iteration
+  }
 
-  await jobState.iterateEntities(
-    { _type: Entities.APPLICATION._type },
-    async (entity: StandardizedOktaApplication) => {
-      await withBatchProcessing(entity);
-    },
+  if (!firstAppId) {
+    logger.warn('No applications found to process user relationships');
+    return;
+  }
+
+  const limit = await apiClient.getAppUsersLimit(firstAppId);
+  const maxConcurrent = limit ? limit * 0.5 : 20; // 50% of the limit.
+  logger.info(
+    `[${Steps.USER_APP_RELATIONSHIP}] Calculated concurrent requests: ${maxConcurrent}`,
   );
 
-  await flushBatch();
+  let appBatch: StandardizedOktaApplication[] = [];
+  const processBatch = async (
+    limiter: Bottleneck,
+    tasksState: QueueTasksState,
+    waitForCompletion: () => Promise<void>,
+  ) => {
+    for (const app of appBatch) {
+      stats.processedApps++;
+      processApplicationUsers(app, limiter, tasksState);
+    }
+    await waitForCompletion();
+
+    stats.requestedApps += appBatch.length;
+    logger.info(
+      { stats },
+      `[${Steps.USER_APP_RELATIONSHIP}] Finished requesting apps batch`,
+    );
+
+    appBatch = [];
+  };
+  await withConcurrentQueue(
+    {
+      maxConcurrent,
+      logger,
+      logPrefix: `[${Steps.USER_APP_RELATIONSHIP}]`,
+      logQueueState: logMetrics,
+    },
+    async (limiter, tasksState, waitForCompletion) => {
+      await jobState.iterateEntities(
+        { _type: Entities.APPLICATION._type },
+        async (entity: StandardizedOktaApplication) => {
+          appBatch.push(entity);
+          if (appBatch.length >= BATCH_SIZE) {
+            await processBatch(limiter, tasksState, waitForCompletion);
+          }
+        },
+      );
+
+      // Process the remaining apps
+      if (appBatch.length) {
+        await processBatch(limiter, tasksState, waitForCompletion);
+      }
+    },
+  );
 }
 
 function createOnInvalidRoleFormatFunction(
