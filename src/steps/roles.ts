@@ -3,6 +3,7 @@ import {
   createIntegrationEntity,
   IntegrationStep,
   IntegrationStepExecutionContext,
+  IntegrationWarnEventName,
   parseTimePropertyValue,
   RelationshipClass,
 } from '@jupiterone/integration-sdk-core';
@@ -125,8 +126,14 @@ export async function fetchRoles({
     );
     await flushBatch();
   } catch (err) {
-    logger.error({ err }, 'Failed to fetch user roles');
-    throw err;
+    if (err.status === 403) {
+      logger.publishWarnEvent({
+        name: IntegrationWarnEventName.MissingPermission,
+        description: 'The API key does not have access to fetch user roles.',
+      });
+    } else {
+      throw err;
+    }
   }
 
   try {
@@ -146,8 +153,14 @@ export async function fetchRoles({
     );
     await flushBatch();
   } catch (err) {
-    logger.error({ err }, 'Failed to fetch group roles');
-    throw err;
+    if (err.status === 403) {
+      logger.publishWarnEvent({
+        name: IntegrationWarnEventName.MissingPermission,
+        description: 'The API key does not have access to fetch group roles.',
+      });
+    } else {
+      throw err;
+    }
   }
 }
 
