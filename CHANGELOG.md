@@ -1,3 +1,15 @@
+# v3.3.20 (Fri May 03 2024)
+
+#### 🐛 Bug Fix
+
+- throw error when queue stops processing; handle 403 error on fetch roles [#270](https://github.com/JupiterOne/graph-okta/pull/270) ([@RonaldEAM](https://github.com/RonaldEAM))
+
+#### Authors: 1
+
+- Ronald Arias ([@RonaldEAM](https://github.com/RonaldEAM))
+
+---
+
 # v3.3.19 (Fri Apr 19 2024)
 
 #### 🐛 Bug Fix
